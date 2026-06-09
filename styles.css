@@ -1233,6 +1233,14 @@ body.mobile-menu-open {
     background-attachment: fixed;
 }
 
+@media (min-width: 769px) {
+    .hero-experimental {
+        /* Dejar espacio bajo la nav fija para que el badge no quede tapado */
+        padding-top: calc(5.25rem + var(--space-md));
+        box-sizing: border-box;
+    }
+}
+
 .hero-background {
     position: absolute;
     top: 0;
@@ -1355,7 +1363,8 @@ body.mobile-menu-open {
 }
 
 .hero-badge-row {
-    display: contents;
+    display: flex;
+    align-items: center;
 }
 
 .hero-badge-row .lang-selector-mobile {
@@ -3543,6 +3552,38 @@ body.mobile-menu-open {
     font-size: 0.9rem;
 }
 
+.footer-legal {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm) var(--space-md);
+    margin-bottom: var(--space-lg);
+}
+
+.footer-legal a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.88rem;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.footer-legal a:hover {
+    color: var(--neon-blue);
+}
+
+.footer-legal-sep {
+    color: rgba(255, 255, 255, 0.2);
+    font-size: 0.88rem;
+    user-select: none;
+}
+
+a.mobile-nav-item {
+    text-decoration: none;
+    font-family: inherit;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     html {
@@ -3615,6 +3656,10 @@ body.mobile-menu-open {
     /* Mostrar header móvil y ocultar header de escritorio */
     .mobile-header {
         display: flex;
+    }
+
+    .mobile-brand-logo {
+        display: none;
     }
 
     .mobile-header-actions {
@@ -3967,20 +4012,6 @@ body.mobile-menu-open {
 
     .mobile-header-left {
         gap: 0.375rem;
-    }
-
-    .mobile-brand-logo {
-        padding-right: 2px;
-    }
-
-    .mobile-logo-text {
-        font-size: 0.4rem;
-        letter-spacing: 0.02em;
-    }
-
-    .mobile-logo-text-main {
-        font-size: 0.58rem;
-        letter-spacing: 0.03em;
     }
 
     .mobile-header-actions {

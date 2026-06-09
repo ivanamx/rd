@@ -30,7 +30,10 @@
                 groupBook: 'RESERVAR',
                 groupConnect: 'CONECTAR',
                 groupRegister: 'REGISTRO',
-                groupTools: 'HERRAMIENTAS'
+                groupTools: 'HERRAMIENTAS',
+                groupLegal: 'LEGAL',
+                terms: 'TÉRMINOS',
+                privacy: 'PRIVACIDAD'
             },
             hero: {
                 badge: 'EN VIVO · SALTILLO',
@@ -97,7 +100,24 @@
             },
             footer: {
                 tagline: 'Orgullo local, innovación digital',
-                copyright: '© 2024 Hecho en Saltillo. Todos los derechos reservados.'
+                copyright: '© 2026 Hecho en Saltillo. Todos los derechos reservados.',
+                terms: 'Términos y condiciones',
+                privacy: 'Política de privacidad'
+            },
+            legal: {
+                back: 'Volver al inicio',
+                terms: {
+                    metaTitle: 'Términos y Condiciones — Hecho en Saltillo',
+                    title: 'Términos y Condiciones de Uso',
+                    subtitle: 'Desierto Sonoro — plataforma digital operada por Hecho en Saltillo',
+                    updated: 'Última actualización: 9 de junio de 2026'
+                },
+                privacy: {
+                    metaTitle: 'Política de Privacidad — Hecho en Saltillo',
+                    title: 'Política de Privacidad',
+                    subtitle: 'Aviso de privacidad integral conforme a la LFPDPPP y su Reglamento',
+                    updated: 'Última actualización: 9 de junio de 2026'
+                }
             },
             productos: {
                 metaTitle: 'Productos — Saltillo Creative Marketplace',
@@ -565,7 +585,10 @@
                 groupBook: 'BOOK',
                 groupConnect: 'CONNECT',
                 groupRegister: 'REGISTER',
-                groupTools: 'TOOLS'
+                groupTools: 'TOOLS',
+                groupLegal: 'LEGAL',
+                terms: 'TERMS',
+                privacy: 'PRIVACY'
             },
             hero: {
                 badge: 'LIVE · SALTILLO',
@@ -632,7 +655,24 @@
             },
             footer: {
                 tagline: 'Local pride, digital innovation',
-                copyright: '© 2024 Made in Saltillo. All rights reserved.'
+                copyright: '© 2026 Made in Saltillo. All rights reserved.',
+                terms: 'Terms and conditions',
+                privacy: 'Privacy policy'
+            },
+            legal: {
+                back: 'Back to home',
+                terms: {
+                    metaTitle: 'Terms and Conditions — Made in Saltillo',
+                    title: 'Terms and Conditions of Use',
+                    subtitle: 'Desierto Sonoro — digital platform operated by Hecho en Saltillo',
+                    updated: 'Last updated: June 9, 2026'
+                },
+                privacy: {
+                    metaTitle: 'Privacy Policy — Made in Saltillo',
+                    title: 'Privacy Policy',
+                    subtitle: 'Comprehensive privacy notice under Mexican LFPDPPP',
+                    updated: 'Last updated: June 9, 2026'
+                }
             },
             productos: {
                 metaTitle: 'Products — Saltillo Creative Marketplace',
