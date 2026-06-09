@@ -170,22 +170,22 @@ class ShazamAutomation {
             socket.on('start-shazam', async (data) => {
                 try {
                     const hasAudio = data?.audio && await this.saveAudioFile(data.audio);
-                    const needsRelaunch = hasAudio && (!this.browserHasFakeAudio || !this.browser?.isConnected());
 
-                    if (!this.browser || !this.browser.isConnected()) {
-                        await this.launchBrowser(hasAudio || true);
-                    } else if (needsRelaunch) {
+                    // Chrome solo lee el WAV fake al lanzar el navegador — relanzar con audio nuevo
+                    if (hasAudio) {
                         await this.launchBrowser(true);
-                        await this.prewarmShazamPage();
-                    } else if (hasAudio) {
-                        console.log('♻️ Reutilizando navegador con audio actualizado');
+                    } else if (!this.browser?.isConnected()) {
+                        this.ensurePlaceholderAudioFile();
+                        await this.launchBrowser(true);
                     }
 
                     await this.startShazamRecognition();
                     socket.emit('shazam-started', { success: true });
                 } catch (error) {
                     this.isListening = false;
-                    socket.emit('shazam-error', { error: error.message });
+                    if (!error.recognitionHandled) {
+                        socket.emit('shazam-error', { error: error.message });
+                    }
                 }
             });
             
@@ -365,19 +365,14 @@ class ShazamAutomation {
             await this.monitorShazamResults();
             
         } catch (error) {
-            console.error('❌ ❌ ERROR EN RECONOCIMIENTO DE SHAZAM:', error);
-            console.error('📊 Detalles del error:', {
-                message: error.message,
-                stack: error.stack,
-                timestamp: new Date().toISOString()
-            });
-            
+            console.error('❌ ERROR EN RECONOCIMIENTO DE SHAZAM:', error.message);
             this.isListening = false;
-            this.io.emit('shazam-error', { 
-                error: error.message,
-                timestamp: new Date().toISOString()
-            });
-            throw error;
+            if (!error.recognitionHandled) {
+                this.io.emit('shazam-error', {
+                    error: error.message,
+                    timestamp: new Date().toISOString()
+                });
+            }
         }
     }
 
@@ -711,13 +706,14 @@ class ShazamAutomation {
             
             const result = await this.waitForRecognitionResult();
             
-            if (result.type === 'no_match') {
+            if (result.type === 'no_match' || result.type === 'timeout') {
                 console.log('❌ Shazam no identificó la canción');
+                this.isListening = false;
                 this.io.emit('shazam-timeout', {
-                    message: 'No se pudo identificar la canción. Asegúrate de que la radio esté sonando.',
+                    message: result.message || 'No se pudo identificar la canción. Asegúrate de que la radio esté sonando.',
                     timestamp: new Date().toISOString()
                 });
-                throw new Error('No se identificó la canción');
+                return;
             }
 
             if (result.type === 'network') {
@@ -742,15 +738,20 @@ class ShazamAutomation {
                 await this.handleShazamResult(songInfo);
             } else {
                 console.log('❌ No se pudo extraer información completa');
-                this.io.emit('shazam-error', { 
-                    error: 'No se pudo extraer información de la canción',
+                this.isListening = false;
+                this.io.emit('shazam-timeout', {
+                    message: 'No se pudo extraer información de la canción',
                     timestamp: new Date().toISOString()
                 });
             }
             
         } catch (error) {
-            console.error('❌ Error monitoreando resultados:', error);
-            throw error;
+            console.error('❌ Error monitoreando resultados:', error.message);
+            this.isListening = false;
+            this.io.emit('shazam-error', {
+                error: error.message,
+                timestamp: new Date().toISOString()
+            });
         }
     }
 
@@ -827,11 +828,10 @@ class ShazamAutomation {
         }
 
         console.log('⏰ Timeout — no se detectó resultado');
-        this.io.emit('shazam-timeout', {
-            message: 'Tiempo agotado. Reproduce la radio cerca del micrófono e intenta de nuevo.',
-            timestamp: new Date().toISOString()
-        });
-        throw new Error('No se detectó resultado de reconocimiento');
+        return {
+            type: 'timeout',
+            message: 'Tiempo agotado. Reproduce la radio e intenta de nuevo.'
+        };
     }
 
     async waitForFirstRedirect() {

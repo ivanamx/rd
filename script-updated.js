@@ -71,7 +71,7 @@ class SaltilloApp {
         this._shazamServiceReady = false;
         this._playerAudioCtx = null;
         this._playerSource = null;
-        this.SHAZAM_CAPTURE_SEC = 5;
+        this.SHAZAM_CAPTURE_SEC = 6;
         this.bandasModal = null;
         this.registroBandaModal = null;
         this.registroBarModal = null;
@@ -363,23 +363,20 @@ class SaltilloApp {
             });
             
             this.shazamSocket.on('shazam-timeout', (data) => {
-                console.log('⏰ Timeout de Shazam:', data);
-                this.stopTimer();
-                this.showShazamStatus(this.t('shazam.noMusic'), 'timeout');
-                this.updateShazamButton(false);
+                console.log('⏰ Timeout de Shazam:', data?.message || data);
+                this.finishShazamSession('timeout', data?.message || this.t('shazam.noMusic'));
             });
             
-            this.shazamSocket.on('shazam-stopped', (data) => {
-                console.log('🛑 Shazam detenido:', data);
-                this.stopTimer();
-                this.updateShazamButton(false);
+            this.shazamSocket.on('shazam-stopped', () => {
+                console.log('🛑 Shazam detenido');
+                if (this.isShazamListening) {
+                    this.finishShazamSession('stopped');
+                }
             });
             
             this.shazamSocket.on('shazam-error', (data) => {
-                console.error('❌ Error de Shazam:', data);
-                this.stopTimer();
-                this.showShazamStatus(this.t('shazam.recognitionError'), 'error');
-                this.updateShazamButton(false);
+                console.error('❌ Error de Shazam:', data?.error || data);
+                this.finishShazamSession('error', data?.error || this.t('shazam.recognitionError'));
             });
             
             this.shazamSocket.on('disconnect', () => {
@@ -462,6 +459,8 @@ class SaltilloApp {
                 this.handleShazamResult(apiResult);
                 return;
             }
+
+            console.log('⚠️ API rápida sin resultado, usando Shazam automatizado...');
 
             if (!this.shazamSocket?.connected) {
                 await this.connectToShazamService();
@@ -633,20 +632,27 @@ class SaltilloApp {
     }
 
     normalizeRecognitionResult(raw, source = 'API') {
-        const spotifyAlbum = raw.spotify?.album || raw.result?.spotify?.album;
+        const track = raw.result || raw;
+        const spotifyAlbum = track.spotify?.album || raw.spotify?.album;
         return {
-            title: raw.title || raw.song || '',
-            artist: raw.artist || '',
-            album: raw.album || '',
-            genre: raw.genre || '',
-            year: raw.year || raw.release_date || '',
-            imageUrl: raw.imageUrl || spotifyAlbum?.images?.[0]?.url || '',
-            shazamCount: raw.shazamCount || '',
-            api: raw.api || source
+            title: track.title || track.song || raw.title || raw.song || '',
+            artist: track.artist || raw.artist || '',
+            album: track.album || raw.album || '',
+            genre: track.genre || raw.genre || '',
+            year: track.year || track.release_date || raw.release_date || '',
+            imageUrl: track.imageUrl || raw.imageUrl || spotifyAlbum?.images?.[0]?.url || '',
+            shazamCount: track.shazamCount || raw.shazamCount || '',
+            api: track.api || raw.api || source
         };
     }
 
     async recognizeViaAPI(audioBlob) {
+        const fromUpload = await this.recognizeViaAPIUpload(audioBlob);
+        if (fromUpload) return fromUpload;
+        return this.recognizeViaAPIUrl();
+    }
+
+    async recognizeViaAPIUpload(audioBlob) {
         if (!audioBlob || audioBlob.size < 1000) return null;
 
         const formData = new FormData();
@@ -659,7 +665,10 @@ class SaltilloApp {
                 signal: this._shazamAbort?.signal
             });
 
-            if (!response.ok) return null;
+            if (!response.ok) {
+                console.warn('⚠️ /api/recognize HTTP', response.status);
+                return null;
+            }
 
             const data = await response.json();
             if (!data.success || !data.result) return null;
@@ -670,9 +679,73 @@ class SaltilloApp {
             return normalized;
         } catch (error) {
             if (error.name === 'AbortError') throw error;
-            console.warn('⚠️ API de reconocimiento no disponible:', error.message);
+            console.warn('⚠️ /api/recognize no disponible:', error.message);
             return null;
         }
+    }
+
+    async recognizeViaAPIUrl() {
+        try {
+            const streamUrl = new URL(this.streamUrl, window.location.href).href;
+            const response = await fetch(`${this.getApiBaseUrl()}/api/recognize-url`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: streamUrl }),
+                signal: this._shazamAbort?.signal
+            });
+
+            if (!response.ok) return null;
+
+            const data = await response.json();
+            if (!data.success || !data.result) return null;
+
+            const normalized = this.normalizeRecognitionResult(data.result);
+            if (!normalized.title || !normalized.artist) return null;
+
+            console.log('✅ Identificado vía URL del stream');
+            return normalized;
+        } catch (error) {
+            if (error.name === 'AbortError') throw error;
+            console.warn('⚠️ /api/recognize-url no disponible:', error.message);
+            return null;
+        }
+    }
+
+    finishShazamSession(status, message) {
+        this.stopTimer();
+        this.isShazamListening = false;
+        this.syncShazamUI();
+
+        if (this.shazamModal) {
+            const statusType = status === 'error' ? 'error' : 'timeout';
+            this.showShazamStatus(message || this.t('shazam.noMusic'), statusType);
+        }
+
+        if (status === 'error') {
+            this.showNotification(this.t('notifications.shazamStartError'), 'error');
+        }
+
+        setTimeout(() => {
+            if (!this.shazamModal) return;
+            const resultEl = this.shazamModal.querySelector('#shazamResult');
+            const hasResult = resultEl && resultEl.style.display !== 'none';
+            if (!hasResult) {
+                this.closeShazamModal();
+            }
+        }, 4000);
+    }
+
+    closeShazamModal() {
+        if (this.shazamModal) {
+            this.shazamModal.remove();
+            this.shazamModal = null;
+            if (!this.hasOpenModal()) {
+                document.body.style.overflow = '';
+            }
+        }
+        this._shazamAbort = null;
+        this.isShazamListening = false;
+        this.syncShazamUI();
     }
 
     arrayBufferToBase64(buffer) {
@@ -730,21 +803,14 @@ class SaltilloApp {
         // Detener contador
         this.stopTimer();
         
-        this.updateShazamButton(false);
+        this.syncShazamUI();
         
         // Detener reconocimiento a través del servicio
         if (this.shazamSocket && this.shazamSocket.connected) {
             this.shazamSocket.emit('stop-shazam');
         }
         
-        // Cerrar modal si está abierto
-        if (this.shazamModal) {
-            this.shazamModal.remove();
-            this.shazamModal = null;
-            if (!this.hasOpenModal()) {
-                document.body.style.overflow = '';
-            }
-        }
+        this.closeShazamModal();
     }
 
     hasOpenModal() {

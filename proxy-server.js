@@ -9,6 +9,28 @@ const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const AUDD_API_TOKEN = process.env.AUDD_API_TOKEN || 'test';
+
+function parseAudDResponse(auddResult) {
+    if (!auddResult || auddResult.status !== 'success') return null;
+    const track = auddResult.result || auddResult;
+    const title = track.title || track.song;
+    const artist = track.artist;
+    if (!title || !artist) return null;
+    return {
+        api: 'AudD',
+        confidence: track.confidence || auddResult.confidence || 85,
+        song: title,
+        title,
+        artist,
+        album: track.album || '',
+        genre: track.genre || '',
+        year: track.release_date || '',
+        spotify: track.spotify,
+        apple_music: track.apple_music,
+        deezer: track.deezer
+    };
+}
 
 // Stripe (opcional — requiere STRIPE_SECRET_KEY)
 let stripe = null;
@@ -238,18 +260,8 @@ async function tryMultipleAPIs(audioFile) {
     try {
         console.log('🎵 Intentando AudD API...');
         const auddResult = await callAudDAPI(audioFile);
-        if (auddResult && auddResult.status === 'success') {
-            results.push({
-                api: 'AudD',
-                confidence: auddResult.confidence || 85,
-                song: auddResult.title,
-                artist: auddResult.artist,
-                album: auddResult.album,
-                genre: auddResult.genre,
-                year: auddResult.release_date,
-                ...auddResult
-            });
-        }
+        const parsed = parseAudDResponse(auddResult);
+        if (parsed) results.push(parsed);
     } catch (error) {
         console.log('❌ Error con AudD:', error.message);
     }
@@ -308,7 +320,7 @@ async function callAudDAPI(audioFile) {
         contentType: audioFile.mimetype
     });
     formData.append('return', 'spotify,apple_music,deezer');
-    formData.append('api_token', 'test'); // Token de prueba
+    formData.append('api_token', AUDD_API_TOKEN);
 
     const response = await fetch(APIS.AUDD.url, {
         method: 'POST',
@@ -319,7 +331,11 @@ async function callAudDAPI(audioFile) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
 
-    return await response.json();
+    const json = await response.json();
+    if (json.status !== 'success' && json.error) {
+        console.log('⚠️ AudD respondió:', json.error?.error_message || json.error);
+    }
+    return json;
 }
 
 // Llamar a AudioTag API
@@ -382,7 +398,7 @@ app.post('/api/recognize-url', async (req, res) => {
         const formData = new FormData();
         formData.append('url', url);
         formData.append('return', 'spotify,apple_music,deezer');
-        formData.append('api_token', 'test');
+        formData.append('api_token', AUDD_API_TOKEN);
 
         const response = await fetch(APIS.AUDD.url, {
             method: 'POST',
@@ -394,21 +410,10 @@ app.post('/api/recognize-url', async (req, res) => {
         }
 
         const result = await response.json();
-        
-        if (result.status === 'success') {
-            res.json({
-                success: true,
-                result: {
-                    api: 'AudD',
-                    confidence: result.confidence || 85,
-                    song: result.title,
-                    artist: result.artist,
-                    album: result.album,
-                    genre: result.genre,
-                    year: result.release_date,
-                    ...result
-                }
-            });
+        const parsed = parseAudDResponse(result);
+
+        if (parsed) {
+            res.json({ success: true, result: parsed });
         } else {
             res.json({
                 success: false,
