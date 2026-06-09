@@ -258,9 +258,16 @@
 }
 
 .bpp-stars {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
     color: #FFB020;
-    font-size: 0.9rem;
-    letter-spacing: 1px;
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.bpp-stars i {
+    display: inline-block;
 }
 
 .bpp-rating-num {
