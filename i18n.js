@@ -308,6 +308,7 @@
                 stopIdentify: 'Detener identificación',
                 identifyMusic: 'Identificar música',
                 playFirst: 'Reproduce la radio para identificar canciones',
+                alreadyIdentified: 'Canción ya identificada',
                 capturing: 'Capturando audio...',
                 capturingRadio: 'Capturando audio de la radio (6 seg)...',
                 listeningRadio: 'Escuchando con micrófono (6 seg)...',
@@ -548,6 +549,7 @@
                 micPermission: '⚠️ Permite acceso al micrófono para identificar la canción',
                 shazamStartError: '❌ Error iniciando Shazam',
                 shazamRequiresPlay: '▶️ Reproduce la estación para usar Shazam',
+                shazamAlreadyIdentified: 'ℹ️ Esta canción ya está identificada',
                 linkCopied: '📋 Enlace copiado al portapapeles',
                 audioError: '❌ Error reproduciendo audio',
                 audioNotFound: '⚠️ Archivo de audio no encontrado. Agrega el MP3 en bandas-media/',
@@ -870,6 +872,7 @@
                 stopIdentify: 'Stop identification',
                 identifyMusic: 'Identify music',
                 playFirst: 'Play the radio to identify songs',
+                alreadyIdentified: 'Song already identified',
                 capturing: 'Capturing audio...',
                 capturingRadio: 'Capturing radio audio (6 sec)...',
                 listeningRadio: 'Listening via microphone (6 sec)...',
@@ -1110,6 +1113,7 @@
                 micPermission: '⚠️ Allow microphone access to identify the song',
                 shazamStartError: '❌ Error starting Shazam',
                 shazamRequiresPlay: '▶️ Play the station to use Shazam',
+                shazamAlreadyIdentified: 'ℹ️ This song is already identified',
                 linkCopied: '📋 Link copied to clipboard',
                 audioError: '❌ Error playing audio',
                 audioNotFound: '⚠️ Audio file not found. Add the MP3 in bandas-media/',
@@ -1137,7 +1141,7 @@
                     { title: 'Crea tu perfil', desc: 'Regístrate gratis y sube muestras de audio' },
                     { title: 'Aparece en el mapa', desc: 'Te ven bares, restaurantes y organizadores' },
                     { title: 'Recibe reservas', desc: 'Calendario, fecha y pago seguro en un flujo' },
-                    { title: 'Gana y crece', desc: 'Más eventos, reseñas y lugar en el Top Ten' }
+                    { title: 'Gana y crece', desc: 'Te quedas con el 90%. Comisión del 10% solo al cobrar' }
                 ],
                 previews: [
                     {
@@ -1164,10 +1168,16 @@
                     },
                     {
                         icon: 'fa-trophy', tag: 'Paso 4 de 4',
-                        title: 'Crece y gana más',
-                        desc: 'Cada evento suma reseñas, visibilidad y posición en el Top Ten anual. Más escena, más ingresos, más reconocimiento en Saltillo.',
-                        benefits: ['Ranking Top Ten', 'Más reservas recurrentes', 'Exposición en radio local'],
-                        potential: '4.8★', potentialLabel: 'rating promedio top bandas'
+                        title: 'Crece y quédate con el 90%',
+                        desc: 'Cada evento suma reseñas, visibilidad y lugar en el Top Ten. Tú pones la música; nosotros conectamos, cobramos y te depositamos — sin perseguir pagos.',
+                        benefits: ['Te quedas con el 90% neto', 'Sin mensualidades', 'Pago directo al confirmar el evento'],
+                        commission: {
+                            rate: '10%',
+                            title: 'Comisión justa, solo cuando cobras',
+                            body: 'Retenemos 10% únicamente en reservas confirmadas y pagadas. Cero costo de registro, cero cuota fija: ganamos cuando tú ganas.',
+                            example: 'Ejemplo: reserva de $6,500 MXN → recibes $5,850 MXN en tu cuenta.'
+                        },
+                        potential: '90%', potentialLabel: 'es tuyo en cada reserva'
                     }
                 ],
                 ctaPrimary: { text: 'Registra tu banda', icon: 'fa-rocket', action: 'registro' },
@@ -1178,7 +1188,7 @@
                     { title: 'Registra tu venue', desc: 'Bar o restaurante visible en el mapa' },
                     { title: 'Explora bandas', desc: 'Filtra por género y disponibilidad hoy' },
                     { title: 'Reserva al instante', desc: 'Elige banda, fecha y confirma en minutos' },
-                    { title: 'Llena tu local', desc: 'Música en vivo que trae clientes' }
+                    { title: 'Llena tu local', desc: 'Comisión del 10% por reserva — sin membresías' }
                 ],
                 previews: [
                     {
@@ -1204,9 +1214,15 @@
                     },
                     {
                         icon: 'fa-chart-line', tag: 'Paso 4 de 4',
-                        title: 'Más clientes, más ingresos',
-                        desc: 'La música en vivo llena mesas, aumenta consumo y fideliza clientes. Conecta con talento local y destaca frente a la competencia.',
-                        benefits: ['Mayor ticket promedio', 'Clientes recurrentes', 'Eventos sin fricción'],
+                        title: 'Más clientes, precio claro',
+                        desc: 'La música en vivo llena mesas y fideliza clientes. Reservas con precio transparente, pago seguro y confirmación automática — sin llamadas ni sorpresas.',
+                        benefits: ['Precio visible antes de pagar', 'Sin membresía mensual', 'Soporte si algo se complica'],
+                        commission: {
+                            rate: '10%',
+                            title: '10% solo cuando reservas de verdad',
+                            body: 'Cobramos 10% por reserva confirmada: cubre pago seguro con Stripe, confirmación al instante y el mapa que te conecta con bandas locales. Sin letras chicas.',
+                            example: 'Ejemplo: reservas una banda de $6,500 MXN → pagas $6,500 MXN. La comisión de plataforma ya está incluida en el flujo.'
+                        },
                         potential: '+35%', potentialLabel: 'ocupación en noches con banda'
                     }
                 ],
@@ -1220,7 +1236,7 @@
                     { title: 'Create your profile', desc: 'Sign up for free and upload audio samples' },
                     { title: 'Appear on the map', desc: 'Bars, restaurants and organizers find you' },
                     { title: 'Receive bookings', desc: 'Calendar, date and secure payment in one flow' },
-                    { title: 'Earn and grow', desc: 'More events, reviews and a spot in the Top Ten' }
+                    { title: 'Earn and grow', desc: 'You keep 90%. 10% fee only when you get paid' }
                 ],
                 previews: [
                     {
@@ -1247,10 +1263,16 @@
                     },
                     {
                         icon: 'fa-trophy', tag: 'Step 4 of 4',
-                        title: 'Grow and earn more',
-                        desc: 'Each event adds reviews, visibility and position in the annual Top Ten. More scene, more income, more recognition in Saltillo.',
-                        benefits: ['Top Ten ranking', 'More recurring bookings', 'Exposure on local radio'],
-                        potential: '4.8★', potentialLabel: 'average rating top bands'
+                        title: 'Grow and keep 90%',
+                        desc: 'Every gig adds reviews, visibility and Top Ten ranking. You bring the music; we connect, collect and pay you out — no chasing payments.',
+                        benefits: ['You keep 90% net', 'No monthly fees', 'Payout when the gig is confirmed'],
+                        commission: {
+                            rate: '10%',
+                            title: 'Fair fee, only when you get paid',
+                            body: 'We take 10% only on confirmed, paid bookings. Zero signup cost, zero fixed fees — we win when you win.',
+                            example: 'Example: a $6,500 MXN booking → you receive $5,850 MXN.'
+                        },
+                        potential: '90%', potentialLabel: 'is yours on every booking'
                     }
                 ],
                 ctaPrimary: { text: 'Register your band', icon: 'fa-rocket', action: 'registro' },
@@ -1261,7 +1283,7 @@
                     { title: 'Register your venue', desc: 'Bar or restaurant visible on the map' },
                     { title: 'Explore bands', desc: 'Filter by genre and availability today' },
                     { title: 'Book instantly', desc: 'Choose band, date and confirm in minutes' },
-                    { title: 'Fill your venue', desc: 'Live music that brings customers' }
+                    { title: 'Fill your venue', desc: '10% per booking — no membership fees' }
                 ],
                 previews: [
                     {
@@ -1287,9 +1309,15 @@
                     },
                     {
                         icon: 'fa-chart-line', tag: 'Step 4 of 4',
-                        title: 'More customers, more revenue',
-                        desc: 'Live music fills tables, increases spending and builds loyal customers. Connect with local talent and stand out from the competition.',
-                        benefits: ['Higher average ticket', 'Returning customers', 'Frictionless events'],
+                        title: 'More customers, clear pricing',
+                        desc: 'Live music fills tables and builds loyalty. Transparent pricing, secure checkout and instant confirmation — no phone tag, no surprises.',
+                        benefits: ['Price shown before you pay', 'No monthly membership', 'Support if something goes wrong'],
+                        commission: {
+                            rate: '10%',
+                            title: '10% only when you actually book',
+                            body: 'A 10% fee per confirmed booking covers secure Stripe payments, instant confirmation and the map that connects you with local bands. No fine print.',
+                            example: 'Example: you book a band for $6,500 MXN → you pay $6,500 MXN. The platform fee is built into the checkout flow.'
+                        },
                         potential: '+35%', potentialLabel: 'occupancy on band nights'
                     }
                 ],

@@ -717,13 +717,16 @@ body.mobile-menu-open {
     bottom: -2px;
     left: 0;
     width: 0;
-    height: 2px;
-    background: var(--primary-gradient);
+    height: 3px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #FF6B00, #FF9500, #FF0080);
+    box-shadow: 0 0 10px rgba(255, 107, 0, 0.65), 0 0 18px rgba(255, 0, 128, 0.35);
     transition: var(--transition-normal);
 }
 
 .nav-item:hover .nav-text {
     color: var(--text-primary);
+    text-shadow: 0 0 12px rgba(255, 107, 0, 0.35);
 }
 
 .nav-item:hover .nav-indicator {
@@ -1172,6 +1175,26 @@ body.mobile-menu-open {
     transform: scale(1.05);
 }
 
+.header-player .shazam-button-container.inactive,
+.header-player .shazam-button-container.identified {
+    opacity: 0.38;
+    cursor: not-allowed;
+    pointer-events: none;
+    transform: none;
+}
+
+.mobile-shazam-btn.identified:not(.listening) {
+    opacity: 0.38;
+    cursor: not-allowed;
+    pointer-events: none;
+    border-color: rgba(0, 255, 136, 0.25);
+    background: rgba(0, 255, 136, 0.08);
+}
+
+.mobile-shazam-btn.identified:not(.listening) .mobile-shazam-logo {
+    fill: rgba(0, 255, 136, 0.45);
+}
+
 .shazam-button-container.inactive {
     opacity: 0.38;
     cursor: not-allowed;
@@ -1186,6 +1209,11 @@ body.mobile-menu-open {
 
 .shazam-button-container.inactive:hover {
     transform: none;
+}
+
+.shazam-button-container.identified:not(.listening) .shazam-logo {
+    fill: rgba(0, 255, 136, 0.45);
+    filter: none;
 }
 
 .shazam-button-container.listening {
@@ -2981,6 +3009,61 @@ body.mobile-menu-open {
 .guia-benefit-pill i {
     font-size: 0.65rem;
     color: var(--neon-green);
+}
+
+.guia-commission-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-top: var(--space-md);
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 107, 0, 0.35);
+    background: linear-gradient(135deg, rgba(255, 107, 0, 0.12), rgba(255, 0, 128, 0.08));
+    box-shadow: 0 0 20px rgba(255, 107, 0, 0.12);
+}
+
+.guia-commission-rate {
+    flex-shrink: 0;
+    min-width: 44px;
+    padding: 6px 8px;
+    border-radius: 10px;
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    color: #fff;
+    background: linear-gradient(135deg, #FF6B00, #FF0080);
+    box-shadow: 0 0 14px rgba(255, 107, 0, 0.35);
+}
+
+.guia-commission-copy {
+    min-width: 0;
+}
+
+.guia-commission-title {
+    display: block;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    line-height: 1.35;
+}
+
+.guia-commission-body {
+    font-size: 0.8rem;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.78);
+    margin: 0;
+}
+
+.guia-commission-example {
+    font-size: 0.75rem;
+    line-height: 1.45;
+    color: rgba(255, 149, 0, 0.95);
+    margin: 8px 0 0;
+    font-weight: 500;
 }
 
 .guia-preview-potential {

@@ -442,6 +442,11 @@ class SaltilloApp {
             return;
         }
 
+        if (this.nowPlaying) {
+            this.showNotification(this.t('notifications.shazamAlreadyIdentified'), 'info');
+            return;
+        }
+
         this._shazamAbort = new AbortController();
         this.isShazamListening = true;
         this.updateShazamButton(true);
@@ -1092,23 +1097,26 @@ class SaltilloApp {
     }
 
     syncShazamUI() {
-        const isAvailable = this.isPlaying;
+        const isPlaying = this.isPlaying;
         const isListening = this.isShazamListening;
+        const isIdentified = !!this.nowPlaying;
         const buttons = [
             document.getElementById('shazamBtn'),
             document.getElementById('mobileShazamBtn')
         ].filter(Boolean);
 
         let labelKey = 'shazam.identifyMusic';
-        if (!isAvailable) labelKey = 'shazam.playFirst';
+        if (!isPlaying) labelKey = 'shazam.playFirst';
+        else if (isIdentified && !isListening) labelKey = 'shazam.alreadyIdentified';
         else if (isListening) labelKey = 'shazam.stopIdentify';
 
         const label = this.t(labelKey);
+        const inactive = !isPlaying || (isIdentified && !isListening);
 
         buttons.forEach((btn) => {
-            const inactive = !isAvailable;
             btn.classList.toggle('inactive', inactive);
-            btn.classList.toggle('listening', isAvailable && isListening);
+            btn.classList.toggle('listening', isPlaying && isListening);
+            btn.classList.toggle('identified', isIdentified && !isListening);
             btn.setAttribute('aria-disabled', inactive ? 'true' : 'false');
 
             if (btn.tagName === 'BUTTON') {
@@ -1121,7 +1129,7 @@ class SaltilloApp {
             btn.setAttribute('aria-label', label);
         });
 
-        window.mobileHeader?.updateShazamState(isListening, isAvailable);
+        window.mobileHeader?.updateShazamState(isListening, isPlaying, isIdentified);
     }
 
     updateShazamButton(isListening) {
@@ -3906,6 +3914,27 @@ class SaltilloApp {
                 ).join('');
             }
 
+            const commissionEl = document.getElementById('guiaCommissionNote');
+            const commissionRate = document.getElementById('guiaCommissionRate');
+            const commissionTitle = document.getElementById('guiaCommissionTitle');
+            const commissionBody = document.getElementById('guiaCommissionBody');
+            const commissionExample = document.getElementById('guiaCommissionExample');
+
+            if (commissionEl) {
+                if (data.commission) {
+                    commissionEl.hidden = false;
+                    if (commissionRate) commissionRate.textContent = data.commission.rate;
+                    if (commissionTitle) commissionTitle.textContent = data.commission.title;
+                    if (commissionBody) commissionBody.textContent = data.commission.body;
+                    if (commissionExample) {
+                        commissionExample.textContent = data.commission.example || '';
+                        commissionExample.style.display = data.commission.example ? 'block' : 'none';
+                    }
+                } else {
+                    commissionEl.hidden = true;
+                }
+            }
+
             preview.classList.remove('fade-swap');
         };
 
@@ -4851,6 +4880,7 @@ class SaltilloApp {
         if (!track?.title || !track?.artist) return;
         this.nowPlaying = { title: track.title, artist: track.artist };
         this.updateNowPlayingUI();
+        this.syncShazamUI();
     }
 
     updateNowPlayingUI() {
@@ -5215,12 +5245,13 @@ class MobileHeader {
         }
     }
     
-    updateShazamState(isListening, isAvailable = true) {
+    updateShazamState(isListening, isPlaying = true, isIdentified = false) {
         if (!this.mobileShazamBtn) return;
 
-        const inactive = !isAvailable;
+        const inactive = !isPlaying || (isIdentified && !isListening);
         this.mobileShazamBtn.classList.toggle('inactive', inactive);
-        this.mobileShazamBtn.classList.toggle('listening', isAvailable && isListening);
+        this.mobileShazamBtn.classList.toggle('listening', isPlaying && isListening);
+        this.mobileShazamBtn.classList.toggle('identified', isIdentified && !isListening);
         this.mobileShazamBtn.disabled = inactive;
         this.mobileShazamBtn.setAttribute('aria-disabled', inactive ? 'true' : 'false');
     }
