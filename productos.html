@@ -2631,9 +2631,8 @@
                                 </div>
                                 <h1 class="bpp-name">${profile.nombre}</h1>
                                 <div class="bpp-rating">
-                                    <span class="bpp-stars">${renderStars(profile.rating || 0)}</span>
+                                    <span class="bpp-stars" aria-hidden="true">${renderStars(profile.rating || 0)}</span>
                                     <span class="bpp-rating-num">${(profile.rating || 0).toFixed(1)}</span>
-                                    <span class="bpp-rating-label">${t('productos.profileRating')}</span>
                                 </div>
                                 ${heroLinkHtml}
                                 <form class="bpp-edit-form bpp-desc-form" id="profileDescForm">
