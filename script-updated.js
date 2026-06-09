@@ -3918,6 +3918,36 @@ class SaltilloApp {
         };
     }
 
+    extractFirstTime(horario) {
+        if (!horario) return '';
+        const match = String(horario).match(/\d{1,2}:\d{2}/);
+        return match ? match[0] : horario;
+    }
+
+    getBarMusicaHoyInfo(bar, connectedBandas = []) {
+        if (!bar?.musicaHoy) return null;
+        const banda = bar.bandaHoy
+            || [...connectedBandas].sort((a, b) => (b.estrellas || 0) - (a.estrellas || 0))[0]?.nombre
+            || '';
+        const horario = bar.horarioHoy || this.extractFirstTime(bar.horarioMusica) || '';
+        return { banda, horario };
+    }
+
+    renderMusicaHoyBadge(bar, connectedBandas = []) {
+        const info = this.getBarMusicaHoyInfo(bar, connectedBandas);
+        if (!info) return '';
+        const detail = [info.banda, info.horario].filter(Boolean).join(' · ');
+        return `
+            <span class="mapa-detail-badge live">
+                <i class="fas fa-circle"></i>
+                <span class="mapa-live-badge-inner">
+                    <span class="mapa-live-badge-title">${this.t('common.musicToday')}</span>
+                    ${detail ? `<span class="mapa-live-badge-detail">${detail}</span>` : ''}
+                </span>
+            </span>
+        `;
+    }
+
     createMapaIcon(type) {
         const isBanda = type === 'banda';
         return L.divIcon({
@@ -4169,8 +4199,10 @@ class SaltilloApp {
             <div class="mapa-sidebar-content">
                 <img class="mapa-detail-img" src="${bar.imagen || ''}" alt="${bar.nombre}"
                      onerror="this.src='https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=600&q=80'">
-                <span class="mapa-detail-badge bar"><i class="fas fa-cocktail"></i> ${bar.tipo}</span>
-                ${bar.musicaHoy ? `<span class="mapa-detail-badge live"><i class="fas fa-circle"></i> ${this.t('common.musicToday')}</span>` : ''}
+                <div class="mapa-detail-badges">
+                    <span class="mapa-detail-badge bar"><i class="fas fa-cocktail"></i> ${bar.tipo}</span>
+                    ${this.renderMusicaHoyBadge(bar, connectedBandas)}
+                </div>
                 <h4 class="mapa-detail-name">${bar.nombre}</h4>
                 <div class="mapa-detail-meta">
                     <span><i class="fas fa-star"></i> ${bar.estrellas}</span>

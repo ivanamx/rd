@@ -101,6 +101,8 @@
       "lng": -100.9750,
       "capacidad": 800,
       "musicaHoy": true,
+      "bandaHoy": "Gary Garcia",
+      "horarioHoy": "20:00",
       "generosPreferidos": ["Rock", "Hip Hop", "Folk", "Electrónica"],
       "estrellas": 4.5,
       "horarioMusica": "Dom 17:00–21:00"

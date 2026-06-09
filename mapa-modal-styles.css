@@ -363,6 +363,19 @@
     letter-spacing: 0.1em;
 }
 
+.mapa-detail-badges {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.mapa-detail-badge.bar {
+    white-space: nowrap;
+    width: fit-content;
+    max-width: 100%;
+}
+
 .mapa-detail-badge.banda {
     color: var(--neon-purple);
     background: rgba(139, 92, 246, 0.15);
@@ -380,6 +393,30 @@
     background: rgba(255, 107, 107, 0.12);
     border: 1px solid rgba(255, 107, 107, 0.35);
     animation: mapa-pulse 2s ease infinite;
+    align-items: flex-start;
+    flex: 1 1 100%;
+    white-space: normal;
+}
+
+.mapa-live-badge-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.mapa-live-badge-title {
+    font-weight: 700;
+    letter-spacing: 0.08em;
+}
+
+.mapa-live-badge-detail {
+    font-size: 0.58rem;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    text-transform: none;
+    color: rgba(255, 255, 255, 0.88);
+    line-height: 1.35;
 }
 
 @keyframes mapa-pulse {
