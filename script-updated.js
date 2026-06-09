@@ -122,6 +122,8 @@ class SaltilloApp {
         this.topTenModal = null;
         this.guiaState = { role: 'banda', step: 1 };
         this.guiaContent = null;
+        this.nowPlaying = null;
+        this._nowPlayingFetch = false;
         
         // Configuración de audio
         this.streamUrl = 'song.mp3';
@@ -150,6 +152,7 @@ class SaltilloApp {
         this.renderGuiaPreview(false);
         this.updateGuiaCTAs();
         this.syncShazamUI();
+        this.updateNowPlayingUI();
         this.refreshOpenModals();
     }
 
@@ -185,6 +188,8 @@ class SaltilloApp {
         this.connectToShazamService().catch(() => {});
 
         this.syncShazamUI();
+
+        this.updateNowPlayingUI();
 
         // Verificar resultado de pago Stripe
         this.checkPaymentResult();
@@ -799,10 +804,7 @@ class SaltilloApp {
         this._shazamAbort?.abort();
         this._shazamAbort = null;
         this.isShazamListening = false;
-        
-        // Detener contador
         this.stopTimer();
-        
         this.syncShazamUI();
         
         // Detener reconocimiento a través del servicio
@@ -1078,6 +1080,8 @@ class SaltilloApp {
         
         // Actualizar estado del botón
         this.updateShazamButton(false);
+
+        this.setNowPlaying({ title: song.title, artist: song.artist });
         
         // Auto-cerrar después de 15 segundos (más tiempo para ver la información)
         setTimeout(() => {
@@ -1218,7 +1222,11 @@ class SaltilloApp {
 
             this.updateRadioLiveBar();
             window.mobileHeader?.updatePlayState(true);
+            this.updateNowPlayingUI();
             this.syncShazamUI();
+            setTimeout(() => this.fetchNowPlayingMetadata(), 2500);
+
+        this.updateNowPlayingUI();
         } catch (error) {
             console.error('Error reproduciendo audio:', error);
             this.showNotification(this.t('notifications.audioError'), 'error');
@@ -1248,8 +1256,10 @@ class SaltilloApp {
             visualizer.classList.remove('playing');
         }
 
+        this.nowPlaying = null;
         this.updateRadioLiveBar();
         window.mobileHeader?.updatePlayState(false);
+        this.updateNowPlayingUI();
         this.syncShazamUI();
     }
 
@@ -4834,6 +4844,72 @@ class SaltilloApp {
             playBtn.innerHTML = this.isPlaying
                 ? '<i class="fas fa-pause"></i>'
                 : '<i class="fas fa-play"></i>';
+        }
+    }
+
+    setNowPlaying(track) {
+        if (!track?.title || !track?.artist) return;
+        this.nowPlaying = { title: track.title, artist: track.artist };
+        this.updateNowPlayingUI();
+    }
+
+    updateNowPlayingUI() {
+        const titleEl = document.getElementById('mobileNowTitle');
+        const artistEl = document.getElementById('mobileNowArtist');
+        const trackEl = document.getElementById('radioNowTrack');
+        const playerEl = document.getElementById('mobileHeaderPlayer');
+
+        let title;
+        let artist;
+
+        if (this.nowPlaying) {
+            title = this.nowPlaying.title;
+            artist = this.nowPlaying.artist;
+        } else if (this.isPlaying) {
+            title = this.t('radio.mobileIdleTitle');
+            artist = this.t('radio.mobileLive');
+        } else {
+            title = this.t('radio.mobileIdleTitle');
+            artist = this.t('radio.mobileTapPlay');
+        }
+
+        if (titleEl) titleEl.textContent = title;
+        if (artistEl) artistEl.textContent = artist;
+        if (trackEl) {
+            trackEl.textContent = this.nowPlaying
+                ? `${title} — ${artist}`
+                : this.t('radio.nowTrack');
+        }
+        if (playerEl) {
+            playerEl.classList.toggle('is-playing', this.isPlaying);
+            playerEl.classList.toggle('has-track', !!this.nowPlaying);
+        }
+    }
+
+    async fetchNowPlayingMetadata() {
+        if (!this.isPlaying || this.nowPlaying || this._nowPlayingFetch) return;
+
+        this._nowPlayingFetch = true;
+        const artistEl = document.getElementById('mobileNowArtist');
+        const prevArtist = artistEl?.textContent;
+
+        if (artistEl && !this.nowPlaying) {
+            artistEl.textContent = this.t('radio.mobileIdentifying');
+        }
+
+        try {
+            const result = await this.recognizeViaAPIUrl();
+            if (result?.title && result?.artist && this.isPlaying && !this.nowPlaying) {
+                this.setNowPlaying(result);
+            } else if (artistEl && !this.nowPlaying) {
+                artistEl.textContent = prevArtist || this.t('radio.mobileLive');
+            }
+        } catch {
+            if (artistEl && !this.nowPlaying) {
+                artistEl.textContent = prevArtist || this.t('radio.mobileLive');
+            }
+        } finally {
+            this._nowPlayingFetch = false;
         }
     }
 
