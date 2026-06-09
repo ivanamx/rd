@@ -1,0 +1,723 @@
+/* Modal de reserva de estudios */
+
+.estudio-modal-native {
+    position: fixed;
+    inset: 0;
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-md);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+}
+
+.estudio-modal-native.show {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.estudio-modal-native .estudio-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.78);
+    backdrop-filter: blur(10px);
+}
+
+.estudio-modal-native .estudio-container {
+    position: relative;
+    width: 100%;
+    max-width: 780px;
+    max-height: 92vh;
+    background: linear-gradient(145deg, #121218, #1e2a38);
+    border-radius: 20px;
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.55), 0 0 40px rgba(0, 212, 255, 0.12);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform: translateY(28px) scale(0.96);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.estudio-modal-native.show .estudio-container {
+    transform: translateY(0) scale(1);
+}
+
+.estudio-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 255, 136, 0.06));
+    flex-shrink: 0;
+}
+
+.estudio-header-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.estudio-header-title i {
+    font-size: 1.5rem;
+    color: var(--neon-blue);
+    filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.6));
+}
+
+.estudio-header-title h3 {
+    color: var(--text-primary);
+    font-family: var(--font-primary);
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.estudio-close-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    font-size: 1.4rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-fast);
+}
+
+.estudio-close-btn:hover {
+    background: rgba(255, 0, 128, 0.15);
+    border-color: var(--neon-pink);
+    color: var(--neon-pink);
+}
+
+.estudio-steps {
+    display: flex;
+    padding: 12px 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    flex-shrink: 0;
+}
+
+.estudio-step {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+}
+
+.estudio-step-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    flex-shrink: 0;
+    transition: var(--transition-fast);
+}
+
+.estudio-step.active .estudio-step-num {
+    background: var(--neon-blue);
+    border-color: var(--neon-blue);
+    color: #000;
+    box-shadow: var(--glow-blue);
+}
+
+.estudio-step.active { color: var(--text-primary); }
+
+.estudio-step.done .estudio-step-num {
+    background: var(--neon-green);
+    border-color: var(--neon-green);
+    color: #000;
+}
+
+.estudio-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px;
+}
+
+.estudio-panel { display: none; }
+
+.estudio-panel.active {
+    display: block;
+    animation: estudioFadeIn 0.3s ease;
+}
+
+@keyframes estudioFadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.estudio-search-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.estudio-search-input-wrap {
+    flex: 1;
+    position: relative;
+}
+
+.estudio-search-input-wrap i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.estudio-search-input {
+    width: 100%;
+    padding: 12px 14px 12px 40px;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-family: var(--font-primary);
+    font-size: 0.9rem;
+    outline: none;
+    transition: var(--transition-fast);
+}
+
+.estudio-search-input:focus {
+    border-color: var(--neon-blue);
+    box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.15);
+}
+
+.estudio-filter-select {
+    padding: 12px 14px;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    outline: none;
+    cursor: pointer;
+    min-width: 150px;
+}
+
+.estudio-filter-select option { background: #1A1A1A; }
+
+/* Grid de estudios con imágenes */
+.estudio-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.estudio-grid::-webkit-scrollbar { width: 4px; }
+.estudio-grid::-webkit-scrollbar-thumb {
+    background: rgba(0, 212, 255, 0.3);
+    border-radius: 4px;
+}
+
+.estudio-card {
+    position: relative;
+    border-radius: 14px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: var(--transition-fast);
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.estudio-card:hover {
+    border-color: rgba(0, 212, 255, 0.5);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(0, 212, 255, 0.15);
+}
+
+.estudio-card.selected {
+    border-color: var(--neon-blue);
+    box-shadow: 0 0 0 1px var(--neon-blue), 0 0 25px rgba(0, 212, 255, 0.25);
+}
+
+.estudio-card-img-wrap {
+    position: relative;
+    height: 120px;
+    overflow: hidden;
+}
+
+.estudio-card-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.estudio-card:hover .estudio-card-img-wrap img {
+    transform: scale(1.06);
+}
+
+.estudio-card-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    padding: 4px 10px;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(0, 212, 255, 0.4);
+    border-radius: 20px;
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    color: var(--neon-blue);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.estudio-card-price-tag {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    padding: 4px 10px;
+    background: rgba(0, 255, 136, 0.9);
+    border-radius: 8px;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #000;
+}
+
+.estudio-card-body {
+    padding: 12px 14px;
+}
+
+.estudio-card-name {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 0.92rem;
+    margin-bottom: 4px;
+}
+
+.estudio-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+}
+
+.estudio-card-meta i { color: var(--neon-blue); font-size: 0.65rem; }
+
+.estudio-card-stars {
+    color: #FFD700;
+    font-size: 0.7rem;
+}
+
+/* Perfil del estudio */
+.estudio-profile-hero {
+    position: relative;
+    height: 180px;
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 18px;
+}
+
+.estudio-profile-hero img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.estudio-profile-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 60%);
+    display: flex;
+    align-items: flex-end;
+    padding: 16px 18px;
+}
+
+.estudio-profile-hero h2 {
+    color: #fff;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.estudio-profile-hero .estudio-hero-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 5px 12px;
+    background: rgba(0, 212, 255, 0.9);
+    border-radius: 20px;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: #000;
+    text-transform: uppercase;
+}
+
+.estudio-gallery {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    overflow-x: auto;
+}
+
+.estudio-gallery img {
+    width: 80px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.1);
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.estudio-gallery img:hover,
+.estudio-gallery img.active {
+    border-color: var(--neon-blue);
+    box-shadow: 0 0 12px rgba(0, 212, 255, 0.3);
+}
+
+.estudio-profile-desc {
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+    line-height: 1.55;
+    margin: 0 0 16px;
+}
+
+.estudio-profile-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.estudio-meta-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: rgba(0, 212, 255, 0.08);
+    border: 1px solid rgba(0, 212, 255, 0.2);
+    border-radius: 20px;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+}
+
+.estudio-meta-chip i { color: var(--neon-blue); font-size: 0.7rem; }
+
+.estudio-equip-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.estudio-equip-tag {
+    padding: 5px 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.estudio-section-title {
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-primary);
+    margin: 0 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.estudio-section-title i { color: var(--neon-blue); }
+
+/* Calendario y horarios */
+.estudio-selected-info {
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    background: rgba(0, 212, 255, 0.06);
+    border: 1px solid rgba(0, 212, 255, 0.2);
+    border-radius: 12px;
+}
+
+.estudio-selected-info h4 { color: var(--text-primary); font-size: 0.95rem; margin: 0 0 4px; }
+.estudio-selected-info p { color: var(--text-secondary); font-size: 0.8rem; margin: 0; }
+
+.estudio-calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.estudio-cal-nav-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-fast);
+}
+
+.estudio-cal-nav-btn:hover { border-color: var(--neon-blue); color: var(--neon-blue); }
+
+.estudio-cal-month {
+    font-weight: 600;
+    color: var(--text-primary);
+    text-transform: capitalize;
+}
+
+.estudio-cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+.estudio-cal-day-name {
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    color: var(--text-secondary);
+    padding: 6px 0;
+    text-transform: uppercase;
+}
+
+.estudio-cal-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.2);
+    cursor: default;
+    transition: var(--transition-fast);
+}
+
+.estudio-cal-day.available {
+    color: var(--text-primary);
+    cursor: pointer;
+    border: 1px solid rgba(0, 255, 136, 0.2);
+    background: rgba(0, 255, 136, 0.05);
+}
+
+.estudio-cal-day.available:hover {
+    background: rgba(0, 255, 136, 0.15);
+    border-color: var(--neon-green);
+}
+
+.estudio-cal-day.selected {
+    background: var(--neon-green);
+    color: #000;
+    border-color: var(--neon-green);
+    font-weight: 700;
+    box-shadow: var(--glow-green);
+}
+
+.estudio-time-slots {
+    margin-top: 18px;
+}
+
+.estudio-time-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.estudio-time-slot {
+    padding: 10px;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.estudio-time-slot:hover {
+    border-color: rgba(0, 212, 255, 0.4);
+    color: var(--text-primary);
+}
+
+.estudio-time-slot.selected {
+    background: rgba(0, 212, 255, 0.15);
+    border-color: var(--neon-blue);
+    color: var(--neon-blue);
+    font-weight: 600;
+    box-shadow: 0 0 12px rgba(0, 212, 255, 0.2);
+}
+
+/* Pago */
+.estudio-payment-summary {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.estudio-payment-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    font-size: 0.9rem;
+}
+
+.estudio-payment-row:last-child { border-bottom: none; }
+
+.estudio-payment-label { color: var(--text-secondary); }
+.estudio-payment-value { color: var(--text-primary); font-weight: 500; }
+
+.estudio-payment-total .estudio-payment-value {
+    color: var(--neon-green);
+    font-family: var(--font-mono);
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.estudio-stripe-btn {
+    width: 100%;
+    padding: 16px 24px;
+    background: linear-gradient(135deg, #635BFF, #00D4FF);
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: var(--transition-fast);
+}
+
+.estudio-stripe-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(99, 91, 255, 0.4);
+}
+
+.estudio-stripe-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.estudio-stripe-note {
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 12px;
+}
+
+.estudio-reserve-btn {
+    width: 100%;
+    padding: 14px;
+    margin-top: 8px;
+    background: linear-gradient(135deg, var(--neon-blue), var(--neon-green));
+    border: none;
+    border-radius: 12px;
+    color: #000;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: var(--transition-fast);
+}
+
+.estudio-reserve-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--glow-blue);
+}
+
+.estudio-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    flex-shrink: 0;
+}
+
+.estudio-btn {
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-family: var(--font-primary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    border: none;
+}
+
+.estudio-btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+}
+
+.estudio-btn-secondary:hover { border-color: var(--text-secondary); color: var(--text-primary); }
+
+.estudio-btn-primary {
+    background: linear-gradient(135deg, var(--neon-blue), #0099CC);
+    color: #000;
+}
+
+.estudio-btn-primary:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: var(--glow-blue);
+}
+
+.estudio-btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.estudio-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-secondary);
+}
+
+.estudio-empty i { font-size: 2rem; opacity: 0.4; display: block; margin-bottom: 12px; }
+
+.estudio-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 40px;
+    color: var(--text-secondary);
+}
+
+@media (max-width: 600px) {
+    .estudio-grid { grid-template-columns: 1fr; }
+    .estudio-time-grid { grid-template-columns: repeat(2, 1fr); }
+    .estudio-step-label { display: none; }
+}

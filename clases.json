@@ -1,0 +1,169 @@
+{
+  "maestros": [
+    {
+      "id": "carlos-guitarra",
+      "nombre": "Carlos Mendoza",
+      "instrumento": "Guitarra",
+      "genero": "Rock & Blues",
+      "descripcion": "Guitarrista de sesión con más de 12 años en escena. Especialista en técnica, improvisación y teoría aplicada al rock y blues.",
+      "imagen": "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=800&q=80",
+      "estrellas": 4.9,
+      "experiencia": "12 años",
+      "alumnos": 85,
+      "modalidad": ["Presencial", "En línea"],
+      "horarios": "Lun–Vie 16:00–20:00",
+      "niveles": ["Principiante", "Intermedio", "Avanzado"],
+      "planes": [
+        { "id": "guitarra-4", "nombre": "4 clases al mes", "descripcion": "1 clase semanal de 60 min", "precio": 120000 },
+        { "id": "guitarra-8", "nombre": "8 clases al mes", "descripcion": "2 clases semanales de 60 min", "precio": 220000 },
+        { "id": "guitarra-1", "nombre": "Clase suelta", "descripcion": "1 clase de 60 min (prueba)", "precio": 35000 }
+      ]
+    },
+    {
+      "id": "ana-voz",
+      "nombre": "Ana Torres",
+      "instrumento": "Voz",
+      "genero": "Pop & Musical",
+      "descripcion": "Cantante lírica y coach vocal. Trabaja técnica respiratoria, afinación y performance escénica para todo tipo de repertorio.",
+      "imagen": "https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=800&q=80",
+      "estrellas": 5.0,
+      "experiencia": "10 años",
+      "alumnos": 120,
+      "modalidad": ["Presencial", "En línea"],
+      "horarios": "Mar–Sáb 10:00–18:00",
+      "niveles": ["Principiante", "Intermedio", "Avanzado"],
+      "planes": [
+        { "id": "voz-4", "nombre": "4 clases al mes", "descripcion": "1 clase semanal de 60 min", "precio": 140000 },
+        { "id": "voz-8", "nombre": "8 clases al mes", "descripcion": "2 clases semanales de 60 min", "precio": 260000 },
+        { "id": "voz-1", "nombre": "Clase suelta", "descripcion": "1 clase de 60 min (prueba)", "precio": 40000 }
+      ]
+    },
+    {
+      "id": "miguel-bateria",
+      "nombre": "Miguel Ríos",
+      "instrumento": "Batería",
+      "genero": "Rock & Jazz",
+      "descripcion": "Baterista de jazz fusión y rock progresivo. Enseña rudimentos, coordinación, lectura y grooves para banda.",
+      "imagen": "https://images.unsplash.com/photo-1519892300169-cbED2c5eab56?w=800&q=80",
+      "estrellas": 4.8,
+      "experiencia": "15 años",
+      "alumnos": 60,
+      "modalidad": ["Presencial"],
+      "horarios": "Lun–Jue 17:00–21:00",
+      "niveles": ["Principiante", "Intermedio", "Avanzado"],
+      "planes": [
+        { "id": "bateria-4", "nombre": "4 clases al mes", "descripcion": "1 clase semanal de 60 min", "precio": 130000 },
+        { "id": "bateria-8", "nombre": "8 clases al mes", "descripcion": "2 clases semanales de 60 min", "precio": 240000 }
+      ]
+    },
+    {
+      "id": "lucia-piano",
+      "nombre": "Lucía Herrera",
+      "instrumento": "Piano",
+      "genero": "Clásico & Pop",
+      "descripcion": "Pianista clásica graduada del conservatorio. Combina técnica clásica con arreglos pop y acompañamiento.",
+      "imagen": "https://images.unsplash.com/photo-1520523839897-bd946433e27e?w=800&q=80",
+      "estrellas": 4.9,
+      "experiencia": "8 años",
+      "alumnos": 95,
+      "modalidad": ["Presencial", "En línea"],
+      "horarios": "Lun–Vie 9:00–14:00",
+      "niveles": ["Principiante", "Intermedio"],
+      "planes": [
+        { "id": "piano-4", "nombre": "4 clases al mes", "descripcion": "1 clase semanal de 60 min", "precio": 110000 },
+        { "id": "piano-8", "nombre": "8 clases al mes", "descripcion": "2 clases semanales de 60 min", "precio": 200000 }
+      ]
+    },
+    {
+      "id": "diego-produccion",
+      "nombre": "Diego Vega",
+      "instrumento": "Producción",
+      "genero": "Beatmaking & DAW",
+      "descripcion": "Productor musical certificado. Enseña Ableton, mezcla básica, sound design y flujo de trabajo profesional.",
+      "imagen": "https://images.unsplash.com/photo-1614149162883-aa63b1d5a6f3?w=800&q=80",
+      "estrellas": 4.7,
+      "experiencia": "7 años",
+      "alumnos": 70,
+      "modalidad": ["Presencial", "En línea"],
+      "horarios": "Mié–Sáb 15:00–21:00",
+      "niveles": ["Principiante", "Intermedio", "Avanzado"],
+      "planes": [
+        { "id": "prod-4", "nombre": "4 clases al mes", "descripcion": "1 clase semanal de 90 min", "precio": 160000 },
+        { "id": "prod-8", "nombre": "8 clases al mes", "descripcion": "2 clases semanales de 90 min", "precio": 300000 }
+      ]
+    },
+    {
+      "id": "rosa-violin",
+      "nombre": "Rosa Delgado",
+      "instrumento": "Violín",
+      "genero": "Clásico & Folklore",
+      "descripcion": "Violinista de orquesta sinfónica con experiencia en música regional y clásica. Ideal para niños y adultos.",
+      "imagen": "https://images.unsplash.com/photo-1514320291840-7555a9c27ad1?w=800&q=80",
+      "estrellas": 4.8,
+      "experiencia": "14 años",
+      "alumnos": 55,
+      "modalidad": ["Presencial"],
+      "horarios": "Mar–Vie 10:00–15:00",
+      "niveles": ["Principiante", "Intermedio", "Avanzado"],
+      "planes": [
+        { "id": "violin-4", "nombre": "4 clases al mes", "descripcion": "1 clase semanal de 60 min", "precio": 135000 },
+        { "id": "violin-8", "nombre": "8 clases al mes", "descripcion": "2 clases semanales de 60 min", "precio": 250000 }
+      ]
+    },
+    {
+      "id": "jorge-sax",
+      "nombre": "Jorge Cantú",
+      "instrumento": "Saxofón",
+      "genero": "Jazz & Funk",
+      "descripcion": "Saxofonista de jazz con giras nacionales. Enseña embocadura, escalas, improvisación y repertorio de standards.",
+      "imagen": "https://images.unsplash.com/photo-1415201364774-f6f0ff26af1b?w=800&q=80",
+      "estrellas": 4.6,
+      "experiencia": "11 años",
+      "alumnos": 40,
+      "modalidad": ["Presencial", "En línea"],
+      "horarios": "Lun–Mié–Vie 18:00–21:00",
+      "niveles": ["Intermedio", "Avanzado"],
+      "planes": [
+        { "id": "sax-4", "nombre": "4 clases al mes", "descripcion": "1 clase semanal de 60 min", "precio": 145000 },
+        { "id": "sax-8", "nombre": "8 clases al mes", "descripcion": "2 clases semanales de 60 min", "precio": 270000 }
+      ]
+    },
+    {
+      "id": "paty-ukelele",
+      "nombre": "Paty Morales",
+      "instrumento": "Ukulele",
+      "genero": "Folk & Pop",
+      "descripcion": "Especialista en ukulele para principiantes y niños. Clases divertidas con canciones populares desde la primera sesión.",
+      "imagen": "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=800&q=80",
+      "estrellas": 4.9,
+      "experiencia": "5 años",
+      "alumnos": 110,
+      "modalidad": ["Presencial", "En línea"],
+      "horarios": "Sáb–Dom 9:00–14:00",
+      "niveles": ["Principiante"],
+      "planes": [
+        { "id": "uke-4", "nombre": "4 clases al mes", "descripcion": "1 clase semanal de 45 min", "precio": 80000 },
+        { "id": "uke-8", "nombre": "8 clases al mes", "descripcion": "2 clases semanales de 45 min", "precio": 150000 },
+        { "id": "uke-1", "nombre": "Clase suelta", "descripcion": "1 clase de 45 min (prueba)", "precio": 25000 }
+      ]
+    },
+    {
+      "id": "fernando-teoria",
+      "nombre": "Fernando Lara",
+      "instrumento": "Teoría musical",
+      "genero": "Composición & Arreglos",
+      "descripcion": "Compositor y arreglista. Clases de teoría, armonía, lectura a primera vista y preparación para exámenes de conservatorio.",
+      "imagen": "https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=800&q=80",
+      "estrellas": 4.7,
+      "experiencia": "9 años",
+      "alumnos": 45,
+      "modalidad": ["Presencial", "En línea"],
+      "horarios": "Lun–Jue 16:00–20:00",
+      "niveles": ["Intermedio", "Avanzado"],
+      "planes": [
+        { "id": "teoria-4", "nombre": "4 clases al mes", "descripcion": "1 clase semanal de 60 min", "precio": 100000 },
+        { "id": "teoria-8", "nombre": "8 clases al mes", "descripcion": "2 clases semanales de 60 min", "precio": 180000 }
+      ]
+    }
+  ]
+}

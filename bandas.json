@@ -1,0 +1,312 @@
+{
+  "bandas": [
+    {
+      "id": "los-del-desierto",
+      "nombre": "Los del Desierto",
+      "genero": "Regional Mexicano",
+      "descripcion": "Banda sinaloense con repertorio de corridos y rancheras. Ideal para fiestas y eventos familiares.",
+      "precio": 850000,
+      "duracion": "3 horas",
+      "imagen": "bandas-media/los-del-desierto/cover.jpg",
+      "estrellas": 4.8,
+      "lugares": ["Alamedas Saltillo", "Centro Histórico", "Quinta Santa Anita", "Parque Saltillo 400"],
+      "canciones": [
+        { "titulo": "Corrido del Norte", "archivo": "bandas-media/los-del-desierto/muestra-1.mp3" },
+        { "titulo": "Ranchera en Vivo", "archivo": "bandas-media/los-del-desierto/muestra-2.mp3" }
+      ],
+      "disponibilidad": ["2026-06-14", "2026-06-15", "2026-06-21", "2026-06-22", "2026-06-28", "2026-07-05", "2026-07-12", "2026-07-19", "2026-07-26", "2026-08-02", "2026-08-09"]
+    },
+    {
+      "id": "neon-saltillo",
+      "nombre": "Neón Saltillo",
+      "genero": "Rock Alternativo",
+      "descripcion": "Cuarteto de rock alternativo con covers y temas originales. Energía para bares y eventos corporativos.",
+      "precio": 650000,
+      "duracion": "2 horas",
+      "imagen": "bandas-media/neon-saltillo/cover.jpg",
+      "estrellas": 4.6,
+      "lugares": ["Bar El Callejón", "Foro Cultural Saltillo", "La Siberia", "Plaza de Armas"],
+      "canciones": [
+        { "titulo": "Luces de Neón", "archivo": "bandas-media/neon-saltillo/muestra-1.mp3" },
+        { "titulo": "Desierto Eléctrico", "archivo": "bandas-media/neon-saltillo/muestra-2.mp3" },
+        { "titulo": "844 Rock", "archivo": "bandas-media/neon-saltillo/muestra-3.mp3" }
+      ],
+      "disponibilidad": ["2026-06-13", "2026-06-20", "2026-06-27", "2026-07-04", "2026-07-11", "2026-07-18", "2026-07-25", "2026-08-01", "2026-08-08", "2026-08-15"]
+    },
+    {
+      "id": "cumbia-del-norte",
+      "nombre": "Cumbia del Norte",
+      "genero": "Cumbia",
+      "descripcion": "Grupo de cumbia norteña con acordeón y percusión. Perfectos para bailar toda la noche.",
+      "precio": 550000,
+      "duracion": "3 horas",
+      "imagen": "bandas-media/cumbia-del-norte/cover.jpg",
+      "estrellas": 4.5,
+      "lugares": ["Mercado de la Cruz", "Alamedas Saltillo", "Parque Mariscal", "Centro Histórico"],
+      "canciones": [
+        { "titulo": "Cumbia Saltillense", "archivo": "bandas-media/cumbia-del-norte/muestra-1.mp3" },
+        { "titulo": "Acordeón del Bravo", "archivo": "bandas-media/cumbia-del-norte/muestra-2.mp3" }
+      ],
+      "disponibilidad": ["2026-06-14", "2026-06-16", "2026-06-23", "2026-06-30", "2026-07-07", "2026-07-14", "2026-07-21", "2026-07-28", "2026-08-04", "2026-08-11"]
+    },
+    {
+      "id": "jazz-coahuila",
+      "nombre": "Jazz Coahuila",
+      "genero": "Jazz",
+      "descripcion": "Ensamble de jazz con estándares clásicos y fusiones latinas. Ambiente sofisticado para cenas y eventos.",
+      "precio": 750000,
+      "duracion": "2 horas",
+      "imagen": "bandas-media/jazz-coahuila/cover.jpg",
+      "estrellas": 4.9,
+      "lugares": ["Casa Purcell", "Foro Cultural Saltillo", "Hotel Sfera", "Quinta Santa Anita"],
+      "canciones": [
+        { "titulo": "Blue Saltillo", "archivo": "bandas-media/jazz-coahuila/muestra-1.mp3" },
+        { "titulo": "Bossa del Desierto", "archivo": "bandas-media/jazz-coahuila/muestra-2.mp3" }
+      ],
+      "disponibilidad": ["2026-06-15", "2026-06-22", "2026-06-29", "2026-07-06", "2026-07-13", "2026-07-20", "2026-07-27", "2026-08-03", "2026-08-10"]
+    },
+    {
+      "id": "mariachi-real",
+      "nombre": "Mariachi Real de Saltillo",
+      "genero": "Mariachi",
+      "descripcion": "Mariachi tradicional con trajes charros. Serenatas, bodas, XV años y celebraciones especiales.",
+      "precio": 950000,
+      "duracion": "2 horas",
+      "imagen": "bandas-media/mariachi-real/cover.jpg",
+      "estrellas": 5.0,
+      "lugares": ["Plaza de Armas", "Centro Histórico", "Catedral de Santiago", "Quinta Santa Anita"],
+      "canciones": [
+        { "titulo": "Serenata Saltillense", "archivo": "bandas-media/mariachi-real/muestra-1.mp3" },
+        { "titulo": "México Lindo", "archivo": "bandas-media/mariachi-real/muestra-2.mp3" },
+        { "titulo": "El Rey (en vivo)", "archivo": "bandas-media/mariachi-real/muestra-3.mp3" }
+      ],
+      "disponibilidad": ["2026-06-14", "2026-06-15", "2026-06-21", "2026-06-28", "2026-07-05", "2026-07-12", "2026-07-19", "2026-07-26", "2026-08-02", "2026-08-09", "2026-08-16"]
+    },
+    {
+      "id": "electro-norte",
+      "nombre": "Electro Norte",
+      "genero": "Electrónica",
+      "descripcion": "DJ y productor con mezclas de electrónica y regional. Ideal para antros y fiestas privadas.",
+      "precio": 450000,
+      "duracion": "4 horas",
+      "imagen": "bandas-media/electro-norte/cover.jpg",
+      "estrellas": 4.4,
+      "lugares": ["La Siberia", "Bar El Callejón", "Parque Saltillo 400", "Foro Cultural Saltillo"],
+      "canciones": [
+        { "titulo": "Norte Remix", "archivo": "bandas-media/electro-norte/muestra-1.mp3" },
+        { "titulo": "Bass del 844", "archivo": "bandas-media/electro-norte/muestra-2.mp3" }
+      ],
+      "disponibilidad": ["2026-06-13", "2026-06-14", "2026-06-20", "2026-06-21", "2026-06-27", "2026-06-28", "2026-07-04", "2026-07-05", "2026-07-11", "2026-07-12", "2026-08-01", "2026-08-02"]
+    },
+    {
+      "id": "charros-del-cerro",
+      "nombre": "Los Charros del Cerro",
+      "genero": "Norteño",
+      "descripcion": "Grupo norteño con acordeón, bajo sexto y tololoche. Repertorio de clásicos y corridos tumbados.",
+      "precio": 700000,
+      "duracion": "3 horas",
+      "imagen": "bandas-media/charros-del-cerro/cover.jpg",
+      "estrellas": 4.7,
+      "lugares": ["Alamedas Saltillo", "Mercado de la Cruz", "Parque Mariscal", "Universidad UAdeC"],
+      "canciones": [
+        { "titulo": "Corrido Tumbado", "archivo": "bandas-media/charros-del-cerro/muestra-1.mp3" },
+        { "titulo": "El Cerro de la Silla", "archivo": "bandas-media/charros-del-cerro/muestra-2.mp3" }
+      ],
+      "disponibilidad": ["2026-06-15", "2026-06-17", "2026-06-24", "2026-07-01", "2026-07-08", "2026-07-15", "2026-07-22", "2026-07-29", "2026-08-05", "2026-08-12"]
+    },
+    {
+      "id": "sonora-tumbada",
+      "nombre": "Sonora Tumbada",
+      "genero": "Ska",
+      "descripcion": "Banda de ska y reggae con vientos y percusión. Animación garantizada para eventos al aire libre.",
+      "precio": 600000,
+      "duracion": "2 horas",
+      "imagen": "bandas-media/sonora-tumbada/cover.jpg",
+      "estrellas": 4.5,
+      "lugares": ["Parque Saltillo 400", "Plaza de Armas", "Foro Cultural Saltillo", "La Siberia"],
+      "canciones": [
+        { "titulo": "Ska del Norte", "archivo": "bandas-media/sonora-tumbada/muestra-1.mp3" },
+        { "titulo": "Pick It Up 844", "archivo": "bandas-media/sonora-tumbada/muestra-2.mp3" }
+      ],
+      "disponibilidad": ["2026-06-13", "2026-06-19", "2026-06-26", "2026-07-03", "2026-07-10", "2026-07-17", "2026-07-24", "2026-07-31", "2026-08-07", "2026-08-14"]
+    },
+    {
+      "id": "mc-desierto",
+      "nombre": "MC Desierto",
+      "genero": "Hip Hop",
+      "descripcion": "Rapero y DJ local con beats originales y freestyle en vivo. Shows dinámicos para eventos juveniles.",
+      "precio": 400000,
+      "duracion": "2 horas",
+      "imagen": "bandas-media/mc-desierto/cover.jpg",
+      "estrellas": 4.3,
+      "lugares": ["Universidad UAdeC", "Parque Saltillo 400", "Bar El Callejón", "Centro Histórico"],
+      "canciones": [
+        { "titulo": "844 Flow", "archivo": "bandas-media/mc-desierto/muestra-1.mp3" },
+        { "titulo": "Freestyle en Vivo", "archivo": "bandas-media/mc-desierto/muestra-2.mp3" }
+      ],
+      "disponibilidad": ["2026-06-14", "2026-06-18", "2026-06-25", "2026-07-02", "2026-07-09", "2026-07-16", "2026-07-23", "2026-07-30", "2026-08-06", "2026-08-13"]
+    },
+    {
+      "id": "duo-lunatica",
+      "nombre": "Dúo Lunática",
+      "genero": "Balada",
+      "descripcion": "Dúo vocal con guitarra acústica. Baladas románticas y covers en español para cenas íntimas.",
+      "precio": 350000,
+      "duracion": "2 horas",
+      "imagen": "bandas-media/duo-lunatica/cover.jpg",
+      "estrellas": 4.8,
+      "lugares": ["Casa Purcell", "Quinta Santa Anita", "Hotel Sfera", "Centro Histórico"],
+      "canciones": [
+        { "titulo": "Bajo la Luna", "archivo": "bandas-media/duo-lunatica/muestra-1.mp3" },
+        { "titulo": "Acústico Romántico", "archivo": "bandas-media/duo-lunatica/muestra-2.mp3" }
+      ],
+      "disponibilidad": ["2026-06-15", "2026-06-16", "2026-06-22", "2026-06-29", "2026-07-06", "2026-07-13", "2026-07-20", "2026-07-27", "2026-08-03", "2026-08-10", "2026-08-17"]
+    },
+    {
+      "id": "forja-metal",
+      "nombre": "Forja Metal",
+      "genero": "Metal",
+      "descripcion": "Banda de heavy metal con influencias thrash. Potencia sonora para festivales y conciertos underground.",
+      "precio": 550000,
+      "duracion": "2 horas",
+      "imagen": "bandas-media/forja-metal/cover.jpg",
+      "estrellas": 4.6,
+      "lugares": ["La Siberia", "Foro Cultural Saltillo", "Bar El Callejón", "Parque Saltillo 400"],
+      "canciones": [
+        { "titulo": "Forja del Infierno", "archivo": "bandas-media/forja-metal/muestra-1.mp3" },
+        { "titulo": "Thrash del Norte", "archivo": "bandas-media/forja-metal/muestra-2.mp3" }
+      ],
+      "disponibilidad": ["2026-06-13", "2026-06-20", "2026-06-27", "2026-07-04", "2026-07-11", "2026-07-18", "2026-07-25", "2026-08-01", "2026-08-08"]
+    },
+    {
+      "id": "folklor-saltillo",
+      "nombre": "Danza Folklórica Saltillo",
+      "genero": "Folklor",
+      "descripcion": "Grupo de danza folclórica con vestuario tradicional coahuilense. Presentaciones culturales y escolares.",
+      "precio": 500000,
+      "duracion": "1.5 horas",
+      "imagen": "bandas-media/folklor-saltillo/cover.jpg",
+      "estrellas": 4.9,
+      "lugares": ["Casa Purcell", "Centro Histórico", "Foro Cultural Saltillo", "Plaza de Armas"],
+      "canciones": [
+        { "titulo": "Jarabe Tapatío (música)", "archivo": "bandas-media/folklor-saltillo/muestra-1.mp3" },
+        { "titulo": "Sones de Coahuila", "archivo": "bandas-media/folklor-saltillo/muestra-2.mp3" }
+      ],
+      "disponibilidad": ["2026-06-14", "2026-06-21", "2026-06-28", "2026-07-05", "2026-07-12", "2026-07-19", "2026-07-26", "2026-08-02", "2026-08-09", "2026-08-16"]
+    },
+    {
+      "id": "populares-844",
+      "nombre": "Populares 844",
+      "genero": "Pop",
+      "descripcion": "Banda de pop en español con covers actuales y clásicos. Versátil para bodas, graduaciones y fiestas.",
+      "precio": 580000,
+      "duracion": "3 horas",
+      "imagen": "bandas-media/populares-844/cover.jpg",
+      "estrellas": 4.5,
+      "lugares": ["Alamedas Saltillo", "Quinta Santa Anita", "Parque Mariscal", "Universidad UAdeC"],
+      "canciones": [
+        { "titulo": "Hits del Momento", "archivo": "bandas-media/populares-844/muestra-1.mp3" },
+        { "titulo": "Clásicos en Español", "archivo": "bandas-media/populares-844/muestra-2.mp3" }
+      ],
+      "disponibilidad": ["2026-06-15", "2026-06-19", "2026-06-26", "2026-07-03", "2026-07-10", "2026-07-17", "2026-07-24", "2026-07-31", "2026-08-07", "2026-08-14"]
+    },
+    {
+      "id": "blues-del-bravo",
+      "nombre": "Blues del Bravo",
+      "genero": "Blues",
+      "descripcion": "Trío de blues con guitarra slide, armónica y contrabajo. Ambiente relajado para lounges y eventos privados.",
+      "precio": 480000,
+      "duracion": "2 horas",
+      "imagen": "bandas-media/blues-del-bravo/cover.jpg",
+      "estrellas": 4.7,
+      "lugares": ["Bar El Callejón", "Casa Purcell", "Hotel Sfera", "Centro Histórico"],
+      "canciones": [
+        { "titulo": "Blues del Río", "archivo": "bandas-media/blues-del-bravo/muestra-1.mp3" },
+        { "titulo": "Slide en Vivo", "archivo": "bandas-media/blues-del-bravo/muestra-2.mp3" }
+      ],
+      "disponibilidad": ["2026-06-16", "2026-06-23", "2026-06-30", "2026-07-07", "2026-07-14", "2026-07-21", "2026-07-28", "2026-08-04", "2026-08-11"]
+    },
+    {
+      "id": "trio-romantico",
+      "nombre": "Trío Romántico Coahuila",
+      "genero": "Bolero",
+      "descripcion": "Trío de boleros y canciones románticas de los 70s y 80s. Perfecto para aniversarios y serenatas.",
+      "precio": 420000,
+      "duracion": "2 horas",
+      "imagen": "bandas-media/trio-romantico/cover.jpg",
+      "estrellas": 4.8,
+      "lugares": ["Quinta Santa Anita", "Plaza de Armas", "Casa Purcell", "Centro Histórico"],
+      "canciones": [
+        { "titulo": "Bésame Mucho", "archivo": "bandas-media/trio-romantico/muestra-1.mp3" },
+        { "titulo": "Contigo en la Distancia", "archivo": "bandas-media/trio-romantico/muestra-2.mp3" }
+      ],
+      "disponibilidad": ["2026-06-14", "2026-06-17", "2026-06-24", "2026-07-01", "2026-07-08", "2026-07-15", "2026-07-22", "2026-07-29", "2026-08-05", "2026-08-12", "2026-08-19"]
+    },
+    {
+      "id": "perla-negra",
+      "nombre": "Banda Perla Negra",
+      "genero": "Banda",
+      "descripcion": "Banda de viento con sección rítmica completa. Grupero, cumbia y baladas para pistas grandes.",
+      "precio": 900000,
+      "duracion": "3 horas",
+      "imagen": "bandas-media/perla-negra/cover.jpg",
+      "estrellas": 4.9,
+      "lugares": ["Alamedas Saltillo", "Parque Mariscal", "Mercado de la Cruz", "Quinta Santa Anita"],
+      "canciones": [
+        { "titulo": "Perla Negra en Vivo", "archivo": "bandas-media/perla-negra/muestra-1.mp3" },
+        { "titulo": "Cumbia Grupera", "archivo": "bandas-media/perla-negra/muestra-2.mp3" },
+        { "titulo": "Balada de Amor", "archivo": "bandas-media/perla-negra/muestra-3.mp3" }
+      ],
+      "disponibilidad": ["2026-06-13", "2026-06-15", "2026-06-22", "2026-06-29", "2026-07-06", "2026-07-13", "2026-07-20", "2026-07-27", "2026-08-03", "2026-08-10"]
+    },
+    {
+      "id": "acustico-ramos",
+      "nombre": "Acústico Ramos",
+      "genero": "Acústico",
+      "descripcion": "Set acústico con dos guitarras y percusión menor. Indie, trova y covers para cafés y terrazas.",
+      "precio": 320000,
+      "duracion": "2 horas",
+      "imagen": "bandas-media/acustico-ramos/cover.jpg",
+      "estrellas": 4.4,
+      "lugares": ["Bar El Callejón", "Centro Histórico", "Casa Purcell", "Mercado de la Cruz"],
+      "canciones": [
+        { "titulo": "Trova en Ramos", "archivo": "bandas-media/acustico-ramos/muestra-1.mp3" },
+        { "titulo": "Indie Covers", "archivo": "bandas-media/acustico-ramos/muestra-2.mp3" }
+      ],
+      "disponibilidad": ["2026-06-14", "2026-06-18", "2026-06-25", "2026-07-02", "2026-07-09", "2026-07-16", "2026-07-23", "2026-07-30", "2026-08-06", "2026-08-13", "2026-08-20"]
+    },
+    {
+      "id": "tambora-saltillense",
+      "nombre": "Tambora Saltillense",
+      "genero": "Tambora",
+      "descripcion": "Grupo de tambora sinaloense con tuba y percusión. Fiesta garantizada con sones y chilenas.",
+      "precio": 780000,
+      "duracion": "3 horas",
+      "imagen": "bandas-media/tambora-saltillense/cover.jpg",
+      "estrellas": 4.7,
+      "lugares": ["Alamedas Saltillo", "Parque Saltillo 400", "Mercado de la Cruz", "Parque Mariscal"],
+      "canciones": [
+        { "titulo": "Tambora del Norte", "archivo": "bandas-media/tambora-saltillense/muestra-1.mp3" },
+        { "titulo": "Chilena Saltillense", "archivo": "bandas-media/tambora-saltillense/muestra-2.mp3" }
+      ],
+      "disponibilidad": ["2026-06-15", "2026-06-20", "2026-06-27", "2026-07-04", "2026-07-11", "2026-07-18", "2026-07-25", "2026-08-01", "2026-08-08", "2026-08-15"]
+    },
+    {
+      "id": "gary-garcia",
+      "nombre": "Gary Garcia",
+      "genero": "Desert Rock",
+      "descripcion": "Desde las dunas de Coahuila surge un muro de distorsión, bajo pesado y ecos psicodélicos que convierten el desierto en escenario. Gary Garcia fusiona el rock ácido de los 70 con la crudeza del norte mexicano: riffs que queman como el mediodía, baterías que retumban como trueno seco y letras que hablan de carretera, polvo y libertad. No es un concierto — es una expedición sonora bajo las estrellas de Saltillo.",
+      "precio": 720000,
+      "duracion": "2.5 horas",
+      "imagen": "bandas-media/gary-garcia/cover.jpg",
+      "estrellas": 5.0,
+      "lugares": ["La Siberia", "Parque Saltillo 400", "Foro Cultural Saltillo", "Bar El Callejón", "Centro Histórico"],
+      "canciones": [
+        { "titulo": "Highway to the Bravo", "archivo": "bandas-media/gary-garcia/muestra-1.mp3" },
+        { "titulo": "Dust Devil", "archivo": "bandas-media/gary-garcia/muestra-2.mp3" },
+        { "titulo": "Mirage (en vivo)", "archivo": "bandas-media/gary-garcia/muestra-3.mp3" }
+      ],
+      "disponibilidad": ["2026-06-13", "2026-06-14", "2026-06-19", "2026-06-26", "2026-07-03", "2026-07-10", "2026-07-17", "2026-07-24", "2026-07-31", "2026-08-07", "2026-08-14"]
+    }
+  ]
+}

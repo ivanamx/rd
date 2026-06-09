@@ -1,0 +1,144 @@
+{
+  "estudios": [
+    {
+      "id": "cabina-neon",
+      "nombre": "Cabina Neón",
+      "tipo": "Grabación vocal",
+      "descripcion": "Cabina aislada acústicamente con cadena de señal premium para voces, podcasts y voice-over. Ideal para demos y singles.",
+      "precio": 85000,
+      "duracionMinima": "2 horas",
+      "imagen": "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800&q=80",
+      "galeria": [
+        "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=600&q=80",
+        "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=600&q=80",
+        "https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=600&q=80"
+      ],
+      "equipamiento": ["Neumann U87", "Universal Audio Apollo x8", "Focusrite ISA One", "Monitores KRK V8", "Tratamiento acústico completo"],
+      "estrellas": 4.9,
+      "ubicacion": "Centro Histórico, Saltillo",
+      "capacidad": "1-2 personas",
+      "disponibilidad": ["2026-06-10", "2026-06-11", "2026-06-12", "2026-06-17", "2026-06-18", "2026-06-19", "2026-06-24", "2026-06-25", "2026-07-01", "2026-07-02", "2026-07-08", "2026-07-09", "2026-07-15", "2026-07-16"],
+      "horarios": ["10:00", "13:00", "16:00", "19:00"]
+    },
+    {
+      "id": "sala-live",
+      "nombre": "Sala Live",
+      "tipo": "Banda en vivo",
+      "descripcion": "Espacio amplio para ensayos y grabación en vivo de bandas completas. Batería, amplificadores y backline incluidos.",
+      "precio": 150000,
+      "duracionMinima": "3 horas",
+      "imagen": "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=800&q=80",
+      "galeria": [
+        "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=600&q=80",
+        "https://images.unsplash.com/photo-1520523839897-bd946433e27e?w=600&q=80",
+        "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600&q=80"
+      ],
+      "equipamiento": ["Batería Pearl", "Ampeg SVT", "Marshall JCM800", "Mesa de 32 canales", "Micrófonos Shure SM57 x8", "In-ear monitors"],
+      "estrellas": 4.8,
+      "ubicacion": "Zona Norte, Saltillo",
+      "capacidad": "Hasta 6 músicos",
+      "disponibilidad": ["2026-06-13", "2026-06-14", "2026-06-20", "2026-06-21", "2026-06-27", "2026-06-28", "2026-07-04", "2026-07-05", "2026-07-11", "2026-07-12", "2026-07-18", "2026-07-19"],
+      "horarios": ["11:00", "15:00", "19:00"]
+    },
+    {
+      "id": "beat-lab",
+      "nombre": "Beat Lab",
+      "tipo": "Producción",
+      "descripcion": "Estudio de producción electrónica y beatmaking con sintetizadores, controladores MIDI y plugins profesionales.",
+      "precio": 70000,
+      "duracionMinima": "2 horas",
+      "imagen": "https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=800&q=80",
+      "galeria": [
+        "https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=600&q=80",
+        "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=600&q=80",
+        "https://images.unsplash.com/photo-1614149162883-aa63b1d5a6f3?w=600&q=80"
+      ],
+      "equipamiento": ["Ableton Push 2", "Moog Subsequent 37", "NI Komplete", "Adam Audio A7X", "Mac Studio M2", "UAD plugins"],
+      "estrellas": 4.7,
+      "ubicacion": "Colonia República, Saltillo",
+      "capacidad": "1-2 productores",
+      "disponibilidad": ["2026-06-10", "2026-06-11", "2026-06-15", "2026-06-16", "2026-06-22", "2026-06-23", "2026-06-29", "2026-06-30", "2026-07-06", "2026-07-07", "2026-07-13", "2026-07-14"],
+      "horarios": ["09:00", "12:00", "15:00", "18:00", "21:00"]
+    },
+    {
+      "id": "podcast-room",
+      "nombre": "Podcast Room",
+      "tipo": "Podcast & streaming",
+      "descripcion": "Set multicámara para podcasts, entrevistas y streaming en vivo. Incluye edición básica post-sesión.",
+      "precio": 95000,
+      "duracionMinima": "2 horas",
+      "imagen": "https://images.unsplash.com/photo-1478737270239-2f02ca77fc06?w=800&q=80",
+      "galeria": [
+        "https://images.unsplash.com/photo-1478737270239-2f02ca77fc06?w=600&q=80",
+        "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=600&q=80",
+        "https://images.unsplash.com/photo-1614149162883-aa63b1d5a6f3?w=600&q=80"
+      ],
+      "equipamiento": ["3 cámaras 4K", "Rode PodMic x4", "Rodecaster Pro II", "Luces LED RGB", "Fondo cromático", "OBS configurado"],
+      "estrellas": 4.9,
+      "ubicacion": "Centro, Saltillo",
+      "capacidad": "Hasta 4 personas",
+      "disponibilidad": ["2026-06-12", "2026-06-13", "2026-06-19", "2026-06-20", "2026-06-26", "2026-06-27", "2026-07-03", "2026-07-04", "2026-07-10", "2026-07-11", "2026-07-17", "2026-07-18"],
+      "horarios": ["10:00", "14:00", "17:00"]
+    },
+    {
+      "id": "master-suite",
+      "nombre": "Master Suite",
+      "tipo": "Mezcla & master",
+      "descripcion": "Sala de referencia para mezcla y mastering con monitores Genelec, convertidores Prism y acústica calibrada. Ingeniero opcional.",
+      "precio": 120000,
+      "duracionMinima": "2 horas",
+      "imagen": "https://images.unsplash.com/photo-1614149162883-aa63b1d5a6f3?w=800&q=80",
+      "galeria": [
+        "https://images.unsplash.com/photo-1614149162883-aa63b1d5a6f3?w=600&q=80",
+        "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=600&q=80",
+        "https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=600&q=80"
+      ],
+      "equipamiento": ["Genelec 8351B", "Prism Titan", "Pro Tools HDX", "SSL Bus Compressor", "Acústica tratada RT60 < 0.3s"],
+      "estrellas": 5.0,
+      "ubicacion": "Parque Saltillo 400",
+      "capacidad": "1-3 personas",
+      "disponibilidad": ["2026-06-11", "2026-06-12", "2026-06-18", "2026-06-19", "2026-06-25", "2026-06-26", "2026-07-02", "2026-07-03", "2026-07-09", "2026-07-10"],
+      "horarios": ["11:00", "14:00", "17:00", "20:00"]
+    },
+    {
+      "id": "rehearsal-box",
+      "nombre": "Rehearsal Box",
+      "tipo": "Ensayo",
+      "descripcion": "Cuarto de ensayo económico con batería, bajo y guitarra listos. Perfecto para bandas emergentes que practican semanalmente.",
+      "precio": 45000,
+      "duracionMinima": "2 horas",
+      "imagen": "https://images.unsplash.com/photo-1520523839897-bd946433e27e?w=800&q=80",
+      "galeria": [
+        "https://images.unsplash.com/photo-1520523839897-bd946433e27e?w=600&q=80",
+        "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=600&q=80",
+        "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600&q=80"
+      ],
+      "equipamiento": ["Batería Tama", "Ampeg BA-115", "Marshall MG50", "PA 2 vías", "Micrófonos dinámicos x4"],
+      "estrellas": 4.5,
+      "ubicacion": "Colonia Mirasierra, Saltillo",
+      "capacidad": "Hasta 4 músicos",
+      "disponibilidad": ["2026-06-10", "2026-06-11", "2026-06-12", "2026-06-13", "2026-06-17", "2026-06-18", "2026-06-19", "2026-06-20", "2026-06-24", "2026-06-25", "2026-06-26", "2026-06-27"],
+      "horarios": ["10:00", "13:00", "16:00", "19:00", "22:00"]
+    },
+    {
+      "id": "video-studio",
+      "nombre": "Video Studio",
+      "tipo": "Video musical",
+      "descripcion": "Plató para rodaje de videoclips y sesiones acústicas filmadas. Incluye iluminación cine, grúa y operador de cámara.",
+      "precio": 180000,
+      "duracionMinima": "4 horas",
+      "imagen": "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&q=80",
+      "galeria": [
+        "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600&q=80",
+        "https://images.unsplash.com/photo-1478737270239-2f02ca77fc06?w=600&q=80",
+        "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=600&q=80"
+      ],
+      "equipamiento": ["Sony FX6 4K", "Kit de luces Aputure", "Grúa deslizante", "Fondos modulables", "Audio inalámbrico Sennheiser", "Monitor de campo"],
+      "estrellas": 4.8,
+      "ubicacion": "Zona Industrial, Saltillo",
+      "capacidad": "Hasta 8 personas",
+      "disponibilidad": ["2026-06-14", "2026-06-15", "2026-06-21", "2026-06-22", "2026-06-28", "2026-06-29", "2026-07-05", "2026-07-06", "2026-07-12", "2026-07-13"],
+      "horarios": ["09:00", "14:00"]
+    }
+  ]
+}

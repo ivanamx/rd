@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="meta.title">Hecho en Saltillo - Experiencia Inmersiva</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="shazam-modal-styles.css">
+    <link rel="stylesheet" href="bandas-modal-styles.css">
+    <link rel="stylesheet" href="estudio-modal-styles.css">
+    <link rel="stylesheet" href="clases-modal-styles.css">
+    <link rel="stylesheet" href="mapa-modal-styles.css">
+    <link rel="stylesheet" href="registro-banda-modal-styles.css">
+    <link rel="stylesheet" href="registro-bar-modal-styles.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Bebas+Neue&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+</head>
+<body>
+    <!-- Cursor personalizado -->
+    <div class="custom-cursor">
+        <div class="cursor-dot"></div>
+        <div class="cursor-outline"></div>
+    </div>
+
+    <!-- Partículas de fondo -->
+    <div class="particles-container"></div>
+
+    <!-- Audio oculto para streaming -->
+    <audio id="hiddenAudio" preload="none" style="display: none;">
+        <source src="song.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Header móvil específico -->
+    <header class="mobile-header">
+        <div class="mobile-header-left">
+            <span class="mobile-logo">SALTILLO</span>
+            <div class="mobile-logo-accent"></div>
+        </div>
+        
+        <div class="mobile-header-center">
+            <div class="mobile-player-controls">
+                <button class="mobile-control-btn" id="mobilePlayBtn">
+                    <i class="fas fa-play"></i>
+                </button>
+                <button class="mobile-control-btn" id="mobileStopBtn">
+                    <i class="fas fa-stop"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="mobile-header-right">
+            <button class="nav-register-btn nav-register-btn-mobile" id="registerBtnMobile" type="button" data-i18n="nav.register">REGÍSTRATE</button>
+            <div class="lang-selector lang-selector-mobile" id="langSelectorMobile">
+                <button class="lang-btn active" data-lang="es" type="button">ES</button>
+                <button class="lang-btn" data-lang="en" type="button">EN</button>
+            </div>
+            <button class="mobile-shazam-btn" id="mobileShazamBtn">
+                <svg class="mobile-shazam-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                    <defs>
+                        <symbol id="MobileShazamLogo">
+                            <path d="M50 10C28.5 10 11 27.5 11 49s17.5 39 39 39 39-17.5 39-39S71.5 10 50 10zm0 70c-17.1 0-31-13.9-31-31s13.9-31 31-31 31 13.9 31 31-13.9 31-31 31z"/>
+                            <path d="M50 25c-13.2 0-24 10.8-24 24s10.8 24 24 24 24-10.8 24-24-10.8-24-24-24zm0 40c-8.8 0-16-7.2-16-16s7.2-16 16-16 16 7.2 16 16-7.2 16-16 16z"/>
+                            <path d="M50 35c-7.7 0-14 6.3-14 14s6.3 14 14 14 14-6.3 14-14-6.3-14-14-14zm0 20c-3.3 0-6-2.7-6-6s2.7-6 6-6 6 2.7 6 6-2.7 6-6 6z"/>
+                            <circle cx="50" cy="49" r="3"/>
+                        </symbol>
+                    </defs>
+                    <use xlink:href="#MobileShazamLogo"></use>
+                </svg>
+            </button>
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <span class="mobile-menu-line"></span>
+                <span class="mobile-menu-line"></span>
+                <span class="mobile-menu-line"></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Navegación experimental -->
+    <nav class="experimental-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <div class="brand-logo">
+                    <div class="logo-line">
+                        <span class="logo-text">HECHO EN</span>
+                    </div>
+                    <div class="logo-line">
+                        <span class="logo-text">SALTILLO</span>
+                    </div>
+                    <div class="logo-accent"></div>
+                </div>
+            </div>
+            <div class="nav-menu">
+                <div class="nav-item" data-section="hero">
+                    <span class="nav-text" data-i18n="nav.home">INICIO</span>
+                    <div class="nav-indicator"></div>
+                </div>
+                <div class="nav-item" data-section="radio">
+                    <span class="nav-text" data-i18n="nav.radio">RADIO</span>
+                    <div class="nav-indicator"></div>
+                </div>
+                <div class="nav-item" data-section="bandas" data-modal="true">
+                    <span class="nav-text" data-i18n="nav.bands">BANDAS</span>
+                    <div class="nav-indicator"></div>
+                </div>
+                <div class="nav-item" data-section="products" data-external="true">
+                    <span class="nav-text" data-i18n="nav.products">PRODUCTOS</span>
+                    <div class="nav-indicator"></div>
+                </div>
+            </div>
+            <div class="nav-controls">
+                <button class="nav-register-btn" id="registerBtn" type="button" data-i18n="nav.register">REGÍSTRATE</button>
+                <div class="lang-selector" id="langSelector">
+                    <button class="lang-btn active" data-lang="es" type="button">ES</button>
+                    <button class="lang-btn" data-lang="en" type="button">EN</button>
+                </div>
+                <div class="header-player">
+                    <div class="player-info">
+                        <div class="audio-visualizer">
+                            <div class="viz-bar"></div>
+                            <div class="viz-bar"></div>
+                            <div class="viz-bar"></div>
+                            <div class="viz-bar"></div>
+                            <div class="viz-bar"></div>
+                            <div class="viz-bar"></div>
+                            <div class="viz-bar"></div>
+                            <div class="viz-bar"></div>
+                        </div>
+                    </div>
+                    <div class="player-controls-small">
+                        <button class="control-btn-small play-btn-small" id="headerPlayBtn">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <button class="control-btn-small stop-btn-small" id="headerStopBtn">
+                            <i class="fas fa-stop"></i>
+                        </button>
+                    </div>
+                <div class="floating-shazam-button">
+                    <div class="shazam-button-container" id="shazamBtn" aria-label="shazam recognition button">
+                        <div class="shazam-logo-container">
+                            <svg class="shazam-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                                <defs>
+                                    <symbol id="ShazamLogo">
+                                        <path d="M50 10C28.5 10 11 27.5 11 49s17.5 39 39 39 39-17.5 39-39S71.5 10 50 10zm0 70c-17.1 0-31-13.9-31-31s13.9-31 31-31 31 13.9 31 31-13.9 31-31 31z"/>
+                                        <path d="M50 25c-13.2 0-24 10.8-24 24s10.8 24 24 24 24-10.8 24-24-10.8-24-24-24zm0 40c-8.8 0-16-7.2-16-16s7.2-16 16-16 16 7.2 16 16-7.2 16-16 16z"/>
+                                        <path d="M50 35c-7.7 0-14 6.3-14 14s6.3 14 14 14 14-6.3 14-14-6.3-14-14-14zm0 20c-3.3 0-6-2.7-6-6s2.7-6 6-6 6 2.7 6 6-2.7 6-6 6z"/>
+                                        <circle cx="50" cy="49" r="3"/>
+                                    </symbol>
+                                </defs>
+                                <use xlink:href="#ShazamLogo"></use>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section Experimental -->
+    <section id="hero" class="hero-experimental">
+        <div class="hero-background">
+            <div class="gradient-orbs">
+                <div class="orb orb-1"></div>
+                <div class="orb orb-2"></div>
+                <div class="orb orb-3"></div>
+            </div>
+            <div class="geometric-shapes">
+                <div class="shape shape-1"></div>
+                <div class="shape shape-2"></div>
+                <div class="shape shape-3"></div>
+            </div>
+        </div>
+        
+        <div class="hero-content">
+            <div class="hero-text-container">
+                <div class="hero-badge">
+                    <span class="badge-text" data-i18n="hero.badge">EN VIVO · SALTILLO</span>
+                    <div class="badge-glow"></div>
+                </div>
+                
+                <h1 class="hero-title">
+                    <span class="title-line" data-i18n="hero.title1">DESIERTO</span>
+                    <span class="title-line" data-i18n="hero.title2">SONORO</span>
+                </h1>
+                
+                <p class="hero-subtitle" data-i18n="hero.subtitle">
+                    La escena musical de Saltillo, conectada en un solo lugar. Escucha radio en vivo, reserva bandas para tu bar, graba en estudios profesionales y descubre creadores locales.
+                </p>
+                
+                <div class="hero-interactive">
+                    <div class="interactive-element" data-interaction="listen">
+                        <div class="element-icon">
+                            <i class="fas fa-play"></i>
+                        </div>
+                        <span class="element-text" data-i18n="hero.listen">ESCUCHAR</span>
+                        <div class="element-wave"></div>
+                    </div>
+                    
+                    <div class="interactive-element" data-interaction="products">
+                        <div class="element-icon">
+                            <i class="fas fa-shopping-bag"></i>
+                        </div>
+                        <span class="element-text" data-i18n="hero.products">PRODUCTOS</span>
+                        <div class="element-wave"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="hero-visual-container">
+                <div class="visual-canvas">
+                    <div class="canvas-element canvas-1"></div>
+                    <div class="canvas-element canvas-2"></div>
+                    <div class="canvas-element canvas-3"></div>
+                    <div class="canvas-center">
+                        <div class="center-ring ring-1"></div>
+                        <div class="center-ring ring-2"></div>
+                        <div class="center-ring ring-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="scroll-indicator">
+            <div class="scroll-line"></div>
+            <div class="scroll-text" data-i18n="hero.scroll">SCROLL</div>
+        </div>
+    </section>
+
+    <!-- Radio Section -->
+    <section id="radio" class="radio-experimental">
+        <div class="section-background">
+            <div class="bg-pattern"></div>
+        </div>
+        
+        <div class="radio-container">
+            <div class="section-header-experimental">
+                <div class="header-number">01</div>
+                <h2 class="section-title">
+                    <span class="title-main" data-i18n="radio.titleMain">RADIO</span>
+                    <span class="title-sub" data-i18n="radio.titleSub">SALTILLO</span>
+                </h2>
+                <div class="header-line"></div>
+            </div>
+            
+            <div class="radio-showcase">
+                <p class="radio-tagline" data-i18n="radio.tagline">Streaming en vivo · Música local · Cultura del desierto</p>
+
+                <div class="radio-live-bar">
+                    <div class="radio-live-status">
+                        <span class="radio-on-air"><span class="radio-pulse"></span><span data-i18n="radio.live">EN VIVO</span></span>
+                        <span class="radio-freq">SALTILLO FM</span>
+                    </div>
+                    <div class="radio-now-playing">
+                        <span class="radio-now-label" data-i18n="radio.nowPlaying">Ahora suena</span>
+                        <span class="radio-now-track" id="radioNowTrack" data-i18n="radio.nowTrack">Desierto Sonoro — Radio Saltillo</span>
+                    </div>
+                    <div class="radio-live-controls">
+                        <button class="radio-live-btn" id="radioLivePlayBtn" data-i18n-title="radio.playTitle" title="Reproducir">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <button class="radio-live-btn radio-live-btn-stop" id="radioLiveStopBtn" data-i18n-title="radio.stopTitle" title="Detener">
+                            <i class="fas fa-stop"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="radio-bento">
+                    <article class="radio-card radio-card-hero" data-radio-action="banda" data-banda-id="gary-garcia">
+                        <img class="radio-card-img" src="bandas-media/gary-garcia/cover.jpg" alt="Gary Garcia en vivo" loading="lazy"
+                             onerror="this.src='https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=900&q=80'">
+                        <div class="radio-card-overlay"></div>
+                        <div class="radio-card-body">
+                            <span class="radio-card-badge" data-i18n="radio.cardGaryBadge">Desert Rock · 5.0 ★</span>
+                            <h3>Gary Garcia</h3>
+                            <p data-i18n="radio.cardGaryDesc">Rock psicodélico del desierto coahuilense. Escucha muestras y reserva para tu evento.</p>
+                            <span class="radio-card-cta"><i class="fas fa-guitar"></i> <span data-i18n="radio.cardGaryCta">Ver perfil y reservar</span></span>
+                        </div>
+                    </article>
+
+                    <article class="radio-card radio-card-estudio" data-radio-action="estudio">
+                        <img class="radio-card-img" src="https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=600&q=80" alt="Estudio de grabación" loading="lazy">
+                        <div class="radio-card-overlay"></div>
+                        <div class="radio-card-body">
+                            <span class="radio-card-badge" data-i18n="radio.cardEstudioBadge">Estudio</span>
+                            <h3 data-i18n="radio.cardEstudioTitle">Reserva un estudio</h3>
+                            <p data-i18n="radio.cardEstudioDesc">Cabina de grabación equipada con mezcla, microfonía y monitores profesionales</p>
+                            <span class="radio-card-cta"><i class="fas fa-calendar-check"></i> <span data-i18n="radio.cardEstudioCta">Reservar sesión</span></span>
+                        </div>
+                    </article>
+
+                    <article class="radio-card radio-card-clases" data-radio-action="clases">
+                        <img class="radio-card-img" src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600&q=80" alt="Clases de música" loading="lazy">
+                        <div class="radio-card-overlay"></div>
+                        <div class="radio-card-body">
+                            <span class="radio-card-badge" data-i18n="radio.cardClasesBadge">Academia</span>
+                            <h3 data-i18n="radio.cardClasesTitle">Clases de música</h3>
+                            <p data-i18n="radio.cardClasesDesc">Guitarra, batería, voz y producción con maestros locales de Saltillo</p>
+                            <span class="radio-card-cta"><i class="fas fa-chalkboard-teacher"></i> <span data-i18n="radio.cardClasesCta">Inscribirme</span></span>
+                        </div>
+                    </article>
+
+                    <div class="radio-card radio-card-schedule">
+                        <div class="radio-card-body radio-card-body-solid">
+                            <span class="radio-card-badge" data-i18n="radio.cardScheduleBadge">Hoy</span>
+                            <h3 data-i18n="radio.cardScheduleTitle">Programación</h3>
+                            <ul class="radio-schedule-list">
+                                <li class="radio-schedule-item radio-schedule-live">
+                                    <span class="radio-schedule-time">06:00</span>
+                                    <span class="radio-schedule-show">Despierta Saltillo</span>
+                                </li>
+                                <li class="radio-schedule-item">
+                                    <span class="radio-schedule-time">10:00</span>
+                                    <span class="radio-schedule-show">Voces del Desierto</span>
+                                </li>
+                                <li class="radio-schedule-item">
+                                    <span class="radio-schedule-time">14:00</span>
+                                    <span class="radio-schedule-show">Música Norteña</span>
+                                </li>
+                                <li class="radio-schedule-item">
+                                    <span class="radio-schedule-time">18:00</span>
+                                    <span class="radio-schedule-show">Gary Garcia Sessions</span>
+                                </li>
+                                <li class="radio-schedule-item">
+                                    <span class="radio-schedule-time">22:00</span>
+                                    <span class="radio-schedule-show">Noche en el 844</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <article class="radio-card radio-card-entrevistas" data-radio-action="play">
+                        <img class="radio-card-img" src="https://images.unsplash.com/photo-1556075798-4825dfaaf498?w=600&q=80" alt="Micrófono de podcast" loading="lazy">
+                        <div class="radio-card-overlay"></div>
+                        <div class="radio-card-body">
+                            <span class="radio-card-badge" data-i18n="radio.cardEntrevistasBadge">Podcast</span>
+                            <h3 data-i18n="radio.cardEntrevistasTitle">Entrevistas</h3>
+                            <p data-i18n="radio.cardEntrevistasDesc">Artesanos, chefs y creadores saltillenses</p>
+                            <span class="radio-card-cta"><i class="fas fa-microphone"></i> <span data-i18n="radio.cardEntrevistasCta">Escuchar</span></span>
+                        </div>
+                    </article>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Guía de la plataforma -->
+    <section id="guia" class="guia-platform">
+        <div class="guia-background">
+            <div class="guia-particles"></div>
+            <div class="guia-grid"></div>
+        </div>
+
+        <div class="guia-container">
+            <div class="guia-header">
+                <div class="guia-header-text">
+                    <h2 class="guia-title">
+                        <span class="title-main" data-i18n="guia.titleMain">ÚNETE</span>
+                        <span class="title-sub" data-i18n="guia.titleSub">A LA ESCENA</span>
+                    </h2>
+                    <p class="guia-intro" data-i18n="guia.intro">Tu escenario, tu bar, tu negocio. Descubre cómo unirte, conectar y sacar provecho de la escena musical de Saltillo.</p>
+                </div>
+            </div>
+
+            <div class="guia-role-tabs">
+                <button class="guia-tab active" data-guia-role="banda">
+                    <i class="fas fa-guitar"></i>
+                    <span data-i18n="guia.tabBanda">Soy banda</span>
+                </button>
+                <button class="guia-tab" data-guia-role="bar">
+                    <i class="fas fa-cocktail"></i>
+                    <span data-i18n="guia.tabBar">Soy bar o restaurante</span>
+                </button>
+            </div>
+
+            <div class="guia-main">
+                <div class="guia-steps" id="guiaSteps">
+                    <div class="guia-step active" data-step="1">
+                        <div class="guia-step-marker"><span>1</span></div>
+                        <div class="guia-step-content">
+                            <h4>Crea tu perfil</h4>
+                            <p>Regístrate gratis y sube muestras de audio</p>
+                        </div>
+                    </div>
+                    <div class="guia-step" data-step="2">
+                        <div class="guia-step-marker"><span>2</span></div>
+                        <div class="guia-step-content">
+                            <h4>Aparece en el mapa</h4>
+                            <p>Te ven bares, restaurantes y organizadores</p>
+                        </div>
+                    </div>
+                    <div class="guia-step" data-step="3">
+                        <div class="guia-step-marker"><span>3</span></div>
+                        <div class="guia-step-content">
+                            <h4>Recibe reservas</h4>
+                            <p>Calendario, fecha y pago seguro en un flujo</p>
+                        </div>
+                    </div>
+                    <div class="guia-step" data-step="4">
+                        <div class="guia-step-marker"><span>4</span></div>
+                        <div class="guia-step-content">
+                            <h4>Gana y crece</h4>
+                            <p>Más eventos, reseñas y lugar en el Top Ten</p>
+                        </div>
+                    </div>
+                    <div class="guia-step-line"><div class="guia-step-line-fill" id="guiaStepLineFill"></div></div>
+                </div>
+
+                <div class="guia-preview" id="guiaPreview">
+                    <div class="guia-preview-glow"></div>
+                    <span class="guia-preview-tag" id="guiaPreviewTag">Paso 1 de 4</span>
+                    <h3 class="guia-preview-title" id="guiaPreviewTitle">Registra tu banda en minutos</h3>
+                    <p class="guia-preview-desc" id="guiaPreviewDesc">Sube tu foto, género, precio y muestras de audio. Los venues escuchan antes de reservar — sin perder tiempo en llamadas.</p>
+                    <div class="guia-preview-benefits" id="guiaPreviewBenefits">
+                        <span class="guia-benefit-pill"><i class="fas fa-check"></i> Perfil visible 24/7</span>
+                        <span class="guia-benefit-pill"><i class="fas fa-check"></i> Muestras en la radio</span>
+                        <span class="guia-benefit-pill"><i class="fas fa-check"></i> Cero comisión de registro</span>
+                    </div>
+                    <div class="guia-preview-potential">
+                        <div class="guia-potential-item">
+                            <span class="guia-potential-lead" id="guiaPotentialLead">Ganancia promedio para tu banda =</span>
+                            <span class="guia-potential-value" id="guiaPotentialValue">$6,500 MXN</span>
+                            <span class="guia-potential-label" id="guiaPotentialLabel"></span>
+                            <span class="guia-potential-hint" id="guiaPotentialHint">Según tarifas publicadas por las bandas en la plataforma</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="guia-stats">
+                <div class="guia-stat">
+                    <span class="guia-stat-num" data-count="18">0</span>
+                    <span class="guia-stat-label" data-i18n="guia.statBands">Bandas activas</span>
+                </div>
+                <div class="guia-stat">
+                    <span class="guia-stat-num" data-count="14">0</span>
+                    <span class="guia-stat-label" data-i18n="guia.statVenues">Bares y venues</span>
+                </div>
+                <div class="guia-stat">
+                    <span class="guia-stat-num" data-count="3">0</span>
+                    <span class="guia-stat-label" data-i18n="guia.statMinutes">Minutos para reservar</span>
+                </div>
+                <div class="guia-stat">
+                    <span class="guia-stat-num" data-count="100">0</span>
+                    <span class="guia-stat-label" data-i18n="guia.statLocal">% talento local</span>
+                </div>
+            </div>
+
+            <div class="guia-cta-row">
+                <button class="guia-cta guia-cta-primary" id="guiaCtaPrimary">
+                    <i class="fas fa-rocket"></i>
+                    <span>Registra tu banda</span>
+                </button>
+                <button class="guia-cta guia-cta-secondary" id="guiaCtaSecondary">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <span>Ver mapa de conexiones</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contacto Experimental -->
+    <section id="contact" class="contact-experimental">
+        <div class="contact-background">
+            <div class="contact-grid"></div>
+            <div class="contact-waves"></div>
+        </div>
+        
+        <div class="contact-container">
+            <div class="contact-header">
+                <div class="header-number">03</div>
+                <h2 class="contact-title">
+                    <span class="title-main" data-i18n="contact.titleMain">CONECTA</span>
+                    <span class="title-sub" data-i18n="contact.titleSub">CON NOSOTROS</span>
+                </h2>
+            </div>
+            
+            <div class="contact-content-experimental">
+                <div class="conecta-grid">
+                    <article class="conecta-card conecta-card-bandas" data-conecta-action="bandas">
+                        <img class="conecta-card-img" src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=900&q=80" alt="Banda en vivo en Saltillo" loading="lazy"
+                             onerror="this.src='https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=900&q=80'">
+                        <div class="conecta-card-overlay conecta-card-overlay-bandas"></div>
+                        <div class="conecta-card-body">
+                            <span class="conecta-card-badge"><i class="fas fa-guitar"></i> <span data-i18n="contact.bandasBadge">Bandas locales</span></span>
+                            <h3 data-i18n="contact.bandasTitle">¿Tu banda quiere ganar dinero $?</h3>
+                            <p data-i18n="contact.bandasDesc">Regístrate, sube tus muestras y empieza a recibir reservas en bares y eventos de Saltillo.</p>
+                            <span class="conecta-card-cta"><i class="fas fa-arrow-right"></i> <span data-i18n="contact.bandasCta">Registra tu banda</span></span>
+                        </div>
+                    </article>
+
+                    <article class="conecta-card conecta-card-bares" data-conecta-action="bares">
+                        <img class="conecta-card-img" src="https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=900&q=80" alt="Bar con música en vivo" loading="lazy"
+                             onerror="this.src='https://images.unsplash.com/photo-1572116469696-31de077fa5ee?w=900&q=80'">
+                        <div class="conecta-card-overlay conecta-card-overlay-bares"></div>
+                        <div class="conecta-card-body">
+                            <span class="conecta-card-badge"><i class="fas fa-cocktail"></i> <span data-i18n="contact.baresBadge">Bares &amp; restaurantes</span></span>
+                            <h3 data-i18n="contact.baresTitle">¿Tu bar necesita música hoy?</h3>
+                            <p data-i18n="contact.baresDesc">Encuentra bandas disponibles para esta noche, reserva en minutos y llena tu local con talento local.</p>
+                            <span class="conecta-card-cta"><i class="fas fa-arrow-right"></i> <span data-i18n="contact.baresCta">Buscar bandas</span></span>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="conecta-mapa-wrap">
+                    <button type="button" class="conecta-mapa-btn" id="verMapaBtn">
+                        <span class="conecta-mapa-icon"><i class="fas fa-map-marked-alt"></i></span>
+                        <span class="conecta-mapa-text" data-i18n="contact.mapBtn">Ver mapa</span>
+                        <span class="conecta-mapa-glow"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer Experimental -->
+    <footer class="footer-experimental">
+        <div class="footer-background">
+            <div class="footer-pattern"></div>
+        </div>
+        
+        <div class="footer-container">
+            <div class="footer-content-experimental">
+                <div class="footer-brand-experimental">
+                    <div class="brand-logo-footer">
+                        <span class="logo-text-footer">SALTILLO</span>
+                        <div class="logo-accent-footer"></div>
+                    </div>
+                    <p class="footer-tagline" data-i18n="footer.tagline">Orgullo local, innovación digital</p>
+                </div>
+                
+                <div class="footer-social-experimental">
+                    <div class="social-item" data-social="instagram">
+                        <div class="social-icon">
+                            <i class="fab fa-instagram"></i>
+                        </div>
+                        <span class="social-label">Instagram</span>
+                    </div>
+                    <div class="social-item" data-social="facebook">
+                        <div class="social-icon">
+                            <i class="fab fa-facebook"></i>
+                        </div>
+                        <span class="social-label">Facebook</span>
+                    </div>
+                    <div class="social-item" data-social="whatsapp">
+                        <div class="social-icon">
+                            <i class="fab fa-whatsapp"></i>
+                        </div>
+                        <span class="social-label">WhatsApp</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom-experimental">
+                <div class="footer-line"></div>
+                <p class="footer-copyright" data-i18n="footer.copyright">
+                    &copy; 2024 Hecho en Saltillo. Todos los derechos reservados.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="mock-data.js"></script>
+    <script src="i18n.js"></script>
+    <script src="script-updated.js"></script>
+</body>
+</html>

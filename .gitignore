@@ -1,0 +1,26 @@
+# Dependencias
+node_modules/
+
+# Variables de entorno (secretos)
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Puppeteer / Chrome descargado localmente
+.cache/
