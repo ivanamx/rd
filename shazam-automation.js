@@ -16,6 +16,32 @@ class ShazamAutomation {
         this.audioFilePath = path.join(__dirname, 'temp-shazam-input.wav');
         this.capturedNetworkResult = null;
         this.networkResponseHandler = null;
+        this.browserHasFakeAudio = false;
+    }
+
+    ensurePlaceholderAudioFile() {
+        if (fs.existsSync(this.audioFilePath) && fs.statSync(this.audioFilePath).size > 1000) {
+            return;
+        }
+        const sampleRate = 44100;
+        const durationSec = 1;
+        const numSamples = sampleRate * durationSec;
+        const dataSize = numSamples * 2;
+        const buffer = Buffer.alloc(44 + dataSize);
+        buffer.write('RIFF', 0);
+        buffer.writeUInt32LE(36 + dataSize, 4);
+        buffer.write('WAVE', 8);
+        buffer.write('fmt ', 12);
+        buffer.writeUInt32LE(16, 16);
+        buffer.writeUInt16LE(1, 20);
+        buffer.writeUInt16LE(1, 22);
+        buffer.writeUInt32LE(sampleRate, 24);
+        buffer.writeUInt32LE(sampleRate * 2, 28);
+        buffer.writeUInt16LE(2, 32);
+        buffer.writeUInt16LE(16, 34);
+        buffer.write('data', 36);
+        buffer.writeUInt32LE(dataSize, 40);
+        fs.writeFileSync(this.audioFilePath, buffer);
     }
 
     async initialize() {
@@ -45,8 +71,10 @@ class ShazamAutomation {
             // Configurar eventos de Socket.IO
             this.setupSocketEvents();
             
-            // Iniciar Puppeteer
-            await this.launchBrowser();
+            // Iniciar Puppeteer con micrófono simulado listo
+            this.ensurePlaceholderAudioFile();
+            await this.launchBrowser(true);
+            await this.prewarmShazamPage();
             
             console.log('✅ Automatización de Shazam inicializada correctamente');
             
@@ -87,8 +115,10 @@ class ShazamAutomation {
 
             if (useAudioFile && fs.existsSync(this.audioFilePath)) {
                 launchArgs.push(`--use-file-for-fake-audio-capture=${this.audioFilePath}`);
+                this.browserHasFakeAudio = true;
                 console.log('🎤 Usando audio capturado del cliente:', this.audioFilePath);
             } else {
+                this.browserHasFakeAudio = false;
                 console.log('⚠️ Sin archivo de audio del cliente — el micrófono fake estará vacío');
             }
 
@@ -120,6 +150,19 @@ class ShazamAutomation {
         }
     }
 
+    async prewarmShazamPage() {
+        if (!this.page || this.page.isClosed()) return;
+        try {
+            await this.page.goto('https://www.shazam.com/apps', {
+                waitUntil: 'domcontentloaded',
+                timeout: 30000
+            });
+            console.log('✅ Shazam precalentado en /apps');
+        } catch (error) {
+            console.warn('⚠️ Precalentamiento de Shazam falló:', error.message);
+        }
+    }
+
     setupSocketEvents() {
         this.io.on('connection', (socket) => {
             console.log('🔌 Cliente conectado:', socket.id);
@@ -127,12 +170,21 @@ class ShazamAutomation {
             socket.on('start-shazam', async (data) => {
                 try {
                     const hasAudio = data?.audio && await this.saveAudioFile(data.audio);
-                    if (hasAudio) {
+                    const needsRelaunch = hasAudio && (!this.browserHasFakeAudio || !this.browser?.isConnected());
+
+                    if (!this.browser || !this.browser.isConnected()) {
+                        await this.launchBrowser(hasAudio || true);
+                    } else if (needsRelaunch) {
                         await this.launchBrowser(true);
+                        await this.prewarmShazamPage();
+                    } else if (hasAudio) {
+                        console.log('♻️ Reutilizando navegador con audio actualizado');
                     }
+
                     await this.startShazamRecognition();
                     socket.emit('shazam-started', { success: true });
                 } catch (error) {
+                    this.isListening = false;
                     socket.emit('shazam-error', { error: error.message });
                 }
             });
@@ -268,34 +320,36 @@ class ShazamAutomation {
                 console.log('✅ Usando página existente');
             }
             
-                // Navegar a Shazam.com/apps
+                // Navegar a Shazam.com/apps (recargar si ya estamos ahí)
                 console.log('🌐 Navegando a Shazam.com/apps...');
                 const navigationStart = Date.now();
                 try {
-                    await this.page.goto('https://www.shazam.com/apps', { 
-                        waitUntil: 'domcontentloaded', // Más rápido que networkidle2
-                        timeout: 60000 // 60 segundos timeout
-                    });
+                    const currentUrl = this.page.url();
+                    if (currentUrl.includes('shazam.com/apps')) {
+                        await this.page.reload({ waitUntil: 'domcontentloaded', timeout: 30000 });
+                    } else {
+                        await this.page.goto('https://www.shazam.com/apps', {
+                            waitUntil: 'domcontentloaded',
+                            timeout: 30000
+                        });
+                    }
                     const navigationTime = Date.now() - navigationStart;
-                    console.log(`✅ Página de Shazam Apps cargada en ${navigationTime}ms`);
+                    console.log(`✅ Página de Shazam Apps lista en ${navigationTime}ms`);
                 } catch (error) {
                     console.error('❌ Error navegando a Shazam Apps:', error);
                     throw new Error(`No se pudo navegar a Shazam Apps: ${error.message}`);
                 }
             
-            // Verificar que estamos en la página correcta
             const currentUrl = this.page.url();
             console.log('📍 URL actual después de navegación:', currentUrl);
             
-            if (!currentUrl.includes('shazam.com/apps')) {
-                console.log('⚠️ ⚠️ ADVERTENCIA: No estamos en shazam.com/apps');
-            }
+            // Esperar hidratación mínima del botón flotante
+            await this.page.waitForSelector(
+                '.FloatingShazamButton_buttonContainer__DZGwL, [data-test-id*="shazam"], button[class*="shazam"]',
+                { timeout: 12000 }
+            ).catch(() => {});
+            await this.page.waitForTimeout(600);
             
-            // Esperar a que la página cargue completamente
-            console.log('⏳ Esperando carga completa de la página (5 segundos)...');
-            await this.page.waitForTimeout(5000);
-            
-            // Verificar que la página está lista
             const pageTitle = await this.page.title();
             console.log('📄 Título de la página:', pageTitle);
 
@@ -422,13 +476,11 @@ class ShazamAutomation {
             }
             
             // Esperar un momento para que se procese el clic
-            await this.page.waitForTimeout(1000);
+            await this.page.waitForTimeout(400);
             
             console.log('🎤 ✅ Botón de Shazam activado - Escuchando música...');
             
-            // Esperar un momento para que se active el micrófono
-            console.log('⏳ Esperando activación del micrófono (2 segundos)...');
-            await this.page.waitForTimeout(2000);
+            await this.page.waitForTimeout(800);
             
             // Verificar si el micrófono se activó después del clic
             console.log('🎤 Verificando activación del micrófono después del clic...');
@@ -706,24 +758,23 @@ class ShazamAutomation {
         console.log('🔍 Esperando resultado de reconocimiento (URL, DOM o API)...');
         
         const initialUrl = this.page.url();
-        const maxAttempts = 45;
+        const maxAttempts = 40;
+        const pollIntervalMs = 500;
         let attempts = 0;
 
         while (attempts < maxAttempts && this.isListening) {
             attempts++;
             
             try {
-                // 1. Resultado capturado de la red
                 if (this.capturedNetworkResult) {
                     return { type: 'network', data: this.capturedNetworkResult };
                 }
 
                 const currentUrl = this.page.url();
 
-                // 2. URL de track detectada
                 if (currentUrl !== initialUrl && /\/track\/|\/song\//i.test(currentUrl)) {
                     console.log('🎯 URL de track detectada:', currentUrl);
-                    await this.page.waitForTimeout(2000);
+                    await this.page.waitForTimeout(800);
                     return { type: 'page' };
                 }
 
@@ -760,11 +811,11 @@ class ShazamAutomation {
                 // 4. Cualquier cambio de URL (SPA parcial)
                 if (currentUrl !== initialUrl && !currentUrl.includes('/apps')) {
                     console.log('🎯 Cambio de URL detectado:', currentUrl);
-                    await this.page.waitForTimeout(2000);
+                    await this.page.waitForTimeout(800);
                     return { type: 'page' };
                 }
 
-                if (attempts % 5 === 0) {
+                if (attempts % 6 === 0) {
                     console.log(`⏳ Intento ${attempts}/${maxAttempts} — escuchando... URL: ${currentUrl}`);
                 }
 
@@ -772,7 +823,7 @@ class ShazamAutomation {
                 console.log(`⚠️ Error verificando resultado (intento ${attempts}):`, e.message);
             }
 
-            await this.page.waitForTimeout(1000);
+            await this.page.waitForTimeout(pollIntervalMs);
         }
 
         console.log('⏰ Timeout — no se detectó resultado');

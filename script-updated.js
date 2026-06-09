@@ -1,4 +1,62 @@
 // Script principal actualizado con integración de Shazam automatizado
+
+const TAP_MOVE_THRESHOLD = 10;
+const mobileNavTouch = { moved: false, resetTimer: null };
+
+function markMobileNavTouchMoved() {
+    mobileNavTouch.moved = true;
+    clearTimeout(mobileNavTouch.resetTimer);
+    mobileNavTouch.resetTimer = setTimeout(() => {
+        mobileNavTouch.moved = false;
+    }, 350);
+}
+
+function bindTap(element, handler) {
+    if (!element) return;
+
+    let lastTouch = 0;
+    let startX = 0;
+    let startY = 0;
+    let moved = false;
+
+    element.addEventListener('touchstart', (e) => {
+        if (e.touches.length > 1) {
+            moved = true;
+            return;
+        }
+        const touch = e.touches[0];
+        startX = touch.clientX;
+        startY = touch.clientY;
+        moved = false;
+    }, { passive: true });
+
+    element.addEventListener('touchmove', (e) => {
+        if (moved || e.touches.length > 1) return;
+        const touch = e.touches[0];
+        if (
+            Math.abs(touch.clientX - startX) > TAP_MOVE_THRESHOLD ||
+            Math.abs(touch.clientY - startY) > TAP_MOVE_THRESHOLD
+        ) {
+            moved = true;
+        }
+    }, { passive: true });
+
+    element.addEventListener('touchcancel', () => {
+        moved = true;
+    }, { passive: true });
+
+    element.addEventListener('touchend', (e) => {
+        if (moved || (element.closest('.mobile-nav-scroll') && mobileNavTouch.moved)) return;
+        lastTouch = Date.now();
+        handler(e);
+    });
+
+    element.addEventListener('click', (e) => {
+        if (Date.now() - lastTouch < 500) return;
+        handler(e);
+    });
+}
+
 class SaltilloApp {
     constructor() {
         this.audio = null;
@@ -7,7 +65,13 @@ class SaltilloApp {
         this.shazamSocket = null;
         this.shazamModal = null;
         this.shazamTimer = null;
-        this.timeRemaining = 50;
+        this.timeRemaining = 40;
+        this._shazamAbort = null;
+        this._shazamConnecting = false;
+        this._shazamServiceReady = false;
+        this._playerAudioCtx = null;
+        this._playerSource = null;
+        this.SHAZAM_CAPTURE_SEC = 5;
         this.bandasModal = null;
         this.registroBandaModal = null;
         this.registroBarModal = null;
@@ -85,7 +149,7 @@ class SaltilloApp {
         this.updateGuiaStepsUI();
         this.renderGuiaPreview(false);
         this.updateGuiaCTAs();
-        this.updateShazamButton(this.isShazamListening);
+        this.syncShazamUI();
         this.refreshOpenModals();
     }
 
@@ -119,6 +183,8 @@ class SaltilloApp {
         
         // Conectar Shazam en segundo plano — no bloquear la UI en móvil
         this.connectToShazamService().catch(() => {});
+
+        this.syncShazamUI();
 
         // Verificar resultado de pago Stripe
         this.checkPaymentResult();
@@ -160,49 +226,36 @@ class SaltilloApp {
         }
     }
 
-    bindTap(element, handler) {
-        if (!element) return;
-        let lastTouch = 0;
-        element.addEventListener('touchend', (e) => {
-            lastTouch = Date.now();
-            handler(e);
-        }, { passive: true });
-        element.addEventListener('click', (e) => {
-            if (Date.now() - lastTouch < 500) return;
-            handler(e);
-        });
-    }
-
     setupEventListeners() {
         // Controles de audio
         document.querySelectorAll('.play-btn, .play-btn-small').forEach(btn => {
-            this.bindTap(btn, () => this.togglePlay());
+            bindTap(btn, () => this.togglePlay());
         });
         
         document.querySelectorAll('.stop-btn, .stop-btn-small').forEach(btn => {
-            this.bindTap(btn, () => this.stopAudio());
+            bindTap(btn, () => this.stopAudio());
         });
         
         // Navegación
         document.querySelectorAll('.nav-item, .mobile-nav-item').forEach(item => {
-            this.bindTap(item, (e) => this.handleNavigation(e));
+            bindTap(item, (e) => this.handleNavigation(e));
         });
         
         // Elementos interactivos del hero
         document.querySelectorAll('.interactive-element').forEach(element => {
-            this.bindTap(element, (e) => this.handleHeroInteraction(e));
+            bindTap(element, (e) => this.handleHeroInteraction(e));
             element.addEventListener('mouseenter', () => this.activateElement(element));
             element.addEventListener('mouseleave', () => this.deactivateElement(element));
         });
         
-        // Botón de Shazam mejorado
-        this.bindTap(document.getElementById('shazamBtn'), () => this.startShazam());
+        // Botón de Shazam — activo solo con la radio en reproducción
+        bindTap(document.getElementById('shazamBtn'), () => this.startShazam());
 
         // Radio showcase
-        this.bindTap(document.getElementById('radioLivePlayBtn'), () => this.togglePlay());
-        this.bindTap(document.getElementById('radioLiveStopBtn'), () => this.stopAudio());
+        bindTap(document.getElementById('radioLivePlayBtn'), () => this.togglePlay());
+        bindTap(document.getElementById('radioLiveStopBtn'), () => this.stopAudio());
         document.querySelectorAll('[data-radio-action]').forEach(card => {
-            this.bindTap(card, () => this.handleRadioCardAction(card.dataset.radioAction, card.dataset.bandaId));
+            bindTap(card, () => this.handleRadioCardAction(card.dataset.radioAction, card.dataset.bandaId));
         });
         
         // Cards de productos
@@ -215,13 +268,13 @@ class SaltilloApp {
         // Guía interactiva de la plataforma
         this.initGuiaPlatform();
         document.querySelectorAll('.conecta-card').forEach(card => {
-            this.bindTap(card, () => this.handleConectaAction(card.dataset.conectaAction));
+            bindTap(card, () => this.handleConectaAction(card.dataset.conectaAction));
         });
 
-        this.bindTap(document.getElementById('verMapaBtn'), () => this.handleVerMapa());
+        bindTap(document.getElementById('verMapaBtn'), () => this.handleVerMapa());
 
-        this.bindTap(document.getElementById('registerBtn'), () => this.openRegistroPickerModal());
-        this.bindTap(document.getElementById('registerBtnMobile'), () => this.openRegistroPickerModal());
+        bindTap(document.getElementById('registerBtn'), () => this.openRegistroPickerModal());
+        bindTap(document.getElementById('registerBtnMobile'), () => this.openRegistroPickerModal());
         
         // Redes sociales
         document.querySelectorAll('.social-item').forEach(item => {
@@ -248,17 +301,27 @@ class SaltilloApp {
     }
 
     async connectToShazamService() {
+        if (this.shazamSocket?.connected) {
+            this._shazamServiceReady = true;
+            return;
+        }
+        if (this._shazamConnecting) return;
+
         try {
-            // Verificar si Socket.IO está disponible globalmente
             if (typeof io === 'undefined') {
                 console.warn('⚠️ Socket.IO no está disponible globalmente');
                 return;
             }
-            
+
+            this._shazamConnecting = true;
             const shazamUrl = this.getShazamServiceUrl();
             console.log('🔌 Conectando servicio Shazam en:', shazamUrl);
 
-            // Conectar al servicio de automatización de Shazam
+            if (this.shazamSocket) {
+                this.shazamSocket.disconnect();
+                this.shazamSocket = null;
+            }
+
             this.shazamSocket = io(shazamUrl, {
                 path: '/socket.io/',
                 timeout: 5000,
@@ -270,6 +333,7 @@ class SaltilloApp {
             
             this.shazamSocket.on('connect', () => {
                 console.log('🔌 Conectado al servicio de Shazam');
+                this._shazamServiceReady = true;
             });
             
             this.shazamSocket.on('shazam-started', (data) => {
@@ -300,24 +364,30 @@ class SaltilloApp {
             
             this.shazamSocket.on('shazam-timeout', (data) => {
                 console.log('⏰ Timeout de Shazam:', data);
+                this.stopTimer();
                 this.showShazamStatus(this.t('shazam.noMusic'), 'timeout');
                 this.updateShazamButton(false);
             });
             
             this.shazamSocket.on('shazam-stopped', (data) => {
                 console.log('🛑 Shazam detenido:', data);
+                this.stopTimer();
                 this.updateShazamButton(false);
             });
             
             this.shazamSocket.on('shazam-error', (data) => {
                 console.error('❌ Error de Shazam:', data);
+                this.stopTimer();
                 this.showShazamStatus(this.t('shazam.recognitionError'), 'error');
                 this.updateShazamButton(false);
             });
             
             this.shazamSocket.on('disconnect', () => {
                 console.log('🔌 Desconectado del servicio de Shazam');
-                this.updateShazamButton(false);
+                this._shazamServiceReady = false;
+                if (this.isShazamListening) {
+                    this.updateShazamButton(false);
+                }
             });
             
             this.shazamSocket.on('connect_error', (error) => {
@@ -340,55 +410,145 @@ class SaltilloApp {
             
         } catch (error) {
             console.error('❌ Error conectando al servicio de Shazam:', error);
+            this._shazamServiceReady = false;
             this.showNotification(this.t('notifications.shazamUnavailable'), 'warning');
+        } finally {
+            this._shazamConnecting = false;
         }
+    }
+
+    getApiBaseUrl() {
+        const { hostname, origin } = window.location;
+        if (hostname === 'localhost' || hostname === '127.0.0.1') {
+            return 'http://localhost:3001';
+        }
+        return origin;
     }
 
     toggleShazam() {
         return this.startShazam();
     }
 
-    // Nueva funcionalidad de Shazam automatizada
     async startShazam() {
+        if (!this.isPlaying) {
+            this.showNotification(this.t('notifications.shazamRequiresPlay'), 'info');
+            return;
+        }
+
         if (this.isShazamListening) {
             this.stopShazam();
             return;
         }
 
-        try {
-            this.isShazamListening = true;
-            this.updateShazamButton(true);
-            
-            this.showShazamModal();
-            this.startTimer();
-            this.showShazamStatus(this.t('shazam.capturing'), 'starting');
+        this._shazamAbort = new AbortController();
+        this.isShazamListening = true;
+        this.updateShazamButton(true);
+        this.showShazamModal();
+        this.startTimer();
+        this.showShazamStatus(this.t('shazam.capturing'), 'starting');
 
-            if (!this.shazamSocket || !this.shazamSocket.connected) {
+        try {
+            const audioBlob = await this.captureAudioForRecognition(this.SHAZAM_CAPTURE_SEC);
+            if (this._shazamAbort.signal.aborted) return;
+
+            console.log('🎵 Audio capturado:', `${Math.round(audioBlob.size / 1024)}KB`);
+
+            this.showShazamStatus(this.t('shazam.analyzingShort'), 'processing');
+            const apiResult = await this.recognizeViaAPI(audioBlob);
+            if (this._shazamAbort.signal.aborted) return;
+
+            if (apiResult?.title && apiResult?.artist) {
+                console.log('✅ Identificado vía API rápida:', apiResult);
+                this.handleShazamResult(apiResult);
+                return;
+            }
+
+            if (!this.shazamSocket?.connected) {
+                await this.connectToShazamService();
+            }
+            if (!this.shazamSocket?.connected) {
                 throw new Error('Servicio de Shazam no disponible');
             }
 
-            // Capturar audio del micrófono (escucha la radio del usuario)
-            let audioBase64 = null;
-            try {
-                this.showShazamStatus(this.t('shazam.listeningRadio'), 'listening');
-                audioBase64 = await this.captureAudioForShazam(8);
-                console.log('🎤 Audio capturado:', audioBase64 ? `${Math.round(audioBase64.length / 1024)}KB` : 'falló');
-            } catch (captureError) {
-                console.warn('⚠️ No se pudo capturar audio del micrófono:', captureError.message);
-                this.showNotification(this.t('notifications.micPermission'), 'warning');
-            }
+            this.showShazamStatus(this.t('shazam.analyzing'), 'processing');
+            const audioBase64 = await this.blobToBase64(audioBlob);
+            if (this._shazamAbort.signal.aborted) return;
 
             this.shazamSocket.emit('start-shazam', { audio: audioBase64 });
-            this.showShazamStatus(this.t('shazam.analyzing'), 'processing');
-            
         } catch (error) {
+            if (this._shazamAbort?.signal.aborted) return;
             console.error('Error iniciando Shazam:', error);
             this.showNotification(this.t('notifications.shazamStartError'), 'error');
             this.stopShazam();
         }
     }
 
-    async captureAudioForShazam(durationSec = 8) {
+    async captureAudioForRecognition(durationSec = 5) {
+        try {
+            this.showShazamStatus(this.t('shazam.capturingRadio'), 'listening');
+            return await this.capturePlayerAudio(durationSec);
+        } catch (playerError) {
+            console.warn('⚠️ Captura del reproductor falló, usando micrófono:', playerError.message);
+            this.showShazamStatus(this.t('shazam.listeningRadio'), 'listening');
+            const base64 = await this.captureMicAudio(durationSec);
+            return this.base64ToBlob(base64);
+        }
+    }
+
+    async capturePlayerAudio(durationSec = 5) {
+        if (!this.audio || !this.isPlaying) {
+            throw new Error('Radio no está reproduciéndose');
+        }
+
+        const audioContext = this._playerAudioCtx
+            || new (window.AudioContext || window.webkitAudioContext)();
+        this._playerAudioCtx = audioContext;
+        await audioContext.resume();
+
+        if (!this._playerSource) {
+            this._playerSource = audioContext.createMediaElementSource(this.audio);
+            this._playerSource.connect(audioContext.destination);
+        }
+
+        const processor = audioContext.createScriptProcessor(4096, 1, 1);
+        const chunks = [];
+        const signal = this._shazamAbort?.signal;
+
+        this._playerSource.connect(processor);
+        processor.connect(audioContext.destination);
+
+        return new Promise((resolve, reject) => {
+            const onAbort = () => {
+                processor.disconnect();
+                reject(new Error('Captura cancelada'));
+            };
+            signal?.addEventListener('abort', onAbort, { once: true });
+
+            processor.onaudioprocess = (e) => {
+                if (signal?.aborted) return;
+                chunks.push(new Float32Array(e.inputBuffer.getChannelData(0)));
+            };
+
+            setTimeout(() => {
+                processor.disconnect();
+                signal?.removeEventListener('abort', onAbort);
+
+                if (signal?.aborted) {
+                    reject(new Error('Captura cancelada'));
+                    return;
+                }
+                if (chunks.length === 0) {
+                    reject(new Error('No se capturó audio del reproductor'));
+                    return;
+                }
+
+                const samples = this.mergeFloat32Chunks(chunks);
+                resolve(this.samplesToWavBlob(samples, audioContext.sampleRate));
+            }, durationSec * 1000);
+        });
+    }
+
+    async captureMicAudio(durationSec = 5) {
         const stream = await navigator.mediaDevices.getUserMedia({
             audio: {
                 echoCancellation: false,
@@ -401,12 +561,23 @@ class SaltilloApp {
         const source = audioContext.createMediaStreamSource(stream);
         const processor = audioContext.createScriptProcessor(4096, 1, 1);
         const chunks = [];
+        const signal = this._shazamAbort?.signal;
 
         source.connect(processor);
         processor.connect(audioContext.destination);
 
         return new Promise((resolve, reject) => {
+            const onAbort = () => {
+                processor.disconnect();
+                source.disconnect();
+                stream.getTracks().forEach(t => t.stop());
+                audioContext.close().catch(() => {});
+                reject(new Error('Captura cancelada'));
+            };
+            signal?.addEventListener('abort', onAbort, { once: true });
+
             processor.onaudioprocess = (e) => {
+                if (signal?.aborted) return;
                 chunks.push(new Float32Array(e.inputBuffer.getChannelData(0)));
             };
 
@@ -415,25 +586,93 @@ class SaltilloApp {
                 source.disconnect();
                 stream.getTracks().forEach(t => t.stop());
                 audioContext.close().catch(() => {});
+                signal?.removeEventListener('abort', onAbort);
 
+                if (signal?.aborted) {
+                    reject(new Error('Captura cancelada'));
+                    return;
+                }
                 if (chunks.length === 0) {
                     reject(new Error('No se capturó audio'));
                     return;
                 }
 
-                const totalLength = chunks.reduce((sum, c) => sum + c.length, 0);
-                const samples = new Float32Array(totalLength);
-                let offset = 0;
-                for (const chunk of chunks) {
-                    samples.set(chunk, offset);
-                    offset += chunk.length;
-                }
-
-                const sampleRate = audioContext.sampleRate;
-                const wavBuffer = this.encodeWav(samples, sampleRate);
-                resolve(this.arrayBufferToBase64(wavBuffer));
+                const samples = this.mergeFloat32Chunks(chunks);
+                resolve(this.arrayBufferToBase64(this.encodeWav(samples, audioContext.sampleRate)));
             }, durationSec * 1000);
         });
+    }
+
+    mergeFloat32Chunks(chunks) {
+        const totalLength = chunks.reduce((sum, c) => sum + c.length, 0);
+        const samples = new Float32Array(totalLength);
+        let offset = 0;
+        for (const chunk of chunks) {
+            samples.set(chunk, offset);
+            offset += chunk.length;
+        }
+        return samples;
+    }
+
+    samplesToWavBlob(samples, sampleRate) {
+        return new Blob([this.encodeWav(samples, sampleRate)], { type: 'audio/wav' });
+    }
+
+    base64ToBlob(base64) {
+        const binary = atob(base64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) {
+            bytes[i] = binary.charCodeAt(i);
+        }
+        return new Blob([bytes], { type: 'audio/wav' });
+    }
+
+    async blobToBase64(blob) {
+        const buffer = await blob.arrayBuffer();
+        return this.arrayBufferToBase64(buffer);
+    }
+
+    normalizeRecognitionResult(raw, source = 'API') {
+        const spotifyAlbum = raw.spotify?.album || raw.result?.spotify?.album;
+        return {
+            title: raw.title || raw.song || '',
+            artist: raw.artist || '',
+            album: raw.album || '',
+            genre: raw.genre || '',
+            year: raw.year || raw.release_date || '',
+            imageUrl: raw.imageUrl || spotifyAlbum?.images?.[0]?.url || '',
+            shazamCount: raw.shazamCount || '',
+            api: raw.api || source
+        };
+    }
+
+    async recognizeViaAPI(audioBlob) {
+        if (!audioBlob || audioBlob.size < 1000) return null;
+
+        const formData = new FormData();
+        formData.append('audio', audioBlob, 'capture.wav');
+
+        try {
+            const response = await fetch(`${this.getApiBaseUrl()}/api/recognize`, {
+                method: 'POST',
+                body: formData,
+                signal: this._shazamAbort?.signal
+            });
+
+            if (!response.ok) return null;
+
+            const data = await response.json();
+            if (!data.success || !data.result) return null;
+
+            const normalized = this.normalizeRecognitionResult(data.result);
+            if (!normalized.title || !normalized.artist) return null;
+
+            return normalized;
+        } catch (error) {
+            if (error.name === 'AbortError') throw error;
+            console.warn('⚠️ API de reconocimiento no disponible:', error.message);
+            return null;
+        }
     }
 
     arrayBufferToBase64(buffer) {
@@ -484,6 +723,8 @@ class SaltilloApp {
     }
 
     stopShazam() {
+        this._shazamAbort?.abort();
+        this._shazamAbort = null;
         this.isShazamListening = false;
         
         // Detener contador
@@ -563,7 +804,7 @@ class SaltilloApp {
                             <use xlink:href="#ShazamLogoLarge"></use>
                         </svg>
                     </div>
-                    <h3 id="shazamTimer">50</h3>
+                    <h3 id="shazamTimer">40</h3>
                     <button class="close-btn">&times;</button>
                 </div>
                 <div class="modal-body">
@@ -619,7 +860,7 @@ class SaltilloApp {
     }
 
     startTimer() {
-        this.timeRemaining = 50;
+        this.timeRemaining = 40;
         this.updateTimerDisplay();
         
         this.shazamTimer = setInterval(() => {
@@ -677,8 +918,9 @@ class SaltilloApp {
 
     handleShazamResult(data) {
         if (!this.shazamModal) return;
-        
-        console.log('🎉 Procesando resultado de Shazam:', data);
+
+        const song = this.normalizeRecognitionResult(data, data.api || 'Shazam');
+        console.log('🎉 Procesando resultado de Shazam:', song);
         
         // Ocultar estado y mostrar resultado
         const statusElement = this.shazamModal.querySelector('#shazamStatus');
@@ -692,30 +934,30 @@ class SaltilloApp {
         const artistElement = resultElement.querySelector('.result-artist');
         const artworkElement = resultElement.querySelector('.artwork-placeholder');
         
-        titleElement.textContent = data.title;
-        artistElement.textContent = data.artist;
+        titleElement.textContent = song.title;
+        artistElement.textContent = song.artist;
         
         // Actualizar imagen del álbum si está disponible
-        if (data.imageUrl) {
-            artworkElement.innerHTML = `<img src="${data.imageUrl}" alt="${data.title}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 16px;">`;
+        if (song.imageUrl) {
+            artworkElement.innerHTML = `<img src="${song.imageUrl}" alt="${song.title}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 16px;">`;
         } else {
             // Mantener el icono por defecto si no hay imagen
             artworkElement.innerHTML = '<i class="fas fa-music"></i>';
         }
         
         // Agregar información adicional si está disponible
-        if (data.album) {
+        if (song.album) {
             const albumElement = document.createElement('p');
             albumElement.className = 'result-album';
-            albumElement.textContent = data.album;
+            albumElement.textContent = song.album;
             albumElement.style.cssText = 'color: var(--text-secondary); font-size: 0.9rem; margin: 4px 0 0 0; opacity: 0.8; font-style: italic;';
             artistElement.parentNode.insertBefore(albumElement, artistElement.nextSibling);
         }
         
-        if (data.genre) {
+        if (song.genre) {
             const genreElement = document.createElement('p');
             genreElement.className = 'result-genre';
-            genreElement.textContent = data.genre;
+            genreElement.textContent = song.genre;
             genreElement.style.cssText = 'color: var(--text-secondary); font-size: 0.9rem; margin: 4px 0 0 0; opacity: 0.7;';
             const albumElement = resultElement.querySelector('.result-album');
             if (albumElement) {
@@ -725,10 +967,10 @@ class SaltilloApp {
             }
         }
         
-        if (data.year) {
+        if (song.year) {
             const yearElement = document.createElement('p');
             yearElement.className = 'result-year';
-            yearElement.textContent = data.year;
+            yearElement.textContent = song.year;
             yearElement.style.cssText = 'color: var(--text-secondary); font-size: 0.8rem; margin: 2px 0 0 0; opacity: 0.6;';
             const genreElement = resultElement.querySelector('.result-genre');
             if (genreElement) {
@@ -738,10 +980,10 @@ class SaltilloApp {
             }
         }
         
-        if (data.shazamCount) {
+        if (song.shazamCount) {
             const countElement = document.createElement('p');
             countElement.className = 'result-count';
-            countElement.textContent = this.t('shazam.identifications', { count: data.shazamCount });
+            countElement.textContent = this.t('shazam.identifications', { count: song.shazamCount });
             countElement.style.cssText = 'color: var(--neon-blue); font-size: 0.8rem; margin: 4px 0 0 0; font-weight: 500;';
             const yearElement = resultElement.querySelector('.result-year');
             if (yearElement) {
@@ -758,11 +1000,11 @@ class SaltilloApp {
         
         // Event listeners para acciones
         resultElement.querySelector('#playResultBtn').addEventListener('click', () => {
-            this.searchAndPlaySong(data.title, data.artist);
+            this.searchAndPlaySong(song.title, song.artist);
         });
         
         resultElement.querySelector('#shareResultBtn').addEventListener('click', () => {
-            this.shareSongResult(data);
+            this.shareSongResult(song);
         });
         
         // Detener contador
@@ -779,20 +1021,42 @@ class SaltilloApp {
         }, 15000);
     }
 
-    updateShazamButton(isListening) {
+    syncShazamUI() {
+        const isAvailable = this.isPlaying;
+        const isListening = this.isShazamListening;
         const buttons = [
             document.getElementById('shazamBtn'),
             document.getElementById('mobileShazamBtn')
         ].filter(Boolean);
 
+        let labelKey = 'shazam.identifyMusic';
+        if (!isAvailable) labelKey = 'shazam.playFirst';
+        else if (isListening) labelKey = 'shazam.stopIdentify';
+
+        const label = this.t(labelKey);
+
         buttons.forEach((btn) => {
-            btn.classList.toggle('listening', isListening);
-            if ('title' in btn) {
-                btn.title = this.t(isListening ? 'shazam.stopIdentify' : 'shazam.identifyMusic');
+            const inactive = !isAvailable;
+            btn.classList.toggle('inactive', inactive);
+            btn.classList.toggle('listening', isAvailable && isListening);
+            btn.setAttribute('aria-disabled', inactive ? 'true' : 'false');
+
+            if (btn.tagName === 'BUTTON') {
+                btn.disabled = inactive;
+            } else {
+                btn.tabIndex = inactive ? -1 : 0;
             }
+
+            if ('title' in btn) btn.title = label;
+            btn.setAttribute('aria-label', label);
         });
 
-        window.mobileHeader?.updateShazamState(isListening);
+        window.mobileHeader?.updateShazamState(isListening, isAvailable);
+    }
+
+    updateShazamButton(isListening) {
+        this.isShazamListening = isListening;
+        this.syncShazamUI();
     }
 
     searchAndPlaySong(title, artist) {
@@ -888,6 +1152,7 @@ class SaltilloApp {
 
             this.updateRadioLiveBar();
             window.mobileHeader?.updatePlayState(true);
+            this.syncShazamUI();
         } catch (error) {
             console.error('Error reproduciendo audio:', error);
             this.showNotification(this.t('notifications.audioError'), 'error');
@@ -895,6 +1160,10 @@ class SaltilloApp {
     }
 
     stopAudio() {
+        if (this.isShazamListening) {
+            this.stopShazam();
+        }
+
         if (this.audio) {
             this.audio.pause();
             this.audio.currentTime = 0;
@@ -915,6 +1184,7 @@ class SaltilloApp {
 
         this.updateRadioLiveBar();
         window.mobileHeader?.updatePlayState(false);
+        this.syncShazamUI();
     }
 
     async tryFallbackStream() {
@@ -938,6 +1208,14 @@ class SaltilloApp {
         const isModal = item.dataset.modal === 'true';
 
         window.mobileHeader?.closeMobileMenu?.();
+
+        if (item.tagName === 'A') {
+            const href = item.getAttribute('href');
+            if (href && href !== '#') {
+                window.location.href = href;
+            }
+            return;
+        }
 
         if (action) {
             switch (action) {
@@ -3424,18 +3702,18 @@ class SaltilloApp {
         if (!section) return;
 
         section.querySelectorAll('.guia-tab').forEach(tab => {
-            this.bindTap(tab, () => this.setGuiaRole(tab.dataset.guiaRole));
+            bindTap(tab, () => this.setGuiaRole(tab.dataset.guiaRole));
         });
 
         section.querySelectorAll('.guia-step').forEach(step => {
-            this.bindTap(step, () => this.setGuiaStep(parseInt(step.dataset.step, 10)));
+            bindTap(step, () => this.setGuiaStep(parseInt(step.dataset.step, 10)));
         });
 
-        this.bindTap(document.getElementById('guiaCtaPrimary'), () => {
+        bindTap(document.getElementById('guiaCtaPrimary'), () => {
             this.handleGuiaCta(this.guiaContent[this.guiaState.role].ctaPrimary.action);
         });
 
-        this.bindTap(document.getElementById('guiaCtaSecondary'), () => {
+        bindTap(document.getElementById('guiaCtaSecondary'), () => {
             this.handleGuiaCta(this.guiaContent[this.guiaState.role].ctaSecondary.action);
         });
 
@@ -3626,7 +3904,7 @@ class SaltilloApp {
         const mapEl = document.getElementById('mapaFloatLeaflet');
         if (!preview || !mapEl || typeof L === 'undefined') return;
 
-        this.bindTap(preview, () => this.openMapaModal());
+        bindTap(preview, () => this.openMapaModal());
 
         const { bandas, bares } = await this.loadMapaData();
         if (!bandas.length && !bares.length) {
@@ -4652,43 +4930,61 @@ class MobileHeader {
     
     init() {
         this.setupEventListeners();
+        this.setupMobileNavScrollGuard();
     }
-    
-    bindTap(element, handler) {
-        if (!element) return;
-        let lastTouch = 0;
-        element.addEventListener('touchend', (e) => {
-            lastTouch = Date.now();
-            handler(e);
+
+    setupMobileNavScrollGuard() {
+        const scrollEl = this.mobileNavOverlay?.querySelector('.mobile-nav-scroll');
+        if (!scrollEl) return;
+
+        let touchY = 0;
+
+        scrollEl.addEventListener('touchstart', (e) => {
+            touchY = e.touches[0]?.clientY ?? 0;
+            mobileNavTouch.moved = false;
+            clearTimeout(mobileNavTouch.resetTimer);
         }, { passive: true });
-        element.addEventListener('click', (e) => {
-            if (Date.now() - lastTouch < 500) return;
-            handler(e);
-        });
+
+        scrollEl.addEventListener('touchmove', (e) => {
+            const y = e.touches[0]?.clientY ?? touchY;
+            if (Math.abs(y - touchY) > TAP_MOVE_THRESHOLD) {
+                markMobileNavTouchMoved();
+            }
+        }, { passive: true });
+
+        scrollEl.addEventListener('touchend', () => {
+            if (mobileNavTouch.moved) {
+                markMobileNavTouchMoved();
+            }
+        }, { passive: true });
+
+        scrollEl.addEventListener('touchcancel', () => {
+            markMobileNavTouchMoved();
+        }, { passive: true });
     }
 
     setupEventListeners() {
-        this.bindTap(this.mobilePlayBtn, () => {
+        bindTap(this.mobilePlayBtn, () => {
             window.saltilloApp?.togglePlay();
         });
         
-        this.bindTap(this.mobileStopBtn, () => {
+        bindTap(this.mobileStopBtn, () => {
             window.saltilloApp?.stopAudio();
         });
         
-        this.bindTap(this.mobileShazamBtn, () => {
-            window.saltilloApp?.toggleShazam();
+        bindTap(this.mobileShazamBtn, () => {
+            window.saltilloApp?.startShazam();
         });
         
-        this.bindTap(this.mobileMenuBtn, () => {
+        bindTap(this.mobileMenuBtn, () => {
             this.toggleMobileMenu();
         });
 
-        this.bindTap(this.mobileNavBackdrop, () => {
+        bindTap(this.mobileNavBackdrop, () => {
             this.closeMobileMenu();
         });
 
-        this.bindTap(document.getElementById('mobileNavClose'), () => {
+        bindTap(document.getElementById('mobileNavClose'), () => {
             this.closeMobileMenu();
         });
 
@@ -4736,14 +5032,14 @@ class MobileHeader {
         }
     }
     
-    updateShazamState(isListening) {
-        if (this.mobileShazamBtn) {
-            if (isListening) {
-                this.mobileShazamBtn.classList.add('listening');
-            } else {
-                this.mobileShazamBtn.classList.remove('listening');
-            }
-        }
+    updateShazamState(isListening, isAvailable = true) {
+        if (!this.mobileShazamBtn) return;
+
+        const inactive = !isAvailable;
+        this.mobileShazamBtn.classList.toggle('inactive', inactive);
+        this.mobileShazamBtn.classList.toggle('listening', isAvailable && isListening);
+        this.mobileShazamBtn.disabled = inactive;
+        this.mobileShazamBtn.setAttribute('aria-disabled', inactive ? 'true' : 'false');
     }
 }
 
