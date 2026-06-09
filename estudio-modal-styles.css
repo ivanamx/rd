@@ -751,6 +751,13 @@
         padding: 16px;
     }
 
+    .estudio-search-input,
+    .estudio-field input,
+    .estudio-field select,
+    .estudio-field textarea {
+        font-size: 16px;
+    }
+
     .estudio-grid { grid-template-columns: 1fr; }
     .estudio-time-grid { grid-template-columns: repeat(2, 1fr); }
 

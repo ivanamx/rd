@@ -725,6 +725,13 @@
         padding: 16px;
     }
 
+    .clases-search-input,
+    .clases-field input,
+    .clases-field select,
+    .clases-field textarea {
+        font-size: 16px;
+    }
+
     .clases-grid { grid-template-columns: 1fr; }
     .maestro-profile-header { flex-direction: column; align-items: center; text-align: center; }
 

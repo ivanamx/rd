@@ -210,6 +210,15 @@ class SaltilloApp {
         this.initAnimations();
     }
 
+    getShazamServiceUrl() {
+        const { hostname, origin } = window.location;
+        if (hostname === 'localhost' || hostname === '127.0.0.1') {
+            return 'http://localhost:3002';
+        }
+        // En producción nginx hace proxy de /socket.io/ → puerto 3002
+        return origin;
+    }
+
     async connectToShazamService() {
         try {
             // Verificar si Socket.IO está disponible globalmente
@@ -218,8 +227,12 @@ class SaltilloApp {
                 return;
             }
             
+            const shazamUrl = this.getShazamServiceUrl();
+            console.log('🔌 Conectando servicio Shazam en:', shazamUrl);
+
             // Conectar al servicio de automatización de Shazam
-            this.shazamSocket = io('http://localhost:3002', {
+            this.shazamSocket = io(shazamUrl, {
+                path: '/socket.io/',
                 timeout: 5000,
                 reconnection: true,
                 reconnectionDelay: 1000,
@@ -462,6 +475,29 @@ class SaltilloApp {
         if (this.shazamModal) {
             this.shazamModal.remove();
             this.shazamModal = null;
+            if (!this.hasOpenModal()) {
+                document.body.style.overflow = '';
+            }
+        }
+    }
+
+    hasOpenModal() {
+        return !!(
+            this.shazamModal ||
+            this.bandasModal ||
+            this.registroPickerModal ||
+            this.registroBandaModal ||
+            this.registroBarModal ||
+            this.estudioModal ||
+            this.clasesModal ||
+            this.mapaModal ||
+            this.topTenModal
+        );
+    }
+
+    releaseBodyScroll() {
+        if (!this.hasOpenModal()) {
+            document.body.style.overflow = '';
         }
     }
 
@@ -544,6 +580,7 @@ class SaltilloApp {
         
         document.body.appendChild(modal);
         this.shazamModal = modal;
+        document.body.style.overflow = 'hidden';
         
         // Event listeners del modal
         modal.querySelector('.close-btn').addEventListener('click', () => this.stopShazam());
@@ -1060,10 +1097,10 @@ class SaltilloApp {
         if (!this.bandasModal) return;
         this.stopBandasAudio();
         this.bandasModal.classList.remove('show');
-        document.body.style.overflow = '';
         setTimeout(() => {
             this.bandasModal?.remove();
             this.bandasModal = null;
+            this.releaseBodyScroll();
         }, 300);
     }
 
@@ -1156,7 +1193,7 @@ class SaltilloApp {
             } else if (nextModal === 'lugar') {
                 this.openRegistroBarModal();
             } else {
-                document.body.style.overflow = '';
+                this.releaseBodyScroll();
             }
         }, 300);
     }
@@ -1376,7 +1413,6 @@ class SaltilloApp {
     closeRegistroBandaModal() {
         if (!this.registroBandaModal) return;
         this.registroBandaModal.classList.remove('show');
-        document.body.style.overflow = '';
         if (this.registroBandaEscHandler) {
             document.removeEventListener('keydown', this.registroBandaEscHandler);
             this.registroBandaEscHandler = null;
@@ -1384,6 +1420,7 @@ class SaltilloApp {
         setTimeout(() => {
             this.registroBandaModal?.remove();
             this.registroBandaModal = null;
+            this.releaseBodyScroll();
         }, 300);
     }
 
@@ -1687,7 +1724,6 @@ class SaltilloApp {
     closeRegistroBarModal() {
         if (!this.registroBarModal) return;
         this.registroBarModal.classList.remove('show');
-        document.body.style.overflow = '';
         if (this.registroBarEscHandler) {
             document.removeEventListener('keydown', this.registroBarEscHandler);
             this.registroBarEscHandler = null;
@@ -1695,6 +1731,7 @@ class SaltilloApp {
         setTimeout(() => {
             this.registroBarModal?.remove();
             this.registroBarModal = null;
+            this.releaseBodyScroll();
         }, 300);
     }
 
@@ -2432,10 +2469,10 @@ class SaltilloApp {
     closeEstudioModal() {
         if (!this.estudioModal) return;
         this.estudioModal.classList.remove('show');
-        document.body.style.overflow = '';
         setTimeout(() => {
             this.estudioModal?.remove();
             this.estudioModal = null;
+            this.releaseBodyScroll();
         }, 300);
     }
 
@@ -2915,10 +2952,10 @@ class SaltilloApp {
     closeClasesModal() {
         if (!this.clasesModal) return;
         this.clasesModal.classList.remove('show');
-        document.body.style.overflow = '';
         setTimeout(() => {
             this.clasesModal?.remove();
             this.clasesModal = null;
+            this.releaseBodyScroll();
         }, 300);
     }
 
@@ -3548,6 +3585,7 @@ class SaltilloApp {
 
         document.body.appendChild(modal);
         this.mapaModal = modal;
+        document.body.style.overflow = 'hidden';
 
         modal.querySelector('.mapa-close-btn').addEventListener('click', () => this.closeMapaModal());
         modal.querySelector('.mapa-backdrop').addEventListener('click', () => this.closeMapaModal());
@@ -3570,6 +3608,7 @@ class SaltilloApp {
         setTimeout(() => {
             this.mapaModal?.remove();
             this.mapaModal = null;
+            this.releaseBodyScroll();
         }, 300);
     }
 
@@ -4072,6 +4111,7 @@ class SaltilloApp {
 
         document.body.appendChild(modal);
         this.topTenModal = modal;
+        document.body.style.overflow = 'hidden';
 
         modal.querySelector('.topten-close-btn').addEventListener('click', () => this.closeTopTenModal());
         modal.querySelector('.topten-backdrop').addEventListener('click', () => this.closeTopTenModal());
@@ -4091,6 +4131,7 @@ class SaltilloApp {
         setTimeout(() => {
             this.topTenModal?.remove();
             this.topTenModal = null;
+            this.releaseBodyScroll();
         }, 300);
     }
 
@@ -4228,6 +4269,15 @@ class SaltilloApp {
 
     setupCustomCursor() {
         const cursor = document.querySelector('.custom-cursor');
+        if (!cursor) return;
+
+        const isTouchDevice = window.matchMedia('(hover: none), (pointer: coarse)').matches
+            || window.matchMedia('(max-width: 768px)').matches;
+        if (isTouchDevice) {
+            cursor.style.display = 'none';
+            return;
+        }
+
         const cursorDot = cursor.querySelector('.cursor-dot');
         const cursorOutline = cursor.querySelector('.cursor-outline');
         

@@ -543,10 +543,20 @@
         padding: 0;
     }
 
+    .shazam-modal-native .modal-backdrop {
+        display: block;
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.65);
+        backdrop-filter: blur(6px);
+    }
+
     .modal-container {
+        position: relative;
+        z-index: 1;
         width: 100%;
         max-width: 100%;
-        max-height: none;
+        max-height: min(72dvh, 520px);
         margin: 0;
         border-radius: 16px 16px 0 0;
     }

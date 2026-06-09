@@ -1044,6 +1044,15 @@
         padding: 16px;
     }
 
+    .bandas-list {
+        max-height: none;
+    }
+
+    .bandas-search-input,
+    .bandas-genre-select {
+        font-size: 16px;
+    }
+
     .bandas-footer {
         flex-direction: column-reverse;
         gap: 10px;

@@ -366,7 +366,7 @@
 
         .products-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
             gap: var(--space-2xl);
             margin-bottom: var(--space-4xl);
         }
@@ -808,13 +808,43 @@
 
         /* Responsive */
         @media (max-width: 768px) {
+            .marketplace-hero {
+                min-height: 100dvh;
+                min-height: 100vh;
+                height: auto;
+                padding: var(--space-3xl) 0;
+            }
+
+            .hero-content {
+                padding: 0 var(--space-md);
+            }
+
+            .hero-subtitle {
+                font-size: 1rem;
+            }
+
+            .marketplace-nav {
+                padding: var(--space-md) 0;
+                padding-top: max(var(--space-md), env(safe-area-inset-top, 0px));
+            }
+
+            .nav-container {
+                padding: 0 var(--space-md);
+            }
+
+            .filters-container,
+            .products-container {
+                padding: 0 var(--space-md);
+            }
+
+            .products-grid {
+                grid-template-columns: 1fr;
+                gap: var(--space-xl);
+            }
+
             .cart-sidebar {
                 width: 100%;
                 right: -100%;
-            }
-            
-            .products-grid {
-                grid-template-columns: 1fr;
             }
             
             .filters-grid {
@@ -834,16 +864,45 @@
             .search-container {
                 margin: 0;
                 max-width: 100%;
+                width: 100%;
             }
         }
 
         @media (max-width: 480px) {
+            .marketplace-hero {
+                padding: var(--space-2xl) 0;
+            }
+
+            .hero-title {
+                font-size: clamp(2.25rem, 12vw, 3rem);
+            }
+
+            .hero-subtitle {
+                font-size: 0.9rem;
+            }
+
+            .back-btn span {
+                display: none;
+            }
+
+            .back-btn {
+                padding: var(--space-sm) var(--space-md);
+            }
+
             .filters-grid {
                 grid-template-columns: 1fr;
             }
             
             .artists-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .filter-card {
+                padding: var(--space-lg);
+            }
+
+            .products-section {
+                padding: var(--space-2xl) 0;
             }
         }
     </style>
