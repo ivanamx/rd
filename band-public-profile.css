@@ -1,0 +1,169 @@
+/* Perfil público de banda — banda.html */
+
+.bpp-public-page {
+    min-height: 100dvh;
+    background: #0a0a0a;
+    color: var(--text-primary, #fff);
+}
+
+.bpp-public-shell {
+    max-width: 960px;
+    margin: 0 auto;
+    padding-bottom: 48px;
+}
+
+.bpp-public-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 20px;
+    background: rgba(10, 10, 10, 0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(0, 212, 255, 0.12);
+}
+
+.bpp-public-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary, #b0b0b0);
+    text-decoration: none;
+    font-size: 0.88rem;
+    transition: color 0.2s;
+}
+
+.bpp-public-back:hover {
+    color: #00D4FF;
+}
+
+.bpp-public-reserve-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.55rem 1rem;
+    border-radius: 100px;
+    border: none;
+    background: linear-gradient(135deg, #00D4FF, #8b5cf6);
+    color: #0a0a0a;
+    font-family: var(--font-primary, 'Space Grotesk', sans-serif);
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.2s, opacity 0.2s;
+}
+
+.bpp-public-reserve-btn:hover {
+    transform: translateY(-1px);
+    opacity: 0.95;
+}
+
+.bpp-public-desc {
+    font-size: 0.92rem;
+    color: var(--text-secondary, #b0b0b0);
+    line-height: 1.6;
+    margin: 0 0 4px;
+}
+
+.bpp-public-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 8px;
+    font-size: 0.82rem;
+    color: var(--text-secondary, #b0b0b0);
+}
+
+.bpp-public-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.bpp-public-meta i {
+    color: #00D4FF;
+}
+
+.bpp-public-venues {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.bpp-public-venue-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0.35rem 0.65rem;
+    border-radius: 100px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 0.78rem;
+    color: var(--text-secondary, #b0b0b0);
+}
+
+.bpp-public-venue-tag i {
+    color: #00D4FF;
+    font-size: 0.7rem;
+}
+
+.bpp-public-gallery .bpp-gallery-item .bpp-gallery-caption {
+    pointer-events: none;
+    cursor: default;
+}
+
+.bpp-public-gallery .bpp-gallery-caption {
+    border: none;
+}
+
+.bpp-public-empty {
+    min-height: 40vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 48px 24px;
+    text-align: center;
+    color: var(--text-secondary, #b0b0b0);
+}
+
+.bpp-public-empty a {
+    color: #00D4FF;
+}
+
+.bpp-public-page .bpp-track-delete,
+.bpp-public-page .bpp-avatar-edit,
+.bpp-public-page .bpp-upload-zone,
+.bpp-public-page .bpp-edit-form,
+.bpp-public-page .bpp-dashboard,
+.bpp-public-page .bpp-show-fee,
+.bpp-public-page .bpp-venue-row-revenue {
+    display: none !important;
+}
+
+.bpp-public-page .bpp-show-status.pending {
+    opacity: 0.85;
+}
+
+@media (max-width: 640px) {
+    .bpp-public-topbar {
+        padding: 12px 14px;
+    }
+
+    .bpp-public-reserve-btn span {
+        display: none;
+    }
+
+    .bpp-public-reserve-btn {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        justify-content: center;
+        border-radius: 50%;
+    }
+}

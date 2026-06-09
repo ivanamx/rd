@@ -299,7 +299,46 @@
       "precio": 720000,
       "duracion": "2.5 horas",
       "imagen": "bandas-media/gary-garcia/cover.svg",
+      "avatar": "bandas-media/gary-garcia/ggprofile.jpeg",
+      "coverVideo": "bandas-media/gary-garcia/timeoutforgary.mp4",
+      "heroLink": {
+        "text": "we like soccer",
+        "video": "bandas-media/gary-garcia/gary1.mp4"
+      },
+      "premium": true,
       "estrellas": 5.0,
+      "stats": {
+        "vistas": 3842,
+        "reservas": 47,
+        "shows": 31
+      },
+      "galeria": [
+        { "id": "gary-g1", "url": "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600&h=400&fit=crop&auto=format", "caption": "Parque Saltillo 400 — Jun 2026", "type": "image" },
+        { "id": "gary-g2", "url": "https://images.unsplash.com/photo-1459749411175-04bf52929825?w=600&h=400&fit=crop&auto=format", "caption": "Bar El Callejón — May 2026", "type": "image" },
+        { "id": "gary-g3", "url": "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=600&h=400&fit=crop&auto=format", "caption": "Sesión de estudio — Abr 2026", "type": "image" },
+        { "id": "gary-g4", "url": "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=600&h=400&fit=crop&auto=format", "caption": "Backline en Foro Cultural", "type": "image" },
+        { "id": "gary-g5", "url": "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600&h=400&fit=crop&auto=format", "caption": "La Siberia — Mar 2026", "type": "image" },
+        { "id": "gary-g6", "url": "https://images.unsplash.com/photo-1506157786151-b8491531f063?w=600&h=400&fit=crop&auto=format", "caption": "Centro Histórico — Feb 2026", "type": "image" },
+        { "id": "gary-v1", "url": "bandas-media/gary-garcia/gary1.mp4", "caption": "gary1", "type": "video" }
+      ],
+      "proximosShows": [
+        { "fecha": "2026-06-14", "venue": "Parque Saltillo 400", "status": "confirmado" },
+        { "fecha": "2026-06-19", "venue": "La Siberia", "status": "confirmado" },
+        { "fecha": "2026-06-26", "venue": "Bar El Callejón", "status": "pendiente" },
+        { "fecha": "2026-07-03", "venue": "Foro Cultural Saltillo", "status": "pendiente" }
+      ],
+      "showsRecientes": [
+        { "fecha": "2026-06-01", "venue": "Parque Saltillo 400", "hours": 2.5 },
+        { "fecha": "2026-05-28", "venue": "Bar El Callejón", "hours": 2.5 },
+        { "fecha": "2026-05-17", "venue": "Centro Histórico", "hours": 2 },
+        { "fecha": "2026-05-04", "venue": "La Siberia", "hours": 2.5 }
+      ],
+      "topVenues": [
+        { "name": "Bar El Callejón", "shows": 8, "lastDate": "2026-05-28" },
+        { "name": "La Siberia", "shows": 5, "lastDate": "2026-04-12" },
+        { "name": "Foro Cultural Saltillo", "shows": 4, "lastDate": "2026-03-21" },
+        { "name": "Parque Saltillo 400", "shows": 3, "lastDate": "2026-06-01" }
+      ],
       "lugares": ["La Siberia", "Parque Saltillo 400", "Foro Cultural Saltillo", "Bar El Callejón", "Centro Histórico"],
       "canciones": [
         { "titulo": "Highway to the Bravo", "archivo": "bandas-media/gary-garcia/muestra-1.mp3" },

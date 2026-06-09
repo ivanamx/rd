@@ -1039,17 +1039,20 @@
 
         .artists-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: var(--space-xl);
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: var(--space-lg);
         }
 
         .artist-card {
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
+            align-items: stretch;
+            gap: var(--space-md);
             background: var(--mp-surface);
             border: 1px solid var(--mp-border);
             border-radius: var(--mp-radius);
             overflow: hidden;
+            padding: var(--space-md);
             transition: transform 0.35s var(--mp-ease), border-color 0.35s, box-shadow 0.35s;
             opacity: 0;
             transform: translateY(20px);
@@ -1070,135 +1073,228 @@
             transform: translateY(-3px);
         }
 
+        .artist-card--link {
+            cursor: pointer;
+        }
+
+        .artist-card--link:focus-visible {
+            outline: 2px solid var(--mp-accent);
+            outline-offset: 2px;
+        }
+
         .artist-image-wrap {
             position: relative;
-            aspect-ratio: 3 / 4;
+            flex: 0 0 96px;
+            width: 96px;
+            height: 96px;
+            border-radius: 14px;
             overflow: hidden;
             background: var(--dark-surface);
+            border: 1px solid var(--mp-border);
         }
 
         .artist-image {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            object-position: center 15%;
+            object-position: center 20%;
             transition: transform 0.6s var(--mp-ease);
         }
 
         .artist-card:hover .artist-image {
-            transform: scale(1.05);
+            transform: scale(1.06);
         }
 
-        .artist-image-overlay {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(180deg, transparent 45%, rgba(10, 10, 10, 0.85) 100%);
-            pointer-events: none;
-        }
-
-        .artist-image-badges {
-            position: absolute;
-            top: var(--space-md);
-            left: var(--space-md);
-            right: var(--space-md);
+        .artist-body {
+            flex: 1;
+            min-width: 0;
             display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
+            flex-direction: column;
             gap: var(--space-sm);
-            pointer-events: none;
+            padding: 2px 0;
+        }
+
+        .artist-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: var(--space-sm);
+        }
+
+        .artist-header-main {
+            min-width: 0;
+        }
+
+        .artist-name-row {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            margin-bottom: 0.15rem;
+        }
+
+        .artist-name {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: -0.01em;
+            line-height: 1.2;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .artist-specialty {
+            font-size: 0.72rem;
+            color: var(--mp-accent);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            font-weight: 500;
         }
 
         .artist-rating-badge {
             display: inline-flex;
             align-items: center;
             gap: 0.3rem;
-            padding: 0.3rem 0.65rem;
-            background: rgba(10, 10, 10, 0.72);
-            backdrop-filter: blur(8px);
-            border: 1px solid var(--mp-border);
+            flex-shrink: 0;
+            padding: 0.25rem 0.55rem;
+            background: rgba(255, 176, 32, 0.1);
+            border: 1px solid rgba(255, 176, 32, 0.22);
             border-radius: 100px;
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             font-weight: 600;
             color: var(--text-primary);
         }
 
         .artist-rating-badge i {
             color: var(--mp-warning);
-            font-size: 0.65rem;
+            font-size: 0.62rem;
         }
 
         .artist-verified-badge {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 28px;
-            height: 28px;
-            background: rgba(0, 255, 136, 0.15);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(0, 255, 136, 0.35);
-            border-radius: 50%;
+            flex-shrink: 0;
+            width: 18px;
+            height: 18px;
             color: var(--mp-success);
-            font-size: 0.8rem;
-        }
-
-        .artist-body {
-            padding: var(--space-lg);
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-        }
-
-        .artist-name {
-            font-size: 1.05rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 0.2rem;
-            letter-spacing: -0.01em;
-        }
-
-        .artist-specialty {
-            font-size: 0.75rem;
-            color: var(--mp-accent);
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            font-weight: 500;
-            margin-bottom: var(--space-md);
+            font-size: 0.82rem;
         }
 
         .artist-description {
             color: var(--text-secondary);
-            font-size: 0.875rem;
-            line-height: 1.6;
-            margin-bottom: var(--space-lg);
-            flex: 1;
+            font-size: 0.82rem;
+            line-height: 1.55;
+            margin: 0;
             display: -webkit-box;
-            -webkit-line-clamp: 3;
+            -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
 
         .artist-stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            display: flex;
+            flex-wrap: wrap;
             gap: var(--space-sm);
-            padding-top: var(--space-md);
+            margin-top: auto;
+            padding-top: var(--space-sm);
             border-top: 1px solid var(--mp-border);
         }
 
-        .artist-stat { text-align: center; }
+        .artist-stat {
+            display: flex;
+            align-items: baseline;
+            gap: 0.35rem;
+            min-width: 0;
+        }
 
         .stat-value {
-            font-size: 1.1rem;
+            font-size: 0.88rem;
             font-weight: 700;
             color: var(--text-primary);
             font-family: var(--font-mono);
         }
 
         .artist-stat .stat-label {
-            font-size: 0.7rem;
+            font-size: 0.68rem;
             color: var(--text-secondary);
             text-transform: uppercase;
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+        }
+
+        .artist-specialty-row {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+        }
+
+        .artist-type-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.12rem 0.45rem;
+            border-radius: 100px;
+            font-size: 0.62rem;
+            font-weight: 600;
             letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .artist-type-badge--artist {
+            color: var(--mp-accent);
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.22);
+        }
+
+        .artist-type-badge--band {
+            color: #c4b5fd;
+            background: rgba(139, 92, 246, 0.12);
+            border: 1px solid rgba(139, 92, 246, 0.28);
+        }
+
+        .creators-pagination {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-md);
+            margin-top: var(--space-xl);
+            padding-top: var(--space-lg);
+            border-top: 1px solid var(--mp-border);
+        }
+
+        .creators-page-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.55rem 1rem;
+            border: 1px solid var(--mp-border);
+            border-radius: 100px;
+            background: var(--mp-surface);
+            color: var(--text-primary);
+            font-family: var(--font-primary);
+            font-size: 0.82rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s, opacity 0.2s;
+        }
+
+        .creators-page-btn:hover:not(:disabled) {
+            border-color: var(--mp-border-hover);
+            background: rgba(0, 212, 255, 0.08);
+        }
+
+        .creators-page-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .creators-page-info {
+            min-width: 120px;
+            text-align: center;
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
         }
 
         /* ── Carrito ── */
@@ -1777,6 +1873,16 @@
             .artists-grid {
                 grid-template-columns: 1fr;
             }
+
+            .artist-card {
+                padding: var(--space-sm);
+            }
+
+            .artist-image-wrap {
+                flex-basis: 80px;
+                width: 80px;
+                height: 80px;
+            }
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -1953,6 +2059,17 @@
                 <div class="section-line" aria-hidden="true"></div>
             </div>
             <div class="artists-grid" id="artistsGrid"></div>
+            <nav class="creators-pagination" id="creatorsPagination" aria-label="Paginación de artistas y bandas" hidden>
+                <button type="button" class="creators-page-btn" id="creatorsPrev" disabled>
+                    <i class="fas fa-chevron-left" aria-hidden="true"></i>
+                    <span data-i18n="productos.creatorsPrev">Anterior</span>
+                </button>
+                <span class="creators-page-info" id="creatorsPageInfo" aria-live="polite"></span>
+                <button type="button" class="creators-page-btn" id="creatorsNext">
+                    <span data-i18n="productos.creatorsNext">Siguiente</span>
+                    <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                </button>
+            </nav>
         </div>
     </section>
 
@@ -2163,9 +2280,17 @@
 
         let carrito = [];
         let productosFiltrados = [...productos];
+        let bandasData = [];
+        let creatorsList = [];
+        let creatorsPage = 1;
+        const CREATORS_PER_PAGE = 6;
 
         const productsGrid = document.getElementById('productsGrid');
         const artistsGrid = document.getElementById('artistsGrid');
+        const creatorsPagination = document.getElementById('creatorsPagination');
+        const creatorsPrev = document.getElementById('creatorsPrev');
+        const creatorsNext = document.getElementById('creatorsNext');
+        const creatorsPageInfo = document.getElementById('creatorsPageInfo');
         const searchInput = document.getElementById('searchInput');
         const filterCards = document.querySelectorAll('.filter-card');
         const cartToggle = document.getElementById('cartToggle');
@@ -2212,21 +2337,192 @@
         let currentBandSession = null;
         let bandProfileAudio = null;
         let playingTrackId = null;
+        let heroCoverMuted = false;
 
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-        function initMarketplace() {
+        async function initMarketplace() {
             window.I18n.init();
             if (typeof window.seedMockBands === 'function') window.seedMockBands();
             updateMetaDescription();
             updateResultsMeta();
             renderProducts();
-            renderArtists();
+            await loadBandas();
+            renderCreators();
             restoreBandSession();
             setupEventListeners();
             updateCartUI();
             animateCounters();
             setupScrollReveal();
+        }
+
+        async function loadBandas() {
+            try {
+                const res = await fetch('bandas.json');
+                if (!res.ok) throw new Error('fetch failed');
+                const data = await res.json();
+                bandasData = data.bandas || [];
+            } catch (_) {
+                bandasData = [];
+            }
+            buildCreatorsList();
+        }
+
+        function mapArtistToCreator(artista) {
+            return {
+                type: 'artist',
+                id: `artist-${artista.id}`,
+                nombre: artista.nombre,
+                specialty: aSpec(artista),
+                descripcion: aDesc(artista),
+                imagen: artista.imagen,
+                rating: artista.rating,
+                stat1: artista.productos,
+                stat1Label: 'productos.statProductsLabel',
+                stat2: artista.ventas,
+                stat2Label: 'productos.statSalesLabel'
+            };
+        }
+
+        function mapBandToCreator(banda) {
+            const imagen = banda.id === 'gary-garcia'
+                ? 'bandas-media/gary-garcia/ggprofile.jpeg'
+                : banda.imagen;
+            return {
+                type: 'band',
+                id: banda.id,
+                nombre: banda.nombre,
+                specialty: banda.genero,
+                descripcion: banda.descripcion,
+                imagen,
+                rating: banda.estrellas || 0,
+                stat1: (banda.canciones || []).length,
+                stat1Label: 'productos.statTracksLabel',
+                stat2: (banda.lugares || []).length,
+                stat2Label: 'productos.statVenuesLabel'
+            };
+        }
+
+        function buildCreatorsList() {
+            const fromArtists = artistas.map(mapArtistToCreator);
+            const fromBands = bandasData.map(mapBandToCreator);
+            creatorsList = [...fromArtists, ...fromBands].sort((a, b) => {
+                if (a.type !== b.type) return a.type === 'artist' ? -1 : 1;
+                return a.nombre.localeCompare(b.nombre, isEn() ? 'en' : 'es', { sensitivity: 'base' });
+            });
+            const totalPages = Math.max(1, Math.ceil(creatorsList.length / CREATORS_PER_PAGE));
+            if (creatorsPage > totalPages) creatorsPage = totalPages;
+        }
+
+        function createCreatorCard(creator, index) {
+            const isArtist = creator.type === 'artist';
+            const verifiedLabel = t('productos.verified');
+            const card = document.createElement('article');
+            card.className = 'artist-card';
+            if (!isArtist) {
+                card.classList.add('artist-card--link');
+                card.setAttribute('role', 'link');
+                card.setAttribute('tabindex', '0');
+                card.setAttribute('aria-label', creator.nombre);
+            }
+            card.innerHTML = `
+                <div class="artist-image-wrap">
+                    <img src="${creator.imagen}" alt="${creator.nombre}" class="artist-image" loading="lazy" decoding="async">
+                </div>
+                <div class="artist-body">
+                    <div class="artist-header">
+                        <div class="artist-header-main">
+                            <div class="artist-name-row">
+                                <div class="artist-name">${creator.nombre}</div>
+                                ${isArtist ? `
+                                    <span class="artist-verified-badge" title="${verifiedLabel}" aria-label="${verifiedLabel}">
+                                        <i class="fas fa-circle-check" aria-hidden="true"></i>
+                                    </span>
+                                ` : `
+                                    <span class="artist-verified-badge" title="${t('productos.creatorBand')}" aria-label="${t('productos.creatorBand')}">
+                                        <i class="fas fa-music" aria-hidden="true"></i>
+                                    </span>
+                                `}
+                            </div>
+                            <div class="artist-specialty-row">
+                                <span class="artist-type-badge artist-type-badge--${creator.type}">${t(isArtist ? 'productos.creatorArtist' : 'productos.creatorBand')}</span>
+                                <span class="artist-specialty">${creator.specialty}</span>
+                            </div>
+                        </div>
+                        <span class="artist-rating-badge">
+                            <i class="fas fa-star" aria-hidden="true"></i>
+                            ${Number(creator.rating).toFixed(1)}
+                        </span>
+                    </div>
+                    <p class="artist-description">${creator.descripcion}</p>
+                    <div class="artist-stats">
+                        <div class="artist-stat">
+                            <span class="stat-value">${creator.stat1}</span>
+                            <span class="stat-label">${t(creator.stat1Label)}</span>
+                        </div>
+                        <div class="artist-stat">
+                            <span class="stat-value">${creator.stat2}</span>
+                            <span class="stat-label">${t(creator.stat2Label)}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            if (!prefersReducedMotion) {
+                setTimeout(() => card.classList.add('visible'), index * 60);
+            } else {
+                card.classList.add('visible');
+            }
+
+            if (!isArtist) {
+                const openBandProfile = () => {
+                    window.location.href = `banda.html?banda=${encodeURIComponent(creator.id)}`;
+                };
+                card.addEventListener('click', openBandProfile);
+                card.addEventListener('keydown', e => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        openBandProfile();
+                    }
+                });
+            }
+
+            return card;
+        }
+
+        function updateCreatorsPagination(totalPages) {
+            if (!creatorsPagination) return;
+            const showPagination = creatorsList.length > CREATORS_PER_PAGE;
+            creatorsPagination.hidden = !showPagination;
+            if (!showPagination) return;
+
+            creatorsPrev.disabled = creatorsPage <= 1;
+            creatorsNext.disabled = creatorsPage >= totalPages;
+            creatorsPageInfo.textContent = t('productos.creatorsPageInfo', {
+                page: creatorsPage,
+                total: totalPages
+            });
+        }
+
+        function renderCreators() {
+            buildCreatorsList();
+            artistsGrid.innerHTML = '';
+
+            const totalPages = Math.max(1, Math.ceil(creatorsList.length / CREATORS_PER_PAGE));
+            const start = (creatorsPage - 1) * CREATORS_PER_PAGE;
+            const pageItems = creatorsList.slice(start, start + CREATORS_PER_PAGE);
+
+            pageItems.forEach((creator, i) => {
+                artistsGrid.appendChild(createCreatorCard(creator, i));
+            });
+
+            updateCreatorsPagination(totalPages);
+        }
+
+        function goToCreatorsPage(page) {
+            const totalPages = Math.max(1, Math.ceil(creatorsList.length / CREATORS_PER_PAGE));
+            creatorsPage = Math.min(Math.max(1, page), totalPages);
+            renderCreators();
+            document.getElementById('artistas')?.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' });
         }
 
         function getBandProfiles() {
@@ -2542,18 +2838,45 @@
             if (resumeHero) initHeroCoverVideo();
         }
 
+        function updateHeroCoverMuteButton(isMuted) {
+            const btn = bandProfileContent?.querySelector('#bandHeroMuteBtn');
+            if (!btn) return;
+            const icon = btn.querySelector('i');
+            if (icon) icon.className = isMuted ? 'fas fa-volume-xmark' : 'fas fa-volume-high';
+            btn.setAttribute('aria-pressed', isMuted ? 'true' : 'false');
+            btn.setAttribute('aria-label', t(isMuted ? 'productos.profileHeroUnmute' : 'productos.profileHeroMute'));
+        }
+
+        function toggleHeroCoverMute() {
+            const video = bandProfileContent?.querySelector('.bpp-cover-video');
+            if (!video) return;
+            heroCoverMuted = !heroCoverMuted;
+            video.muted = heroCoverMuted;
+            if (!heroCoverMuted) {
+                video.volume = 1;
+                const wrap = video.closest('.bpp-cover-wrap--video');
+                if (wrap) wrap.dataset.audioReady = '1';
+            }
+            updateHeroCoverMuteButton(heroCoverMuted);
+            video.play().catch(() => {});
+        }
+
         function initHeroCoverVideo() {
             const video = bandProfileContent?.querySelector('.bpp-cover-video');
             if (!video) return;
 
-            video.muted = false;
-            video.volume = 1;
+            video.muted = heroCoverMuted;
+            video.volume = heroCoverMuted ? 0 : 1;
+            updateHeroCoverMuteButton(heroCoverMuted);
             video.play().catch(() => {
+                if (heroCoverMuted) return;
                 const wrap = video.closest('.bpp-cover-wrap--video');
                 if (!wrap || wrap.dataset.audioReady === '1') return;
                 const unlockAudio = () => {
                     video.muted = false;
                     video.volume = 1;
+                    heroCoverMuted = false;
+                    updateHeroCoverMuteButton(false);
                     video.play().then(() => {
                         wrap.dataset.audioReady = '1';
                     }).catch(() => {});
@@ -2586,6 +2909,9 @@
             const coverHtml = profile.coverVideo
                 ? `<div class="bpp-cover-wrap bpp-cover-wrap--video">
                         <video class="bpp-cover-video" src="${escAttr(profile.coverVideo)}" autoplay loop playsinline></video>
+                        <button type="button" class="bpp-cover-mute-btn" id="bandHeroMuteBtn" aria-pressed="false" data-i18n-aria="productos.profileHeroMute" aria-label="${escAttr(t('productos.profileHeroMute'))}">
+                            <i class="fas fa-volume-high" aria-hidden="true"></i>
+                        </button>
                    </div>`
                 : profile.cover
                     ? `<div class="bpp-cover-wrap"><img class="bpp-cover" src="${escAttr(profile.cover)}" alt=""></div>`
@@ -2749,6 +3075,11 @@
             `;
 
             bandProfileContent.querySelector('#bandAvatarEditBtn')?.addEventListener('click', () => bandAvatarInput?.click());
+
+            bandProfileContent.querySelector('#bandHeroMuteBtn')?.addEventListener('click', e => {
+                e.stopPropagation();
+                toggleHeroCoverMute();
+            });
 
             bandProfileContent.querySelector('#bandHeroVideoLink')?.addEventListener('click', e => {
                 e.preventDefault();
@@ -3014,7 +3345,7 @@
             updateMetaDescription();
             updateResultsMeta();
             renderProducts();
-            renderArtists();
+            renderCreators();
             updateCartUI();
             if (productModal.classList.contains('open')) {
                 const openId = productModal.dataset.openId;
@@ -3090,51 +3421,7 @@
         }
 
         function renderArtists() {
-            artistsGrid.innerHTML = '';
-            artistas.forEach((artista, i) => {
-                const card = document.createElement('article');
-                card.className = 'artist-card';
-                card.innerHTML = `
-                    <div class="artist-image-wrap">
-                        <img src="${artista.imagen}" alt="${artista.nombre}" class="artist-image" loading="lazy" decoding="async">
-                        <div class="artist-image-overlay" aria-hidden="true"></div>
-                        <div class="artist-image-badges">
-                            <span class="artist-rating-badge">
-                                <i class="fas fa-star" aria-hidden="true"></i>
-                                ${artista.rating}
-                            </span>
-                            <span class="artist-verified-badge" title="${t('productos.verified')}" aria-label="${t('productos.verified')}">
-                                <i class="fas fa-circle-check" aria-hidden="true"></i>
-                            </span>
-                        </div>
-                    </div>
-                    <div class="artist-body">
-                        <div class="artist-name">${artista.nombre}</div>
-                        <div class="artist-specialty">${aSpec(artista)}</div>
-                        <p class="artist-description">${aDesc(artista)}</p>
-                        <div class="artist-stats">
-                            <div class="artist-stat">
-                                <div class="stat-value">${artista.productos}</div>
-                                <div class="stat-label">${t('productos.statProductsLabel')}</div>
-                            </div>
-                            <div class="artist-stat">
-                                <div class="stat-value">${artista.ventas}</div>
-                                <div class="stat-label">${t('productos.statSalesLabel')}</div>
-                            </div>
-                            <div class="artist-stat">
-                                <div class="stat-value">${artista.rating}</div>
-                                <div class="stat-label">${t('productos.statRatingLabel')}</div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                artistsGrid.appendChild(card);
-                if (!prefersReducedMotion) {
-                    setTimeout(() => card.classList.add('visible'), i * 80);
-                } else {
-                    card.classList.add('visible');
-                }
-            });
+            renderCreators();
         }
 
         function addToCart(productoId, btn) {
@@ -3433,6 +3720,9 @@
                     filterProducts(card.dataset.category);
                 });
             });
+
+            creatorsPrev?.addEventListener('click', () => goToCreatorsPage(creatorsPage - 1));
+            creatorsNext?.addEventListener('click', () => goToCreatorsPage(creatorsPage + 1));
 
             let searchDebounce;
             searchInput.addEventListener('input', e => {

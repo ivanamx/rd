@@ -121,8 +121,21 @@ class SaltilloApp {
 
         // Verificar resultado de pago Stripe
         this.checkPaymentResult();
+        this.checkBandaDeepLink();
         
         console.log('✅ Radio Saltillo inicializada');
+    }
+
+    async checkBandaDeepLink() {
+        const params = new URLSearchParams(window.location.search);
+        const bandaId = params.get('banda');
+        if (!bandaId) return;
+
+        await this.openBandasModal(bandaId);
+        if (params.get('reservar') === '1') {
+            setTimeout(() => this.bandasGoToStep(3), 150);
+        }
+        window.history.replaceState({}, '', window.location.pathname);
     }
 
     checkAPISupport() {
@@ -4335,7 +4348,11 @@ class SaltilloApp {
                 this.openBandasModal();
                 break;
             case 'banda':
-                this.openBandasModal(bandaId);
+                if (bandaId) {
+                    window.location.href = `banda.html?banda=${encodeURIComponent(bandaId)}`;
+                } else {
+                    this.openBandasModal();
+                }
                 break;
             case 'estudio':
                 this.openEstudioModal();
