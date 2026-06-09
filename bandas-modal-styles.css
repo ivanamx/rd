@@ -1005,9 +1005,20 @@
     }
 
     .bandas-modal-native .bandas-container {
+        width: 100%;
+        max-width: 100%;
+        max-height: 95dvh;
         max-height: 95vh;
         border-radius: 16px 16px 0 0;
-        max-width: 100%;
+        min-height: 0;
+    }
+
+    .bandas-header {
+        padding: 16px 16px 12px;
+    }
+
+    .bandas-header-title h3 {
+        font-size: 1rem;
     }
 
     .bandas-search-bar {
@@ -1034,7 +1045,21 @@
     }
 
     .bandas-footer {
+        flex-direction: column-reverse;
+        gap: 10px;
         padding: 14px 16px;
+        padding-bottom: max(14px, env(safe-area-inset-bottom, 14px));
+    }
+
+    .bandas-btn {
+        display: flex;
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .bandas-btn-primary {
+        flex: none;
     }
 
     .banda-profile-top {
@@ -1054,5 +1079,21 @@
     .banda-profile-image-wrap {
         width: 120px;
         height: 120px;
+    }
+}
+
+@media (max-width: 480px) {
+    .bandas-modal-native .bandas-container {
+        max-height: 100dvh;
+        max-height: 100vh;
+        border-radius: 12px 12px 0 0;
+    }
+
+    .bandas-header {
+        padding: 14px 14px 10px;
+    }
+
+    .bandas-body {
+        padding: 14px;
     }
 }

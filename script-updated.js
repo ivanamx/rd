@@ -11,6 +11,7 @@ class SaltilloApp {
         this.bandasModal = null;
         this.registroBandaModal = null;
         this.registroBarModal = null;
+        this.registroPickerModal = null;
         this.bandasAudio = null;
         this.bandasState = {
             bandas: [],
@@ -90,6 +91,7 @@ class SaltilloApp {
     refreshOpenModals() {
         if (this.shazamModal) this.updateShazamModalLabels();
         if (this.bandasModal) this.updateBandasModalLabels();
+        if (this.registroPickerModal) this.updateRegistroPickerModalLabels();
         if (this.registroBandaModal) this.updateRegistroBandaModalLabels();
         if (this.registroBarModal) this.updateRegistroBarModalLabels();
         if (this.estudioModal) this.updateEstudioModalLabels();
@@ -154,7 +156,7 @@ class SaltilloApp {
         });
         
         // Navegación
-        document.querySelectorAll('.nav-item').forEach(item => {
+        document.querySelectorAll('.nav-item, .mobile-nav-item').forEach(item => {
             item.addEventListener('click', (e) => this.handleNavigation(e));
         });
         
@@ -190,8 +192,8 @@ class SaltilloApp {
 
         document.getElementById('verMapaBtn')?.addEventListener('click', () => this.handleVerMapa());
 
-        document.getElementById('registerBtn')?.addEventListener('click', () => this.openRegistroBandaModal());
-        document.getElementById('registerBtnMobile')?.addEventListener('click', () => this.openRegistroBandaModal());
+        document.getElementById('registerBtn')?.addEventListener('click', () => this.openRegistroPickerModal());
+        document.getElementById('registerBtnMobile')?.addEventListener('click', () => this.openRegistroPickerModal());
         
         // Redes sociales
         document.querySelectorAll('.social-item').forEach(item => {
@@ -863,20 +865,59 @@ class SaltilloApp {
     }
 
     handleNavigation(e) {
-        const target = e.currentTarget.dataset.section;
-        const isExternal = e.currentTarget.dataset.external === 'true';
-        const isModal = e.currentTarget.dataset.modal === 'true';
+        const item = e.currentTarget;
+        const target = item.dataset.section;
+        const action = item.dataset.action;
+        const isExternal = item.dataset.external === 'true';
+        const isModal = item.dataset.modal === 'true';
 
-        if (isModal && target === 'bandas') {
-            this.openBandasModal();
-            return;
+        window.mobileHeader?.closeMobileMenu?.();
+
+        if (action) {
+            switch (action) {
+                case 'listen':
+                    this.togglePlay();
+                    return;
+                case 'shazam':
+                    this.startShazam();
+                    return;
+                case 'registro':
+                    this.openRegistroPickerModal();
+                    return;
+                case 'registro-banda':
+                    this.openRegistroBandaModal();
+                    return;
+                case 'registro-bar':
+                    this.openRegistroBarModal();
+                    return;
+                case 'topten':
+                    this.openTopTenModal();
+                    return;
+            }
+        }
+
+        if (isModal) {
+            switch (target) {
+                case 'bandas':
+                    this.openBandasModal();
+                    return;
+                case 'estudio':
+                    this.openEstudioModal();
+                    return;
+                case 'clases':
+                    this.openClasesModal();
+                    return;
+                case 'mapa':
+                    this.openMapaModal();
+                    return;
+            }
         }
         
         if (isExternal) {
             if (target === 'products') {
                 window.open('productos.html', '_blank');
             }
-        } else {
+        } else if (target) {
             const element = document.getElementById(target);
             if (element) {
                 element.scrollIntoView({ behavior: 'smooth' });
@@ -1034,9 +1075,116 @@ class SaltilloApp {
     }
 
     handleGuiaCta(action) {
-        if (action === 'registro') this.openRegistroBandaModal();
+        if (action === 'registro') this.openRegistroPickerModal();
         else if (action === 'bandas') this.openBandasModal();
         else if (action === 'mapa') this.openMapaModal();
+    }
+
+    openRegistroPickerModal() {
+        if (this.registroPickerModal) return;
+
+        window.mobileHeader?.closeMobileMenu?.();
+
+        const modal = document.createElement('div');
+        modal.className = 'registro-picker-modal-native';
+        modal.innerHTML = `
+            <div class="registro-picker-backdrop"></div>
+            <div class="registro-picker-container">
+                <button class="registro-picker-close-btn" type="button" aria-label="Cerrar">&times;</button>
+                <div class="registro-picker-header">
+                    <h3>${this.t('registroPicker.title')}</h3>
+                    <p>${this.t('registroPicker.subtitle')}</p>
+                </div>
+                <div class="registro-picker-options">
+                    <button class="registro-picker-option" type="button" data-registro-type="banda">
+                        <span class="registro-picker-option-icon"><i class="fas fa-guitar"></i></span>
+                        <span class="registro-picker-option-text">
+                            <strong>${this.t('registroPicker.banda')}</strong>
+                            <small>${this.t('registroPicker.bandaDesc')}</small>
+                        </span>
+                        <i class="fas fa-chevron-right registro-picker-option-arrow"></i>
+                    </button>
+                    <button class="registro-picker-option" type="button" data-registro-type="lugar">
+                        <span class="registro-picker-option-icon"><i class="fas fa-store"></i></span>
+                        <span class="registro-picker-option-text">
+                            <strong>${this.t('registroPicker.lugar')}</strong>
+                            <small>${this.t('registroPicker.lugarDesc')}</small>
+                        </span>
+                        <i class="fas fa-chevron-right registro-picker-option-arrow"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+        this.registroPickerModal = modal;
+        document.body.style.overflow = 'hidden';
+
+        modal.querySelector('.registro-picker-close-btn').addEventListener('click', () => this.closeRegistroPickerModal());
+        modal.querySelector('.registro-picker-backdrop').addEventListener('click', () => this.closeRegistroPickerModal());
+        modal.querySelectorAll('[data-registro-type]').forEach(btn => {
+            btn.addEventListener('click', () => this.selectRegistroType(btn.dataset.registroType));
+        });
+
+        this.registroPickerEscHandler = (e) => {
+            if (e.key === 'Escape') this.closeRegistroPickerModal();
+        };
+        document.addEventListener('keydown', this.registroPickerEscHandler);
+
+        setTimeout(() => modal.classList.add('show'), 10);
+    }
+
+    closeRegistroPickerModal(nextModal) {
+        if (!this.registroPickerModal) {
+            if (nextModal === 'banda') this.openRegistroBandaModal();
+            else if (nextModal === 'lugar') this.openRegistroBarModal();
+            return;
+        }
+
+        this.registroPickerModal.classList.remove('show');
+        if (this.registroPickerEscHandler) {
+            document.removeEventListener('keydown', this.registroPickerEscHandler);
+            this.registroPickerEscHandler = null;
+        }
+
+        setTimeout(() => {
+            this.registroPickerModal?.remove();
+            this.registroPickerModal = null;
+
+            if (nextModal === 'banda') {
+                this.openRegistroBandaModal();
+            } else if (nextModal === 'lugar') {
+                this.openRegistroBarModal();
+            } else {
+                document.body.style.overflow = '';
+            }
+        }, 300);
+    }
+
+    selectRegistroType(type) {
+        if (type === 'banda' || type === 'lugar') {
+            this.closeRegistroPickerModal(type);
+        }
+    }
+
+    updateRegistroPickerModalLabels() {
+        if (!this.registroPickerModal) return;
+        const m = this.registroPickerModal;
+        const h3 = m.querySelector('.registro-picker-header h3');
+        const p = m.querySelector('.registro-picker-header p');
+        if (h3) h3.textContent = this.t('registroPicker.title');
+        if (p) p.textContent = this.t('registroPicker.subtitle');
+
+        const bandaBtn = m.querySelector('[data-registro-type="banda"]');
+        const lugarBtn = m.querySelector('[data-registro-type="lugar"]');
+        if (bandaBtn) {
+            bandaBtn.querySelector('strong').textContent = this.t('registroPicker.banda');
+            bandaBtn.querySelector('small').textContent = this.t('registroPicker.bandaDesc');
+        }
+        if (lugarBtn) {
+            lugarBtn.querySelector('strong').textContent = this.t('registroPicker.lugar');
+            lugarBtn.querySelector('small').textContent = this.t('registroPicker.lugarDesc');
+        }
     }
 
     openRegistroBandaModal() {
@@ -4162,47 +4310,81 @@ class MobileHeader {
         this.mobileStopBtn = document.getElementById('mobileStopBtn');
         this.mobileShazamBtn = document.getElementById('mobileShazamBtn');
         this.mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        this.mobileNavOverlay = document.getElementById('mobileNavOverlay');
+        this.mobileNavBackdrop = document.getElementById('mobileNavBackdrop');
+        this.isMenuOpen = false;
         
         this.init();
     }
     
     init() {
-        if (!this.mobilePlayBtn || !this.mobileStopBtn) return;
-        
         this.setupEventListeners();
     }
     
     setupEventListeners() {
-        // Controles de reproducción móvil
-        this.mobilePlayBtn.addEventListener('click', () => {
+        this.mobilePlayBtn?.addEventListener('click', () => {
             if (window.saltilloApp) {
                 window.saltilloApp.togglePlay();
             }
         });
         
-        this.mobileStopBtn.addEventListener('click', () => {
+        this.mobileStopBtn?.addEventListener('click', () => {
             if (window.saltilloApp) {
                 window.saltilloApp.stopAudio();
             }
         });
         
-        // Botón Shazam móvil
-        this.mobileShazamBtn.addEventListener('click', () => {
+        this.mobileShazamBtn?.addEventListener('click', () => {
             if (window.saltilloApp) {
                 window.saltilloApp.toggleShazam();
             }
         });
         
-        // Menú hamburguesa móvil
-        this.mobileMenuBtn.addEventListener('click', () => {
+        this.mobileMenuBtn?.addEventListener('click', () => {
             this.toggleMobileMenu();
+        });
+
+        this.mobileNavBackdrop?.addEventListener('click', () => {
+            this.closeMobileMenu();
+        });
+
+        document.getElementById('mobileNavClose')?.addEventListener('click', () => {
+            this.closeMobileMenu();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.closeMobileMenu();
+            }
         });
     }
     
     toggleMobileMenu() {
-        this.mobileMenuBtn.classList.toggle('active');
-        // Aquí puedes agregar la lógica para mostrar/ocultar el menú móvil
-        console.log('Menú móvil toggle');
+        if (this.isMenuOpen) {
+            this.closeMobileMenu();
+        } else {
+            this.openMobileMenu();
+        }
+    }
+
+    openMobileMenu() {
+        if (!this.mobileNavOverlay || !this.mobileMenuBtn) return;
+
+        this.isMenuOpen = true;
+        this.mobileNavOverlay.classList.add('open');
+        this.mobileNavOverlay.setAttribute('aria-hidden', 'false');
+        this.mobileMenuBtn.classList.add('active');
+        document.body.classList.add('mobile-menu-open');
+    }
+
+    closeMobileMenu() {
+        if (!this.mobileNavOverlay || !this.mobileMenuBtn) return;
+
+        this.isMenuOpen = false;
+        this.mobileNavOverlay.classList.remove('open');
+        this.mobileNavOverlay.setAttribute('aria-hidden', 'true');
+        this.mobileMenuBtn.classList.remove('active');
+        document.body.classList.remove('mobile-menu-open');
     }
     
     updatePlayState(isPlaying) {

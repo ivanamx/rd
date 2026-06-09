@@ -13,7 +13,24 @@
                 radio: 'RADIO',
                 bands: 'BANDAS',
                 register: 'REGÍSTRATE',
-                products: 'PRODUCTOS'
+                products: 'PRODUCTOS',
+                guia: 'ÚNETE A LA ESCENA',
+                estudio: 'ESTUDIO',
+                clases: 'CLASES',
+                mapa: 'MAPA',
+                topten: 'TOP TEN',
+                contact: 'CONTACTO',
+                listen: 'ESCUCHAR RADIO',
+                shazam: 'IDENTIFICAR CANCIÓN',
+                registerBand: 'REGISTRA TU BANDA',
+                registerBar: 'REGISTRA TU BAR',
+                lang: 'IDIOMA',
+                closeMenu: 'Cerrar menú',
+                groupExplore: 'EXPLORAR',
+                groupBook: 'RESERVAR',
+                groupConnect: 'CONECTAR',
+                groupRegister: 'REGISTRO',
+                groupTools: 'HERRAMIENTAS'
             },
             hero: {
                 badge: 'EN VIVO · SALTILLO',
@@ -267,6 +284,14 @@
                 errorEmail: 'Ingresa un correo válido',
                 errorChecks: 'Debes aceptar las condiciones para continuar'
             },
+            registroPicker: {
+                title: '¿Qué quieres registrar?',
+                subtitle: 'Selecciona una opción para continuar',
+                banda: 'Banda',
+                bandaDesc: 'Registra tu grupo musical',
+                lugar: 'Lugar',
+                lugarDesc: 'Registra tu bar, restaurante o venue'
+            },
             estudio: {
                 title: 'Reserva un Estudio',
                 stepStudio: 'Estudio',
@@ -368,7 +393,24 @@
                 radio: 'RADIO',
                 bands: 'BANDS',
                 register: 'SIGN UP',
-                products: 'PRODUCTS'
+                products: 'PRODUCTS',
+                guia: 'JOIN THE SCENE',
+                estudio: 'STUDIO',
+                clases: 'LESSONS',
+                mapa: 'MAP',
+                topten: 'TOP TEN',
+                contact: 'CONTACT',
+                listen: 'LISTEN TO RADIO',
+                shazam: 'IDENTIFY SONG',
+                registerBand: 'REGISTER YOUR BAND',
+                registerBar: 'REGISTER YOUR BAR',
+                lang: 'LANGUAGE',
+                closeMenu: 'Close menu',
+                groupExplore: 'EXPLORE',
+                groupBook: 'BOOK',
+                groupConnect: 'CONNECT',
+                groupRegister: 'REGISTER',
+                groupTools: 'TOOLS'
             },
             hero: {
                 badge: 'LIVE · SALTILLO',
@@ -621,6 +663,14 @@
                 errorPhone: 'Enter a valid 10-digit phone number',
                 errorEmail: 'Enter a valid email address',
                 errorChecks: 'You must accept the terms to continue'
+            },
+            registroPicker: {
+                title: 'What do you want to register?',
+                subtitle: 'Select an option to continue',
+                banda: 'Band',
+                bandaDesc: 'Register your music group',
+                lugar: 'Venue',
+                lugarDesc: 'Register your bar, restaurant or venue'
             },
             estudio: {
                 title: 'Book a Studio',

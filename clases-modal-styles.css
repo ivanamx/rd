@@ -691,7 +691,70 @@
 }
 
 @media (max-width: 600px) {
-    .clases-grid { grid-template-columns: 1fr; }
+    .clases-modal-native {
+        padding: 0;
+        align-items: flex-end;
+    }
+
+    .clases-modal-native .clases-container {
+        width: 100%;
+        max-width: 100%;
+        max-height: 95dvh;
+        max-height: 95vh;
+        border-radius: 16px 16px 0 0;
+        min-height: 0;
+    }
+
+    .clases-header {
+        padding: 16px 16px 12px;
+    }
+
+    .clases-header-title h3 {
+        font-size: 1rem;
+    }
+
+    .clases-steps {
+        padding: 10px 16px;
+        justify-content: center;
+        gap: 12px;
+    }
+
     .clases-step-label { display: none; }
+
+    .clases-body {
+        padding: 16px;
+    }
+
+    .clases-grid { grid-template-columns: 1fr; }
     .maestro-profile-header { flex-direction: column; align-items: center; text-align: center; }
+
+    .clases-footer {
+        flex-direction: column-reverse;
+        gap: 10px;
+        padding: 14px 16px;
+        padding-bottom: max(14px, env(safe-area-inset-bottom, 14px));
+    }
+
+    .clases-btn {
+        display: flex;
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .clases-modal-native .clases-container {
+        max-height: 100dvh;
+        max-height: 100vh;
+        border-radius: 12px 12px 0 0;
+    }
+
+    .clases-header {
+        padding: 14px 14px 10px;
+    }
+
+    .clases-body {
+        padding: 14px;
+    }
 }

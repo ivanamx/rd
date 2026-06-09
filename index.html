@@ -82,6 +82,125 @@
         </div>
     </header>
 
+    <!-- Menú móvil -->
+    <div class="mobile-nav-overlay" id="mobileNavOverlay" aria-hidden="true">
+        <div class="mobile-nav-backdrop" id="mobileNavBackdrop"></div>
+        <nav class="mobile-nav-menu" aria-label="Navegación móvil">
+            <div class="mobile-nav-header">
+                <div class="mobile-nav-brand">
+                    <span class="mobile-nav-brand-top">HECHO EN</span>
+                    <span class="mobile-nav-brand-main">SALTILLO</span>
+                </div>
+                <button class="mobile-nav-close" id="mobileNavClose" type="button" data-i18n-aria="nav.closeMenu" aria-label="Cerrar menú">&times;</button>
+            </div>
+
+            <div class="mobile-nav-scroll">
+                <div class="mobile-nav-group">
+                    <span class="mobile-nav-group-label" data-i18n="nav.groupExplore">EXPLORAR</span>
+                    <button class="mobile-nav-item" type="button" data-section="hero">
+                        <i class="fas fa-home mobile-nav-icon"></i>
+                        <span class="mobile-nav-text" data-i18n="nav.home">INICIO</span>
+                        <i class="fas fa-chevron-right mobile-nav-arrow"></i>
+                    </button>
+                    <button class="mobile-nav-item" type="button" data-section="radio">
+                        <i class="fas fa-broadcast-tower mobile-nav-icon"></i>
+                        <span class="mobile-nav-text" data-i18n="nav.radio">RADIO</span>
+                        <i class="fas fa-chevron-right mobile-nav-arrow"></i>
+                    </button>
+                    <button class="mobile-nav-item" type="button" data-section="guia">
+                        <i class="fas fa-rocket mobile-nav-icon"></i>
+                        <span class="mobile-nav-text" data-i18n="nav.guia">ÚNETE A LA ESCENA</span>
+                        <i class="fas fa-chevron-right mobile-nav-arrow"></i>
+                    </button>
+                    <button class="mobile-nav-item" type="button" data-section="products" data-external="true">
+                        <i class="fas fa-shopping-bag mobile-nav-icon"></i>
+                        <span class="mobile-nav-text" data-i18n="nav.products">PRODUCTOS</span>
+                        <i class="fas fa-external-link-alt mobile-nav-arrow"></i>
+                    </button>
+                </div>
+
+                <div class="mobile-nav-group">
+                    <span class="mobile-nav-group-label" data-i18n="nav.groupBook">RESERVAR</span>
+                    <button class="mobile-nav-item" type="button" data-section="bandas" data-modal="true">
+                        <i class="fas fa-guitar mobile-nav-icon"></i>
+                        <span class="mobile-nav-text" data-i18n="nav.bands">BANDAS</span>
+                        <i class="fas fa-chevron-right mobile-nav-arrow"></i>
+                    </button>
+                    <button class="mobile-nav-item" type="button" data-section="estudio" data-modal="true">
+                        <i class="fas fa-microphone-alt mobile-nav-icon"></i>
+                        <span class="mobile-nav-text" data-i18n="nav.estudio">ESTUDIO</span>
+                        <i class="fas fa-chevron-right mobile-nav-arrow"></i>
+                    </button>
+                    <button class="mobile-nav-item" type="button" data-section="clases" data-modal="true">
+                        <i class="fas fa-chalkboard-teacher mobile-nav-icon"></i>
+                        <span class="mobile-nav-text" data-i18n="nav.clases">CLASES</span>
+                        <i class="fas fa-chevron-right mobile-nav-arrow"></i>
+                    </button>
+                </div>
+
+                <div class="mobile-nav-group">
+                    <span class="mobile-nav-group-label" data-i18n="nav.groupConnect">CONECTAR</span>
+                    <button class="mobile-nav-item" type="button" data-section="mapa" data-modal="true">
+                        <i class="fas fa-map-marked-alt mobile-nav-icon"></i>
+                        <span class="mobile-nav-text" data-i18n="nav.mapa">MAPA</span>
+                        <i class="fas fa-chevron-right mobile-nav-arrow"></i>
+                    </button>
+                    <button class="mobile-nav-item" type="button" data-action="topten">
+                        <i class="fas fa-trophy mobile-nav-icon"></i>
+                        <span class="mobile-nav-text" data-i18n="nav.topten">TOP TEN</span>
+                        <i class="fas fa-chevron-right mobile-nav-arrow"></i>
+                    </button>
+                    <button class="mobile-nav-item" type="button" data-section="contact">
+                        <i class="fas fa-envelope mobile-nav-icon"></i>
+                        <span class="mobile-nav-text" data-i18n="nav.contact">CONTACTO</span>
+                        <i class="fas fa-chevron-right mobile-nav-arrow"></i>
+                    </button>
+                </div>
+
+                <div class="mobile-nav-group">
+                    <span class="mobile-nav-group-label" data-i18n="nav.groupRegister">REGISTRO</span>
+                    <button class="mobile-nav-item mobile-nav-item-accent" type="button" data-action="registro">
+                        <i class="fas fa-user-plus mobile-nav-icon"></i>
+                        <span class="mobile-nav-text" data-i18n="nav.register">REGÍSTRATE</span>
+                        <i class="fas fa-chevron-right mobile-nav-arrow"></i>
+                    </button>
+                    <button class="mobile-nav-item" type="button" data-action="registro-banda">
+                        <i class="fas fa-music mobile-nav-icon"></i>
+                        <span class="mobile-nav-text" data-i18n="nav.registerBand">REGISTRA TU BANDA</span>
+                        <i class="fas fa-chevron-right mobile-nav-arrow"></i>
+                    </button>
+                    <button class="mobile-nav-item" type="button" data-action="registro-bar">
+                        <i class="fas fa-cocktail mobile-nav-icon"></i>
+                        <span class="mobile-nav-text" data-i18n="nav.registerBar">REGISTRA TU BAR</span>
+                        <i class="fas fa-chevron-right mobile-nav-arrow"></i>
+                    </button>
+                </div>
+
+                <div class="mobile-nav-group">
+                    <span class="mobile-nav-group-label" data-i18n="nav.groupTools">HERRAMIENTAS</span>
+                    <button class="mobile-nav-item" type="button" data-action="listen">
+                        <i class="fas fa-play mobile-nav-icon"></i>
+                        <span class="mobile-nav-text" data-i18n="nav.listen">ESCUCHAR RADIO</span>
+                        <i class="fas fa-chevron-right mobile-nav-arrow"></i>
+                    </button>
+                    <button class="mobile-nav-item" type="button" data-action="shazam">
+                        <i class="fas fa-search mobile-nav-icon"></i>
+                        <span class="mobile-nav-text" data-i18n="nav.shazam">IDENTIFICAR CANCIÓN</span>
+                        <i class="fas fa-chevron-right mobile-nav-arrow"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="mobile-nav-footer">
+                <span class="mobile-nav-footer-label" data-i18n="nav.lang">IDIOMA</span>
+                <div class="lang-selector lang-selector-mobile-nav" id="langSelectorMobileNav">
+                    <button class="lang-btn active" data-lang="es" type="button">ES</button>
+                    <button class="lang-btn" data-lang="en" type="button">EN</button>
+                </div>
+            </div>
+        </nav>
+    </div>
+
     <!-- Navegación experimental -->
     <nav class="experimental-nav">
         <div class="nav-container">
