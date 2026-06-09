@@ -2524,19 +2524,41 @@
 
         function openBandVideoModal(src) {
             if (!bandVideoModal || !bandVideoModalPlayer || !src) return;
+            bandProfileContent?.querySelector('.bpp-cover-video')?.pause();
             bandVideoModalPlayer.src = src;
             bandVideoModal.classList.add('open');
             bandVideoModal.setAttribute('aria-hidden', 'false');
             bandVideoModalPlayer.play().catch(() => {});
         }
 
-        function closeBandVideoModal() {
+        function closeBandVideoModal(resumeHero = true) {
             if (!bandVideoModal || !bandVideoModalPlayer) return;
             bandVideoModalPlayer.pause();
             bandVideoModalPlayer.removeAttribute('src');
             bandVideoModalPlayer.load();
             bandVideoModal.classList.remove('open');
             bandVideoModal.setAttribute('aria-hidden', 'true');
+            if (resumeHero) initHeroCoverVideo();
+        }
+
+        function initHeroCoverVideo() {
+            const video = bandProfileContent?.querySelector('.bpp-cover-video');
+            if (!video) return;
+
+            video.muted = false;
+            video.volume = 1;
+            video.play().catch(() => {
+                const wrap = video.closest('.bpp-cover-wrap--video');
+                if (!wrap || wrap.dataset.audioReady === '1') return;
+                const unlockAudio = () => {
+                    video.muted = false;
+                    video.volume = 1;
+                    video.play().then(() => {
+                        wrap.dataset.audioReady = '1';
+                    }).catch(() => {});
+                };
+                wrap.addEventListener('click', unlockAudio, { once: true });
+            });
         }
 
         function renderBandProfile() {
@@ -2562,7 +2584,7 @@
 
             const coverHtml = profile.coverVideo
                 ? `<div class="bpp-cover-wrap bpp-cover-wrap--video">
-                        <video class="bpp-cover-video" src="${escAttr(profile.coverVideo)}" autoplay muted loop playsinline></video>
+                        <video class="bpp-cover-video" src="${escAttr(profile.coverVideo)}" autoplay loop playsinline></video>
                    </div>`
                 : profile.cover
                     ? `<div class="bpp-cover-wrap"><img class="bpp-cover" src="${escAttr(profile.cover)}" alt=""></div>`
@@ -2767,6 +2789,7 @@
                 });
             });
 
+            initHeroCoverVideo();
             bindProfileEditors();
         }
 
@@ -2876,7 +2899,8 @@
 
         function closeBandProfilePanel() {
             stopBandProfileAudio();
-            closeBandVideoModal();
+            closeBandVideoModal(false);
+            bandProfileContent?.querySelector('.bpp-cover-video')?.pause();
             bandProfilePanel.classList.remove('open');
             bandProfileOverlay.classList.remove('open');
             bandProfileOverlay.setAttribute('aria-hidden', 'true');
