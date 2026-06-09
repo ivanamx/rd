@@ -505,7 +505,9 @@
                 noBandsVenue: 'Aún no hay bandas registradas en este venue. ¡Sé el primero en reservar!',
                 reserveBand: 'Reservar esta banda',
                 reserveBandForBar: 'Reservar banda para este bar',
-                filterWarning: '⚠️ Debe haber al menos un tipo visible'
+                filterWarning: '⚠️ Debe haber al menos un tipo visible',
+                floatLabel: 'Mapa de conexiones',
+                floatAria: 'Abrir mapa de conexiones'
             },
             topten: {
                 title: 'Top Ten {{year}}',
@@ -1038,7 +1040,9 @@
                 noBandsVenue: 'No bands registered at this venue yet. Be the first to book!',
                 reserveBand: 'Book this band',
                 reserveBandForBar: 'Book a band for this bar',
-                filterWarning: '⚠️ At least one type must be visible'
+                filterWarning: '⚠️ At least one type must be visible',
+                floatLabel: 'Connection map',
+                floatAria: 'Open connection map'
             },
             topten: {
                 title: 'Top Ten {{year}}',

@@ -43,6 +43,7 @@ class SaltilloApp {
             instrumentoFilter: ''
         };
         this.mapaModal = null;
+        this.mapaFloatMap = null;
         this.mapaState = {
             map: null,
             bandas: [],
@@ -122,6 +123,7 @@ class SaltilloApp {
         // Verificar resultado de pago Stripe
         this.checkPaymentResult();
         this.checkBandaDeepLink();
+        this.initMapaFloatPreview();
         
         console.log('✅ Radio Saltillo inicializada');
     }
@@ -3608,6 +3610,84 @@ class SaltilloApp {
         this.openMapaModal();
     }
 
+    hideMapaFloatPreview() {
+        document.getElementById('mapaFloatPreview')?.classList.add('is-hidden');
+    }
+
+    showMapaFloatPreview() {
+        const el = document.getElementById('mapaFloatPreview');
+        if (!el) return;
+        el.classList.remove('is-hidden');
+        setTimeout(() => this.mapaFloatMap?.invalidateSize(), 120);
+    }
+
+    async initMapaFloatPreview() {
+        const preview = document.getElementById('mapaFloatPreview');
+        const mapEl = document.getElementById('mapaFloatLeaflet');
+        if (!preview || !mapEl || typeof L === 'undefined') return;
+
+        this.bindTap(preview, () => this.openMapaModal());
+
+        const { bandas, bares } = await this.loadMapaData();
+        if (!bandas.length && !bares.length) {
+            preview.hidden = true;
+            return;
+        }
+
+        const map = L.map(mapEl, {
+            center: [25.428, -100.988],
+            zoom: 12,
+            zoomControl: false,
+            attributionControl: false,
+            dragging: false,
+            scrollWheelZoom: false,
+            doubleClickZoom: false,
+            touchZoom: false,
+            boxZoom: false,
+            keyboard: false
+        });
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            subdomains: 'abcd',
+            maxZoom: 19
+        }).addTo(map);
+
+        bares.forEach(bar => {
+            if (bar.lat == null || bar.lng == null) return;
+            L.circleMarker([bar.lat, bar.lng], {
+                radius: 4,
+                color: '#00FF88',
+                fillColor: '#00FF88',
+                fillOpacity: 0.9,
+                weight: 1
+            }).addTo(map);
+        });
+
+        bandas.forEach(banda => {
+            const coords = this.getBandaCoords(banda, bares);
+            L.circleMarker([coords.lat, coords.lng], {
+                radius: 4,
+                color: '#00D4FF',
+                fillColor: '#00D4FF',
+                fillOpacity: 0.9,
+                weight: 1
+            }).addTo(map);
+
+            const venueName = banda.lugares?.[0];
+            const bar = bares.find(b => b.nombre === venueName);
+            if (bar?.lat != null && bar?.lng != null) {
+                L.polyline([[coords.lat, coords.lng], [bar.lat, bar.lng]], {
+                    color: 'rgba(0, 212, 255, 0.35)',
+                    weight: 1.5,
+                    opacity: 0.7
+                }).addTo(map);
+            }
+        });
+
+        this.mapaFloatMap = map;
+        setTimeout(() => map.invalidateSize(), 150);
+    }
+
     updateMapaModalLabels() {
         if (!this.mapaModal) return;
         const m = this.mapaModal;
@@ -3735,6 +3815,7 @@ class SaltilloApp {
         document.body.appendChild(modal);
         this.mapaModal = modal;
         document.body.style.overflow = 'hidden';
+        this.hideMapaFloatPreview();
 
         modal.querySelector('.mapa-close-btn').addEventListener('click', () => this.closeMapaModal());
         modal.querySelector('.mapa-backdrop').addEventListener('click', () => this.closeMapaModal());
@@ -3758,6 +3839,7 @@ class SaltilloApp {
             this.mapaModal?.remove();
             this.mapaModal = null;
             this.releaseBodyScroll();
+            this.showMapaFloatPreview();
         }, 300);
     }
 
