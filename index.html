@@ -35,28 +35,32 @@
     <!-- Header móvil específico -->
     <header class="mobile-header">
         <div class="mobile-header-left">
-            <span class="mobile-logo">SALTILLO</span>
-            <div class="mobile-logo-accent"></div>
-        </div>
-        
-        <div class="mobile-header-center">
-            <div class="mobile-player-controls">
-                <button class="mobile-control-btn" id="mobilePlayBtn">
-                    <i class="fas fa-play"></i>
-                </button>
-                <button class="mobile-control-btn" id="mobileStopBtn">
-                    <i class="fas fa-stop"></i>
-                </button>
+            <div class="mobile-brand-logo">
+                <div class="mobile-logo-line">
+                    <span class="mobile-logo-text">HECHO EN</span>
+                </div>
+                <div class="mobile-logo-line">
+                    <span class="mobile-logo-text mobile-logo-text-main">SALTILLO</span>
+                </div>
+                <div class="mobile-logo-accent"></div>
             </div>
-        </div>
-        
-        <div class="mobile-header-right">
+
             <button class="nav-register-btn nav-register-btn-mobile" id="registerBtnMobile" type="button" data-i18n="nav.register">REGÍSTRATE</button>
-            <div class="lang-selector lang-selector-mobile" id="langSelectorMobile">
-                <button class="lang-btn active" data-lang="es" type="button">ES</button>
-                <button class="lang-btn" data-lang="en" type="button">EN</button>
+        </div>
+
+        <div class="mobile-header-actions">
+            <div class="mobile-header-player">
+                <div class="mobile-player-controls">
+                    <button class="mobile-control-btn" id="mobilePlayBtn" aria-label="Reproducir">
+                        <i class="fas fa-play"></i>
+                    </button>
+                    <button class="mobile-control-btn" id="mobileStopBtn" aria-label="Detener">
+                        <i class="fas fa-stop"></i>
+                    </button>
+                </div>
             </div>
-            <button class="mobile-shazam-btn" id="mobileShazamBtn">
+
+            <button class="mobile-shazam-btn" id="mobileShazamBtn" aria-label="Shazam">
                 <svg class="mobile-shazam-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
                     <defs>
                         <symbol id="MobileShazamLogo">
@@ -69,7 +73,8 @@
                     <use xlink:href="#MobileShazamLogo"></use>
                 </svg>
             </button>
-            <button class="mobile-menu-btn" id="mobileMenuBtn">
+
+            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menú">
                 <span class="mobile-menu-line"></span>
                 <span class="mobile-menu-line"></span>
                 <span class="mobile-menu-line"></span>
@@ -174,9 +179,15 @@
         
         <div class="hero-content">
             <div class="hero-text-container">
-                <div class="hero-badge">
-                    <span class="badge-text" data-i18n="hero.badge">EN VIVO · SALTILLO</span>
-                    <div class="badge-glow"></div>
+                <div class="hero-badge-row">
+                    <div class="hero-badge">
+                        <span class="badge-text" data-i18n="hero.badge">EN VIVO · SALTILLO</span>
+                        <div class="badge-glow"></div>
+                    </div>
+                    <div class="lang-selector lang-selector-mobile" id="langSelectorMobile">
+                        <button class="lang-btn active" data-lang="es" type="button">ES</button>
+                        <button class="lang-btn" data-lang="en" type="button">EN</button>
+                    </div>
                 </div>
                 
                 <h1 class="hero-title">
