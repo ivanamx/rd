@@ -2464,9 +2464,16 @@ body.mobile-menu-open {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 var(--space-xl);
-    opacity: 0;
-    transform: translateY(32px);
+    opacity: 1;
+    transform: none;
     transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+@media (min-width: 769px) {
+    .guia-container:not(.animate-in) {
+        opacity: 0;
+        transform: translateY(32px);
+    }
 }
 
 .guia-container.animate-in {
@@ -3538,6 +3545,73 @@ body.mobile-menu-open {
 
 /* Responsive */
 @media (max-width: 768px) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    /* Rendimiento táctil — iOS / Android */
+    button,
+    a,
+    [role="button"],
+    .interactive-element,
+    .mobile-nav-item,
+    .nav-item,
+    .radio-card,
+    .conecta-card,
+    .guia-tab,
+    .guia-step,
+    .guia-cta,
+    .social-item,
+    .mobile-control-btn,
+    .mobile-shazam-btn,
+    .mobile-menu-btn,
+    .nav-register-btn-mobile {
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .mobile-control-btn,
+    .mobile-shazam-btn,
+    .mobile-menu-btn {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    /* Menos carga GPU en móvil */
+    .particles-container,
+    .gradient-orbs,
+    .geometric-shapes,
+    .orb {
+        display: none !important;
+    }
+
+    .experimental-nav,
+    .mobile-header,
+    .mobile-nav-menu,
+    [class*="-modal-native"] [class*="-backdrop"],
+    .registro-picker-backdrop {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    .mobile-header {
+        background: rgba(10, 10, 10, 0.97);
+    }
+
+    .hero-experimental {
+        background-attachment: scroll;
+    }
+
+    /* Contenido visible sin esperar scroll observer */
+    .guia-container,
+    .hero-content,
+    .radio-showcase,
+    .contact-container {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none;
+    }
+
     /* Mostrar header móvil y ocultar header de escritorio */
     .mobile-header {
         display: flex;

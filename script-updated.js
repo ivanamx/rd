@@ -116,8 +116,8 @@ class SaltilloApp {
         // Inicializar audio
         this.initAudio();
         
-        // Conectar con servicio de Shazam
-        await this.connectToShazamService();
+        // Conectar Shazam en segundo plano — no bloquear la UI en móvil
+        this.connectToShazamService().catch(() => {});
 
         // Verificar resultado de pago Stripe
         this.checkPaymentResult();
@@ -145,36 +145,49 @@ class SaltilloApp {
         }
     }
 
+    bindTap(element, handler) {
+        if (!element) return;
+        let lastTouch = 0;
+        element.addEventListener('touchend', (e) => {
+            lastTouch = Date.now();
+            handler(e);
+        }, { passive: true });
+        element.addEventListener('click', (e) => {
+            if (Date.now() - lastTouch < 500) return;
+            handler(e);
+        });
+    }
+
     setupEventListeners() {
         // Controles de audio
         document.querySelectorAll('.play-btn, .play-btn-small').forEach(btn => {
-            btn.addEventListener('click', () => this.togglePlay());
+            this.bindTap(btn, () => this.togglePlay());
         });
         
         document.querySelectorAll('.stop-btn, .stop-btn-small').forEach(btn => {
-            btn.addEventListener('click', () => this.stopAudio());
+            this.bindTap(btn, () => this.stopAudio());
         });
         
         // Navegación
         document.querySelectorAll('.nav-item, .mobile-nav-item').forEach(item => {
-            item.addEventListener('click', (e) => this.handleNavigation(e));
+            this.bindTap(item, (e) => this.handleNavigation(e));
         });
         
         // Elementos interactivos del hero
         document.querySelectorAll('.interactive-element').forEach(element => {
-            element.addEventListener('click', (e) => this.handleHeroInteraction(e));
+            this.bindTap(element, (e) => this.handleHeroInteraction(e));
             element.addEventListener('mouseenter', () => this.activateElement(element));
             element.addEventListener('mouseleave', () => this.deactivateElement(element));
         });
         
         // Botón de Shazam mejorado
-        document.getElementById('shazamBtn')?.addEventListener('click', () => this.startShazam());
+        this.bindTap(document.getElementById('shazamBtn'), () => this.startShazam());
 
         // Radio showcase
-        document.getElementById('radioLivePlayBtn')?.addEventListener('click', () => this.togglePlay());
-        document.getElementById('radioLiveStopBtn')?.addEventListener('click', () => this.stopAudio());
+        this.bindTap(document.getElementById('radioLivePlayBtn'), () => this.togglePlay());
+        this.bindTap(document.getElementById('radioLiveStopBtn'), () => this.stopAudio());
         document.querySelectorAll('[data-radio-action]').forEach(card => {
-            card.addEventListener('click', () => this.handleRadioCardAction(card.dataset.radioAction, card.dataset.bandaId));
+            this.bindTap(card, () => this.handleRadioCardAction(card.dataset.radioAction, card.dataset.bandaId));
         });
         
         // Cards de productos
@@ -187,13 +200,13 @@ class SaltilloApp {
         // Guía interactiva de la plataforma
         this.initGuiaPlatform();
         document.querySelectorAll('.conecta-card').forEach(card => {
-            card.addEventListener('click', () => this.handleConectaAction(card.dataset.conectaAction));
+            this.bindTap(card, () => this.handleConectaAction(card.dataset.conectaAction));
         });
 
-        document.getElementById('verMapaBtn')?.addEventListener('click', () => this.handleVerMapa());
+        this.bindTap(document.getElementById('verMapaBtn'), () => this.handleVerMapa());
 
-        document.getElementById('registerBtn')?.addEventListener('click', () => this.openRegistroPickerModal());
-        document.getElementById('registerBtnMobile')?.addEventListener('click', () => this.openRegistroPickerModal());
+        this.bindTap(document.getElementById('registerBtn'), () => this.openRegistroPickerModal());
+        this.bindTap(document.getElementById('registerBtnMobile'), () => this.openRegistroPickerModal());
         
         // Redes sociales
         document.querySelectorAll('.social-item').forEach(item => {
@@ -294,7 +307,6 @@ class SaltilloApp {
             
             this.shazamSocket.on('connect_error', (error) => {
                 console.error('❌ Error de conexión con Shazam:', error);
-                this.showNotification(this.t('notifications.shazamUnavailable'), 'warning');
             });
             
             this.shazamSocket.on('reconnect', (attemptNumber) => {
@@ -317,6 +329,10 @@ class SaltilloApp {
         }
     }
 
+    toggleShazam() {
+        return this.startShazam();
+    }
+
     // Nueva funcionalidad de Shazam automatizada
     async startShazam() {
         if (this.isShazamListening) {
@@ -326,10 +342,7 @@ class SaltilloApp {
 
         try {
             this.isShazamListening = true;
-            const shazamBtn = document.getElementById('shazamBtn');
-            
-            shazamBtn.classList.add('listening');
-            shazamBtn.title = this.t('shazam.stopIdentify');
+            this.updateShazamButton(true);
             
             this.showShazamModal();
             this.startTimer();
@@ -457,14 +470,11 @@ class SaltilloApp {
 
     stopShazam() {
         this.isShazamListening = false;
-        const shazamBtn = document.getElementById('shazamBtn');
         
         // Detener contador
         this.stopTimer();
         
-        // Remover clase de animación
-        shazamBtn.classList.remove('listening');
-        shazamBtn.title = this.t('shazam.identifyMusic');
+        this.updateShazamButton(false);
         
         // Detener reconocimiento a través del servicio
         if (this.shazamSocket && this.shazamSocket.connected) {
@@ -755,15 +765,19 @@ class SaltilloApp {
     }
 
     updateShazamButton(isListening) {
-        const shazamBtn = document.getElementById('shazamBtn');
-        
-        if (isListening) {
-            shazamBtn.classList.add('listening');
-            shazamBtn.title = this.t('shazam.stopIdentify');
-        } else {
-            shazamBtn.classList.remove('listening');
-            shazamBtn.title = this.t('shazam.identifyMusic');
-        }
+        const buttons = [
+            document.getElementById('shazamBtn'),
+            document.getElementById('mobileShazamBtn')
+        ].filter(Boolean);
+
+        buttons.forEach((btn) => {
+            btn.classList.toggle('listening', isListening);
+            if ('title' in btn) {
+                btn.title = this.t(isListening ? 'shazam.stopIdentify' : 'shazam.identifyMusic');
+            }
+        });
+
+        window.mobileHeader?.updateShazamState(isListening);
     }
 
     searchAndPlaySong(title, artist) {
@@ -3276,18 +3290,18 @@ class SaltilloApp {
         if (!section) return;
 
         section.querySelectorAll('.guia-tab').forEach(tab => {
-            tab.addEventListener('click', () => this.setGuiaRole(tab.dataset.guiaRole));
+            this.bindTap(tab, () => this.setGuiaRole(tab.dataset.guiaRole));
         });
 
         section.querySelectorAll('.guia-step').forEach(step => {
-            step.addEventListener('click', () => this.setGuiaStep(parseInt(step.dataset.step, 10)));
+            this.bindTap(step, () => this.setGuiaStep(parseInt(step.dataset.step, 10)));
         });
 
-        document.getElementById('guiaCtaPrimary')?.addEventListener('click', () => {
+        this.bindTap(document.getElementById('guiaCtaPrimary'), () => {
             this.handleGuiaCta(this.guiaContent[this.guiaState.role].ctaPrimary.action);
         });
 
-        document.getElementById('guiaCtaSecondary')?.addEventListener('click', () => {
+        this.bindTap(document.getElementById('guiaCtaSecondary'), () => {
             this.handleGuiaCta(this.guiaContent[this.guiaState.role].ctaSecondary.action);
         });
 
@@ -3306,12 +3320,15 @@ class SaltilloApp {
 
         section.querySelectorAll('.guia-stat-num').forEach(el => statsObserver.observe(el));
 
-        this.guiaAutoTimer = setInterval(() => {
-            if (!section.matches(':hover') && !document.hidden) {
-                const next = this.guiaState.step >= 4 ? 1 : this.guiaState.step + 1;
-                this.setGuiaStep(next);
-            }
-        }, 6000);
+        const isTouchDevice = window.matchMedia('(hover: none), (pointer: coarse)').matches;
+        if (!isTouchDevice) {
+            this.guiaAutoTimer = setInterval(() => {
+                if (!section.matches(':hover') && !document.hidden) {
+                    const next = this.guiaState.step >= 4 ? 1 : this.guiaState.step + 1;
+                    this.setGuiaStep(next);
+                }
+            }, 6000);
+        }
     }
 
     setGuiaRole(role) {
@@ -4300,7 +4317,13 @@ class SaltilloApp {
     }
 
     initParticles() {
+        if (window.matchMedia('(max-width: 768px), (hover: none), (pointer: coarse)').matches) {
+            return;
+        }
+
         const container = document.querySelector('.particles-container');
+        if (!container) return;
+
         const particleCount = 50;
         
         for (let i = 0; i < particleCount; i++) {
@@ -4315,18 +4338,24 @@ class SaltilloApp {
     }
 
     initAnimations() {
-        // Animaciones de entrada para elementos
+        const targets = document.querySelectorAll('.hero-content, .radio-showcase, .guia-container, .contact-container');
+        const isMobile = window.matchMedia('(max-width: 768px), (hover: none), (pointer: coarse)').matches;
+
+        if (isMobile) {
+            targets.forEach((el) => el.classList.add('animate-in'));
+            return;
+        }
+
         const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
+            entries.forEach((entry) => {
                 if (entry.isIntersecting) {
                     entry.target.classList.add('animate-in');
+                    observer.unobserve(entry.target);
                 }
             });
-        });
-        
-        document.querySelectorAll('.hero-content, .radio-showcase, .guia-container, .contact-container').forEach(el => {
-            observer.observe(el);
-        });
+        }, { threshold: 0.08, rootMargin: '80px 0px' });
+
+        targets.forEach((el) => observer.observe(el));
     }
 
     showNotification(message, type = 'info') {
@@ -4371,34 +4400,41 @@ class MobileHeader {
         this.setupEventListeners();
     }
     
+    bindTap(element, handler) {
+        if (!element) return;
+        let lastTouch = 0;
+        element.addEventListener('touchend', (e) => {
+            lastTouch = Date.now();
+            handler(e);
+        }, { passive: true });
+        element.addEventListener('click', (e) => {
+            if (Date.now() - lastTouch < 500) return;
+            handler(e);
+        });
+    }
+
     setupEventListeners() {
-        this.mobilePlayBtn?.addEventListener('click', () => {
-            if (window.saltilloApp) {
-                window.saltilloApp.togglePlay();
-            }
+        this.bindTap(this.mobilePlayBtn, () => {
+            window.saltilloApp?.togglePlay();
         });
         
-        this.mobileStopBtn?.addEventListener('click', () => {
-            if (window.saltilloApp) {
-                window.saltilloApp.stopAudio();
-            }
+        this.bindTap(this.mobileStopBtn, () => {
+            window.saltilloApp?.stopAudio();
         });
         
-        this.mobileShazamBtn?.addEventListener('click', () => {
-            if (window.saltilloApp) {
-                window.saltilloApp.toggleShazam();
-            }
+        this.bindTap(this.mobileShazamBtn, () => {
+            window.saltilloApp?.toggleShazam();
         });
         
-        this.mobileMenuBtn?.addEventListener('click', () => {
+        this.bindTap(this.mobileMenuBtn, () => {
             this.toggleMobileMenu();
         });
 
-        this.mobileNavBackdrop?.addEventListener('click', () => {
+        this.bindTap(this.mobileNavBackdrop, () => {
             this.closeMobileMenu();
         });
 
-        document.getElementById('mobileNavClose')?.addEventListener('click', () => {
+        this.bindTap(document.getElementById('mobileNavClose'), () => {
             this.closeMobileMenu();
         });
 

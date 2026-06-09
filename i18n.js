@@ -935,9 +935,25 @@
         }
     };
 
+    function safeStorageGet(key) {
+        try {
+            return localStorage.getItem(key);
+        } catch {
+            return null;
+        }
+    }
+
+    function safeStorageSet(key, value) {
+        try {
+            localStorage.setItem(key, value);
+        } catch {
+            /* Safari modo privado u otras restricciones */
+        }
+    }
+
     class I18nManager {
         constructor() {
-            const saved = localStorage.getItem('hes_lang');
+            const saved = safeStorageGet('hes_lang');
             this.lang = saved || (navigator.language.startsWith('en') ? 'en' : 'es');
             if (!TRANSLATIONS[this.lang]) this.lang = 'es';
         }
@@ -989,7 +1005,7 @@
         setLanguage(lang) {
             if (!TRANSLATIONS[lang] || lang === this.lang) return;
             this.lang = lang;
-            localStorage.setItem('hes_lang', lang);
+            safeStorageSet('hes_lang', lang);
             document.documentElement.lang = lang;
             this.apply();
             window.dispatchEvent(new CustomEvent('languagechange', { detail: { lang } }));
