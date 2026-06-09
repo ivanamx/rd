@@ -3919,9 +3919,10 @@ class SaltilloApp {
             const commissionTitle = document.getElementById('guiaCommissionTitle');
             const commissionBody = document.getElementById('guiaCommissionBody');
             const commissionExample = document.getElementById('guiaCommissionExample');
+            const potentialWrap = document.getElementById('guiaPreviewPotential');
 
             if (commissionEl) {
-                if (data.commission) {
+                if (step === 4 && data.commission) {
                     commissionEl.hidden = false;
                     if (commissionRate) commissionRate.textContent = data.commission.rate;
                     if (commissionTitle) commissionTitle.textContent = data.commission.title;
@@ -3933,6 +3934,10 @@ class SaltilloApp {
                 } else {
                     commissionEl.hidden = true;
                 }
+            }
+
+            if (potentialWrap) {
+                potentialWrap.classList.toggle('has-commission', step === 4 && !!data.commission);
             }
 
             preview.classList.remove('fade-swap');

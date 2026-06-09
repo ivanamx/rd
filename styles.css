@@ -3014,13 +3014,17 @@ body.mobile-menu-open {
 .guia-commission-note {
     display: flex;
     align-items: flex-start;
-    gap: 12px;
-    margin-top: var(--space-md);
-    padding: 14px 16px;
+    gap: 10px;
+    margin-top: 0;
+    padding: 12px 14px;
     border-radius: 14px;
     border: 1px solid rgba(255, 107, 0, 0.35);
     background: linear-gradient(135deg, rgba(255, 107, 0, 0.12), rgba(255, 0, 128, 0.08));
     box-shadow: 0 0 20px rgba(255, 107, 0, 0.12);
+}
+
+.guia-commission-note[hidden] {
+    display: none !important;
 }
 
 .guia-commission-rate {
@@ -3066,10 +3070,46 @@ body.mobile-menu-open {
     font-weight: 500;
 }
 
+.guia-preview-potential.has-commission .guia-commission-title {
+    font-size: 0.82rem;
+}
+
+.guia-preview-potential.has-commission .guia-commission-body {
+    font-size: 0.75rem;
+}
+
+.guia-preview-potential.has-commission .guia-commission-example {
+    font-size: 0.7rem;
+    margin-top: 6px;
+}
+
 .guia-preview-potential {
     margin-top: auto;
     padding-top: var(--space-md);
     border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.guia-potential-row {
+    display: block;
+}
+
+.guia-preview-potential.has-commission .guia-potential-row {
+    display: flex;
+    align-items: stretch;
+    gap: var(--space-md);
+}
+
+.guia-preview-potential.has-commission .guia-potential-item {
+    flex: 1 1 0;
+    min-width: 0;
+    align-self: center;
+}
+
+.guia-preview-potential.has-commission .guia-commission-note {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 52%;
+    align-self: stretch;
 }
 
 .guia-potential-item {
@@ -4014,6 +4054,14 @@ a.mobile-nav-item {
     .guia-preview {
         min-height: 280px;
         padding: var(--space-lg);
+    }
+
+    .guia-preview-potential.has-commission .guia-potential-row {
+        flex-direction: column;
+    }
+
+    .guia-preview-potential.has-commission .guia-commission-note {
+        max-width: 100%;
     }
 
     .guia-cta-row {
