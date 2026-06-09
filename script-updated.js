@@ -4856,8 +4856,11 @@ class SaltilloApp {
     updateNowPlayingUI() {
         const titleEl = document.getElementById('mobileNowTitle');
         const artistEl = document.getElementById('mobileNowArtist');
+        const desktopTitle = document.getElementById('desktopNowTitle');
+        const desktopArtist = document.getElementById('desktopNowArtist');
         const trackEl = document.getElementById('radioNowTrack');
         const playerEl = document.getElementById('mobileHeaderPlayer');
+        const headerPlayer = document.getElementById('headerPlayer');
 
         let title;
         let artist;
@@ -4873,8 +4876,12 @@ class SaltilloApp {
             artist = this.t('radio.mobileTapPlay');
         }
 
-        if (titleEl) titleEl.textContent = title;
-        if (artistEl) artistEl.textContent = artist;
+        [titleEl, desktopTitle].forEach((el) => {
+            if (el) el.textContent = title;
+        });
+        [artistEl, desktopArtist].forEach((el) => {
+            if (el) el.textContent = artist;
+        });
         if (trackEl) {
             trackEl.textContent = this.nowPlaying
                 ? `${title} — ${artist}`
@@ -4884,29 +4891,44 @@ class SaltilloApp {
             playerEl.classList.toggle('is-playing', this.isPlaying);
             playerEl.classList.toggle('has-track', !!this.nowPlaying);
         }
+        if (headerPlayer) {
+            headerPlayer.classList.toggle('is-playing', this.isPlaying);
+            headerPlayer.classList.toggle('has-track', !!this.nowPlaying);
+        }
+    }
+
+    setNowPlayingArtistLabel(text) {
+        const artistEls = [
+            document.getElementById('mobileNowArtist'),
+            document.getElementById('desktopNowArtist')
+        ].filter(Boolean);
+        artistEls.forEach((el) => {
+            el.textContent = text;
+        });
     }
 
     async fetchNowPlayingMetadata() {
         if (!this.isPlaying || this.nowPlaying || this._nowPlayingFetch) return;
 
         this._nowPlayingFetch = true;
-        const artistEl = document.getElementById('mobileNowArtist');
-        const prevArtist = artistEl?.textContent;
+        const prevArtist = this.isPlaying && !this.nowPlaying
+            ? this.t('radio.mobileLive')
+            : this.t('radio.mobileTapPlay');
 
-        if (artistEl && !this.nowPlaying) {
-            artistEl.textContent = this.t('radio.mobileIdentifying');
+        if (!this.nowPlaying) {
+            this.setNowPlayingArtistLabel(this.t('radio.mobileIdentifying'));
         }
 
         try {
             const result = await this.recognizeViaAPIUrl();
             if (result?.title && result?.artist && this.isPlaying && !this.nowPlaying) {
                 this.setNowPlaying(result);
-            } else if (artistEl && !this.nowPlaying) {
-                artistEl.textContent = prevArtist || this.t('radio.mobileLive');
+            } else if (!this.nowPlaying) {
+                this.setNowPlayingArtistLabel(prevArtist);
             }
         } catch {
-            if (artistEl && !this.nowPlaying) {
-                artistEl.textContent = prevArtist || this.t('radio.mobileLive');
+            if (!this.nowPlaying) {
+                this.setNowPlayingArtistLabel(prevArtist);
             }
         } finally {
             this._nowPlayingFetch = false;
@@ -5073,6 +5095,10 @@ class MobileHeader {
     init() {
         this.setupEventListeners();
         this.setupMobileNavScrollGuard();
+        if (this.mobileNavOverlay) {
+            this.mobileNavOverlay.inert = true;
+            this.mobileNavOverlay.setAttribute('aria-hidden', 'true');
+        }
     }
 
     setupMobileNavScrollGuard() {
@@ -5117,8 +5143,9 @@ class MobileHeader {
         bindTap(this.mobileShazamBtn, () => {
             window.saltilloApp?.startShazam();
         });
-        
-        bindTap(this.mobileMenuBtn, () => {
+
+        this.mobileMenuBtn?.addEventListener('click', (e) => {
+            e.stopPropagation();
             this.toggleMobileMenu();
         });
 
@@ -5149,10 +5176,16 @@ class MobileHeader {
         if (!this.mobileNavOverlay || !this.mobileMenuBtn) return;
 
         this.isMenuOpen = true;
+        this.mobileNavOverlay.inert = false;
         this.mobileNavOverlay.classList.add('open');
         this.mobileNavOverlay.setAttribute('aria-hidden', 'false');
         this.mobileMenuBtn.classList.add('active');
+        this.mobileMenuBtn.setAttribute('aria-expanded', 'true');
         document.body.classList.add('mobile-menu-open');
+
+        requestAnimationFrame(() => {
+            document.getElementById('mobileNavClose')?.focus({ preventScroll: true });
+        });
     }
 
     closeMobileMenu() {
@@ -5161,8 +5194,16 @@ class MobileHeader {
         this.isMenuOpen = false;
         this.mobileNavOverlay.classList.remove('open');
         this.mobileNavOverlay.setAttribute('aria-hidden', 'true');
+        this.mobileNavOverlay.inert = true;
         this.mobileMenuBtn.classList.remove('active');
+        this.mobileMenuBtn.setAttribute('aria-expanded', 'false');
         document.body.classList.remove('mobile-menu-open');
+
+        const active = document.activeElement;
+        if (active && this.mobileNavOverlay.contains(active)) {
+            active.blur();
+        }
+        this.mobileMenuBtn.focus({ preventScroll: true });
     }
     
     updatePlayState(isPlaying) {
