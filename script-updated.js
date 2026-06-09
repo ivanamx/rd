@@ -3936,13 +3936,17 @@ class SaltilloApp {
     renderMusicaHoyBadge(bar, connectedBandas = []) {
         const info = this.getBarMusicaHoyInfo(bar, connectedBandas);
         if (!info) return '';
-        const detail = [info.banda, info.horario].filter(Boolean).join(' · ');
         return `
-            <span class="mapa-detail-badge live">
-                <i class="fas fa-circle"></i>
-                <span class="mapa-live-badge-inner">
-                    <span class="mapa-live-badge-title">${this.t('common.musicToday')}</span>
-                    ${detail ? `<span class="mapa-live-badge-detail">${detail}</span>` : ''}
+            <span class="mapa-detail-badge mapa-live-badge">
+                <span class="mapa-live-dot" aria-hidden="true"></span>
+                <span class="mapa-live-badge-body">
+                    <span class="mapa-live-badge-label">${this.t('common.musicToday')}</span>
+                    ${info.banda || info.horario ? `
+                        <span class="mapa-live-badge-show">
+                            ${info.banda ? `<span class="mapa-live-band"><i class="fas fa-guitar" aria-hidden="true"></i>${info.banda}</span>` : ''}
+                            ${info.horario ? `<span class="mapa-live-time"><i class="far fa-clock" aria-hidden="true"></i>${info.horario}</span>` : ''}
+                        </span>
+                    ` : ''}
                 </span>
             </span>
         `;
