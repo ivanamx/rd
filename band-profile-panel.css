@@ -636,6 +636,105 @@
     display: block;
 }
 
+.bpp-cover-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+}
+
+.bpp-cover-wrap--video::after {
+    background: linear-gradient(
+        180deg,
+        rgba(10, 10, 10, 0.45) 0%,
+        rgba(10, 10, 10, 0.65) 60%,
+        rgba(10, 10, 10, 0.92) 100%
+    );
+}
+
+.bpp-hero-link-wrap {
+    margin: 0 0 12px;
+}
+
+.bpp-hero-link {
+    display: inline-block;
+    font-family: var(--font-primary);
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #00D4FF;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color 0.2s, opacity 0.2s;
+}
+
+.bpp-hero-link:hover {
+    color: #fff;
+    opacity: 0.9;
+}
+
+.bpp-video-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 10050;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.25s, visibility 0.25s;
+}
+
+.bpp-video-modal.open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.bpp-video-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.82);
+}
+
+.bpp-video-modal-content {
+    position: relative;
+    width: min(920px, 100%);
+    z-index: 1;
+}
+
+.bpp-video-modal-content video {
+    width: 100%;
+    max-height: 80vh;
+    display: block;
+    border-radius: 12px;
+    background: #000;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
+}
+
+.bpp-video-modal-close {
+    position: absolute;
+    top: -44px;
+    right: 0;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.bpp-video-modal-close:hover {
+    background: rgba(255, 255, 255, 0.22);
+}
+
 .bpp-cover-bg {
     height: 200px;
     background-size: cover;

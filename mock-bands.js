@@ -9,8 +9,10 @@
     const PROFILES_KEY = 'desiertoSonoro_bandProfiles';
 
     const IMG = {
-        avatar: 'bandas-media/gary-garcia/avatar.svg',
+        avatar: 'bandas-media/gary-garcia/ggprofile.jpeg',
         cover: 'bandas-media/gary-garcia/cover.svg',
+        gary1: 'bandas-media/gary-garcia/gary1.mp4',
+        coverVideo: 'bandas-media/gary-garcia/timeoutforgary.mp4',
         g1: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600&h=400&fit=crop&auto=format',
         g2: 'https://images.unsplash.com/photo-1459749411175-04bf52929825?w=600&h=400&fit=crop&auto=format',
         g3: 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=600&h=400&fit=crop&auto=format',
@@ -41,13 +43,16 @@
             lugares: ['La Siberia', 'Parque Saltillo 400', 'Foro Cultural Saltillo', 'Bar El Callejón', 'Centro Histórico'],
             avatar: IMG.avatar,
             cover: IMG.cover,
+            coverVideo: IMG.coverVideo,
+            heroLink: { text: 'we like soccer', video: IMG.gary1 },
             galeria: [
                 { id: 'gary-g1', url: IMG.g1, caption: 'Parque Saltillo 400 — Jun 2026', type: 'image' },
                 { id: 'gary-g2', url: IMG.g2, caption: 'Bar El Callejón — May 2026', type: 'image' },
                 { id: 'gary-g3', url: IMG.g3, caption: 'Sesión de estudio — Abr 2026', type: 'image' },
                 { id: 'gary-g4', url: IMG.g4, caption: 'Backline en Foro Cultural', type: 'image' },
                 { id: 'gary-g5', url: IMG.g5, caption: 'La Siberia — Mar 2026', type: 'image' },
-                { id: 'gary-g6', url: IMG.g6, caption: 'Centro Histórico — Feb 2026', type: 'image' }
+                { id: 'gary-g6', url: IMG.g6, caption: 'Centro Histórico — Feb 2026', type: 'image' },
+                { id: 'gary-v1', url: IMG.gary1, caption: 'gary1', type: 'video' }
             ],
             muestras: [
                 { id: 'gary-m1', titulo: 'Highway to the Bravo', nombre: 'muestra-1.mp3', dataUrl: 'bandas-media/gary-garcia/muestra-1.mp3' },

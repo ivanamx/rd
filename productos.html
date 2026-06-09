@@ -2077,6 +2077,17 @@
         <input type="file" class="bpp-hidden-input" id="bandGalleryInput" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/*" multiple>
     </div>
 
+    <!-- Modal de video del hero -->
+    <div class="bpp-video-modal" id="bandVideoModal" aria-hidden="true">
+        <div class="bpp-video-modal-backdrop" id="bandVideoModalBackdrop"></div>
+        <div class="bpp-video-modal-content">
+            <button class="bpp-video-modal-close" id="bandVideoModalClose" type="button" aria-label="Cerrar">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+            <video id="bandVideoModalPlayer" controls playsinline></video>
+        </div>
+    </div>
+
     <!-- Toast -->
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -2188,6 +2199,10 @@
         const bandAvatarInput = document.getElementById('bandAvatarInput');
         const bandMp3Input = document.getElementById('bandMp3Input');
         const bandGalleryInput = document.getElementById('bandGalleryInput');
+        const bandVideoModal = document.getElementById('bandVideoModal');
+        const bandVideoModalBackdrop = document.getElementById('bandVideoModalBackdrop');
+        const bandVideoModalClose = document.getElementById('bandVideoModalClose');
+        const bandVideoModalPlayer = document.getElementById('bandVideoModalPlayer');
 
         const BAND_ACCOUNTS_KEY = 'desiertoSonoro_bandAccounts';
         const BAND_PROFILES_KEY = 'desiertoSonoro_bandProfiles';
@@ -2507,6 +2522,23 @@
             });
         }
 
+        function openBandVideoModal(src) {
+            if (!bandVideoModal || !bandVideoModalPlayer || !src) return;
+            bandVideoModalPlayer.src = src;
+            bandVideoModal.classList.add('open');
+            bandVideoModal.setAttribute('aria-hidden', 'false');
+            bandVideoModalPlayer.play().catch(() => {});
+        }
+
+        function closeBandVideoModal() {
+            if (!bandVideoModal || !bandVideoModalPlayer) return;
+            bandVideoModalPlayer.pause();
+            bandVideoModalPlayer.removeAttribute('src');
+            bandVideoModalPlayer.load();
+            bandVideoModal.classList.remove('open');
+            bandVideoModal.setAttribute('aria-hidden', 'true');
+        }
+
         function renderBandProfile() {
             if (!currentBandSession) return;
             const profile = getBandProfile(currentBandSession.nombreKey) || createDefaultProfile(currentBandSession);
@@ -2528,8 +2560,18 @@
                 ? `<img src="${profile.avatar}" alt="${profile.nombre}" class="bpp-avatar">`
                 : `<div class="bpp-avatar-fallback"><i class="fas fa-guitar"></i></div>`;
 
-            const coverHtml = profile.cover
-                ? `<div class="bpp-cover-wrap"><img class="bpp-cover" src="${profile.cover}" alt=""></div>`
+            const coverHtml = profile.coverVideo
+                ? `<div class="bpp-cover-wrap bpp-cover-wrap--video">
+                        <video class="bpp-cover-video" src="${escAttr(profile.coverVideo)}" autoplay muted loop playsinline></video>
+                   </div>`
+                : profile.cover
+                    ? `<div class="bpp-cover-wrap"><img class="bpp-cover" src="${escAttr(profile.cover)}" alt=""></div>`
+                    : '';
+
+            const heroLinkHtml = profile.heroLink?.video
+                ? `<p class="bpp-hero-link-wrap">
+                        <a href="#" class="bpp-hero-link" id="bandHeroVideoLink" data-video="${escAttr(profile.heroLink.video)}">${escAttr(profile.heroLink.text || 'we like soccer')}</a>
+                   </p>`
                 : '';
 
             const tracksHtml = (profile.muestras || []).length
@@ -2571,6 +2613,7 @@
                                     <span class="bpp-rating-num">${(profile.rating || 0).toFixed(1)}</span>
                                     <span class="bpp-rating-label">${t('productos.profileRating')}</span>
                                 </div>
+                                ${heroLinkHtml}
                                 <form class="bpp-edit-form bpp-desc-form" id="profileDescForm">
                                     <label class="bpp-edit-label" for="profileDescripcion">${t('productos.profileDescription')}</label>
                                     <textarea class="bpp-edit-textarea" id="profileDescripcion" name="descripcion" rows="3" maxlength="500">${String(profile.descripcion || '').replace(/&/g, '&amp;').replace(/</g, '&lt;')}</textarea>
@@ -2684,6 +2727,12 @@
             `;
 
             bandProfileContent.querySelector('#bandAvatarEditBtn')?.addEventListener('click', () => bandAvatarInput?.click());
+
+            bandProfileContent.querySelector('#bandHeroVideoLink')?.addEventListener('click', e => {
+                e.preventDefault();
+                const src = e.currentTarget.dataset.video;
+                if (src) openBandVideoModal(src);
+            });
 
             bandProfileContent.querySelectorAll('.bpp-track-play').forEach(btn => {
                 btn.addEventListener('click', () => {
@@ -2827,6 +2876,7 @@
 
         function closeBandProfilePanel() {
             stopBandProfileAudio();
+            closeBandVideoModal();
             bandProfilePanel.classList.remove('open');
             bandProfileOverlay.classList.remove('open');
             bandProfileOverlay.setAttribute('aria-hidden', 'true');
@@ -3394,6 +3444,11 @@
             bandGalleryInput?.addEventListener('change', e => {
                 handleGalleryUpload(e.target.files);
                 e.target.value = '';
+            });
+            bandVideoModalClose?.addEventListener('click', closeBandVideoModal);
+            bandVideoModalBackdrop?.addEventListener('click', closeBandVideoModal);
+            document.addEventListener('keydown', e => {
+                if (e.key === 'Escape' && bandVideoModal?.classList.contains('open')) closeBandVideoModal();
             });
             togglePassword.addEventListener('click', () => {
                 const isPassword = loginPassword.type === 'password';
