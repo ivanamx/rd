@@ -281,6 +281,41 @@
     flex: 1;
 }
 
+.registro-banda-password-wrap {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+}
+
+.registro-banda-password-wrap input {
+    flex: 1;
+    padding-right: 44px;
+}
+
+.registro-banda-toggle-pw {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.registro-banda-toggle-pw:hover {
+    color: var(--neon-blue);
+}
+
+.registro-banda-field.invalid .registro-banda-password-wrap input {
+    border-color: #ef4444;
+}
+
 .registro-banda-file-wrap {
     position: relative;
 }

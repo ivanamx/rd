@@ -966,7 +966,7 @@ class SaltilloApp {
         
         if (isExternal) {
             if (target === 'products') {
-                window.open('productos.html', '_blank');
+                window.location.href = 'productos.html';
             }
         } else if (target) {
             const element = document.getElementById(target);
@@ -1270,6 +1270,17 @@ class SaltilloApp {
                                     <input type="text" name="nombre" placeholder="${this.t('registroBanda.placeholderName')}" required maxlength="80">
                                     <span class="field-error">${this.t('registroBanda.errorRequired')}</span>
                                 </div>
+                                <div class="registro-banda-field full" data-field="contrasena">
+                                    <label>${this.t('registroBanda.labelPassword')} <span class="required">*</span></label>
+                                    <div class="registro-banda-password-wrap">
+                                        <input type="password" name="contrasena" placeholder="${this.t('registroBanda.placeholderPassword')}" required minlength="6" autocomplete="new-password">
+                                        <button type="button" class="registro-banda-toggle-pw" aria-label="Mostrar contraseña">
+                                            <i class="fas fa-eye" aria-hidden="true"></i>
+                                        </button>
+                                    </div>
+                                    <span class="field-hint">${this.t('registroBanda.hintPassword')}</span>
+                                    <span class="field-error">${this.t('registroBanda.errorPassword')}</span>
+                                </div>
                                 <div class="registro-banda-field" data-field="genero">
                                     <label>${this.t('registroBanda.labelGenre')} <span class="required">*</span></label>
                                     <select name="genero" required>
@@ -1415,6 +1426,17 @@ class SaltilloApp {
             e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10);
         });
 
+        modal.querySelector('.registro-banda-toggle-pw')?.addEventListener('click', (e) => {
+            const btn = e.currentTarget;
+            const input = modal.querySelector('input[name="contrasena"]');
+            if (!input) return;
+            const icon = btn.querySelector('i');
+            const show = input.type === 'password';
+            input.type = show ? 'text' : 'password';
+            icon.className = show ? 'fas fa-eye-slash' : 'fas fa-eye';
+            btn.setAttribute('aria-label', show ? 'Ocultar contraseña' : 'Mostrar contraseña');
+        });
+
         this.registroBandaEscHandler = (e) => {
             if (e.key === 'Escape') this.closeRegistroBandaModal();
         };
@@ -1463,12 +1485,81 @@ class SaltilloApp {
         });
     }
 
+    readFileAsDataURL(file, maxBytes = 3 * 1024 * 1024) {
+        return new Promise(resolve => {
+            if (!file || file.size > maxBytes) {
+                resolve(null);
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => resolve(null);
+            reader.readAsDataURL(file);
+        });
+    }
+
+    saveBandAccount(registro) {
+        if (!registro.nombre?.trim() || !registro.contrasena) return;
+        try {
+            const key = 'desiertoSonoro_bandAccounts';
+            const accounts = JSON.parse(localStorage.getItem(key) || '[]');
+            const account = {
+                nombre: registro.nombre.trim(),
+                nombreKey: registro.nombre.trim().toLowerCase(),
+                email: registro.email?.trim() || '',
+                emailKey: registro.email?.trim().toLowerCase() || '',
+                password: registro.contrasena,
+                telefono: registro.telefono
+            };
+            const idx = accounts.findIndex(a => a.nombreKey === account.nombreKey);
+            if (idx >= 0) accounts[idx] = account;
+            else accounts.push(account);
+            localStorage.setItem(key, JSON.stringify(accounts));
+        } catch (_) { /* storage unavailable */ }
+    }
+
+    saveBandProfile(registro) {
+        if (!registro.nombre?.trim()) return;
+        try {
+            const key = 'desiertoSonoro_bandProfiles';
+            const profiles = JSON.parse(localStorage.getItem(key) || '{}');
+            const nombreKey = registro.nombre.trim().toLowerCase();
+            const existing = profiles[nombreKey] || {};
+
+            profiles[nombreKey] = {
+                ...existing,
+                nombre: registro.nombre.trim(),
+                nombreKey,
+                genero: registro.genero || existing.genero || '',
+                duracion: registro.duracion || existing.duracion || '',
+                precio: registro.precio ?? existing.precio ?? 0,
+                descripcion: registro.descripcion || existing.descripcion || '',
+                contacto: registro.contacto || existing.contacto || '',
+                telefono: registro.telefono || existing.telefono || '',
+                email: registro.email || existing.email || '',
+                lugares: registro.lugares?.length ? registro.lugares : (existing.lugares || []),
+                avatar: registro.avatar || existing.avatar || null,
+                muestras: registro.muestras?.length ? registro.muestras : (existing.muestras || []),
+                stats: existing.stats || {
+                    vistas: Math.floor(Math.random() * 800) + 200,
+                    reservas: Math.floor(Math.random() * 25) + 5,
+                    shows: Math.floor(Math.random() * 20) + 3,
+                    productos: Math.floor(Math.random() * 6)
+                },
+                rating: existing.rating || +(4 + Math.random() * 0.9).toFixed(1),
+                premium: true,
+                fechaRegistro: existing.fechaRegistro || registro.fechaRegistro || new Date().toISOString()
+            };
+            localStorage.setItem(key, JSON.stringify(profiles));
+        } catch (_) { /* storage unavailable */ }
+    }
+
     validateRegistroBandaForm(form) {
         let valid = true;
 
         form.querySelectorAll('.registro-banda-field, .registro-banda-checks').forEach(el => el.classList.remove('invalid'));
 
-        const required = ['nombre', 'genero', 'duracion', 'precio', 'contacto', 'telefono'];
+        const required = ['nombre', 'genero', 'duracion', 'precio', 'contacto', 'telefono', 'contrasena'];
         required.forEach(name => {
             const field = form.querySelector(`[name="${name}"]`);
             const wrapper = form.querySelector(`[data-field="${name}"]`);
@@ -1477,6 +1568,13 @@ class SaltilloApp {
                 valid = false;
             }
         });
+
+        const contrasena = form.querySelector('[name="contrasena"]');
+        const pwWrapper = form.querySelector('[data-field="contrasena"]');
+        if (contrasena?.value && contrasena.value.length < 6) {
+            pwWrapper?.classList.add('invalid');
+            valid = false;
+        }
 
         const telefono = form.querySelector('[name="telefono"]');
         const telWrapper = form.querySelector('[data-field="telefono"]');
@@ -1503,7 +1601,7 @@ class SaltilloApp {
         return valid;
     }
 
-    submitRegistroBanda(e) {
+    async submitRegistroBanda(e) {
         e.preventDefault();
         const form = e.target;
         if (!this.validateRegistroBandaForm(form)) return;
@@ -1512,6 +1610,22 @@ class SaltilloApp {
         if (submitBtn) {
             submitBtn.disabled = true;
             submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${this.t('registroBanda.submitting')}`;
+        }
+
+        const imageFile = form.querySelector('[name="imagen"]')?.files?.[0];
+        const sampleFiles = Array.from(form.querySelector('[name="muestras"]')?.files || []);
+        const avatar = imageFile ? await this.readFileAsDataURL(imageFile, 1024 * 1024) : null;
+        const muestras = [];
+        for (const file of sampleFiles) {
+            const dataUrl = await this.readFileAsDataURL(file);
+            if (dataUrl) {
+                muestras.push({
+                    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+                    titulo: file.name.replace(/\.[^.]+$/, ''),
+                    nombre: file.name,
+                    dataUrl
+                });
+            }
         }
 
         const formData = new FormData(form);
@@ -1524,14 +1638,19 @@ class SaltilloApp {
             contacto: formData.get('contacto'),
             telefono: `+52${formData.get('telefono')}`,
             email: formData.get('email') || '',
+            contrasena: formData.get('contrasena'),
             lugares: (formData.get('lugares') || '').split(',').map(s => s.trim()).filter(Boolean),
             whatsappConsent: true,
-            imagen: form.querySelector('[name="imagen"]')?.files?.[0]?.name || null,
-            muestras: Array.from(form.querySelector('[name="muestras"]')?.files || []).map(f => f.name),
+            avatar,
+            muestras,
             fechaRegistro: new Date().toISOString()
         };
 
-        console.log('📝 Registro de banda (frontend):', registro);
+        this.saveBandAccount(registro);
+        this.saveBandProfile(registro);
+
+        const { contrasena: _, ...registroLog } = registro;
+        console.log('📝 Registro de banda (frontend):', registroLog);
 
         setTimeout(() => {
             form.classList.add('hidden');
@@ -3280,7 +3399,7 @@ class SaltilloApp {
                 this.togglePlay();
                 break;
             case 'products':
-                window.open('productos.html', '_blank');
+                window.location.href = 'productos.html';
                 break;
         }
     }

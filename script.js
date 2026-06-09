@@ -174,8 +174,7 @@ class SaltilloExperience {
         const isExternal = e.currentTarget.dataset.external === 'true';
         
         if (isExternal && sectionId === 'products') {
-            // Abrir página de productos en nueva pestaña
-            window.open('productos.html', '_blank');
+            window.location.href = 'productos.html';
             return;
         }
         
@@ -571,7 +570,7 @@ class SaltilloExperience {
                         this.startRadioStream();
                         break;
                     case 'products':
-                        window.open('productos.html', '_blank');
+                        window.location.href = 'productos.html';
                         break;
                 }
                 

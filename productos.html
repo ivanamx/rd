@@ -7,7 +7,7 @@
     <title data-i18n="productos.metaTitle">Productos — Saltillo Creative Marketplace</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="band-profile-panel.css">
     <style>
         :root {
             --mp-accent: #00D4FF;
@@ -101,6 +101,18 @@
             text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
         }
 
+        .mp-mobile-hero-bar {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: var(--space-xl);
+        }
+
+        .mp-lang-mobile {
+            display: none;
+        }
+
         .mp-hero-badge {
             display: inline-flex;
             align-items: center;
@@ -113,7 +125,6 @@
             font-weight: 600;
             letter-spacing: 0.12em;
             color: var(--mp-accent);
-            margin-bottom: var(--space-xl);
             animation: mp-fade-up 0.7s var(--mp-ease) both;
         }
 
@@ -402,6 +413,233 @@
             font-weight: 600;
             border-radius: 100px;
         }
+
+        .login-btn {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: 0.6rem 1rem;
+            background: transparent;
+            border: 1px solid var(--mp-border);
+            border-radius: 100px;
+            color: var(--text-primary);
+            font-family: var(--font-primary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+            flex-shrink: 0;
+            min-height: 44px;
+        }
+
+        .login-btn:hover {
+            border-color: var(--mp-border-hover);
+            background: var(--mp-accent-dim);
+        }
+
+        .login-btn i {
+            color: var(--mp-accent);
+            font-size: 0.95rem;
+        }
+
+        /* ── Modal login ── */
+        .login-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 10002;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-xl);
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .login-modal.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .login-modal-content {
+            background: var(--dark-surface);
+            border: 1px solid var(--mp-border);
+            border-radius: var(--mp-radius);
+            width: 100%;
+            max-width: 420px;
+            transform: scale(0.95) translateY(16px);
+            transition: transform 0.35s var(--mp-ease);
+            overflow: hidden;
+        }
+
+        .login-modal.open .login-modal-content {
+            transform: scale(1) translateY(0);
+        }
+
+        .login-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: var(--space-xl);
+            padding-bottom: var(--space-md);
+            border-bottom: 1px solid var(--mp-border);
+        }
+
+        .login-modal-eyebrow {
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--mp-accent);
+            margin-bottom: var(--space-xs);
+        }
+
+        .login-modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+        }
+
+        .login-modal-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: var(--space-xs);
+            line-height: 1.5;
+        }
+
+        .close-login {
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--mp-border);
+            background: transparent;
+            border-radius: 50%;
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, border-color 0.2s;
+            flex-shrink: 0;
+        }
+
+        .close-login:hover {
+            background: var(--mp-accent-dim);
+            border-color: var(--mp-border-hover);
+        }
+
+        .login-form {
+            padding: var(--space-xl);
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-lg);
+        }
+
+        .login-field {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+
+        .login-label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .login-input-wrap {
+            position: relative;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            padding-left: 2.75rem;
+            background: var(--mp-surface);
+            border: 1px solid var(--mp-border);
+            border-radius: var(--mp-radius-sm);
+            color: var(--text-primary);
+            font-family: var(--font-primary);
+            font-size: 0.95rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            min-height: 48px;
+        }
+
+        .login-input:focus {
+            outline: none;
+            border-color: var(--mp-accent);
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.12);
+        }
+
+        .login-input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            pointer-events: none;
+        }
+
+        .login-input-wrap .login-input {
+            padding-right: 2.75rem;
+        }
+
+        .login-toggle-pw {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0.25rem;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .login-toggle-pw:hover { color: var(--mp-accent); }
+
+        .login-submit {
+            width: 100%;
+            min-height: 48px;
+        }
+
+        .login-footer {
+            padding: 0 var(--space-xl) var(--space-xl);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--space-md);
+        }
+
+        .login-forgot {
+            background: none;
+            border: none;
+            color: var(--mp-accent);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .login-forgot:hover { opacity: 0.8; }
+
+        .login-register {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        .login-register a {
+            color: var(--mp-accent);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .login-register a:hover { text-decoration: underline; }
 
         .cart-count {
             position: absolute;
@@ -1431,6 +1669,21 @@
                 padding: calc(var(--mp-nav-h) + 2rem) var(--space-md) 3rem;
             }
 
+            .back-btn {
+                display: none;
+            }
+
+            .mp-mobile-hero-bar {
+                justify-content: space-between;
+                gap: var(--space-md);
+                margin-bottom: var(--space-lg);
+            }
+
+            .mp-lang-mobile {
+                display: flex;
+                flex-shrink: 0;
+            }
+
             .nav-container {
                 padding: 0 var(--space-md);
                 gap: var(--space-sm);
@@ -1441,6 +1694,14 @@
                 min-height: 32px;
                 padding: 0.25rem 0.5rem;
                 font-size: 0.75rem;
+            }
+
+            .login-btn span { display: none; }
+
+            .login-btn {
+                padding: 0.6rem;
+                min-width: 44px;
+                justify-content: center;
             }
 
             .filters-container,
@@ -1501,8 +1762,6 @@
         }
 
         @media (max-width: 480px) {
-            .back-btn span { display: none; }
-
             .mp-hero-ctas {
                 flex-direction: column;
                 width: 100%;
@@ -1548,10 +1807,10 @@
                 <i class="fas fa-search search-icon" aria-hidden="true"></i>
                 <input type="search" class="search-input" id="searchInput" data-i18n-placeholder="productos.searchPlaceholder" placeholder="Buscar productos o artistas..." data-i18n-aria="productos.searchAria" aria-label="Buscar productos">
             </div>
-            <div class="lang-selector mp-lang-selector" aria-label="Language">
-                <button class="lang-btn active" data-lang="es" type="button">ES</button>
-                <button class="lang-btn" data-lang="en" type="button">EN</button>
-            </div>
+            <button class="login-btn" id="loginBtn" type="button" data-i18n-aria="productos.loginAria" aria-label="Abrir inicio de sesión">
+                <i class="fas fa-user" aria-hidden="true"></i>
+                <span data-i18n="productos.login">Iniciar sesión</span>
+            </button>
             <button class="cart-toggle" id="cartToggle" data-i18n-aria="productos.openCart" aria-label="Abrir carrito de compras">
                 <i class="fas fa-shopping-cart" aria-hidden="true"></i>
                 <span class="cart-count" id="cartCount" aria-live="polite">0</span>
@@ -1564,9 +1823,15 @@
         <div class="mp-hero-bg" aria-hidden="true"></div>
         <div class="mp-hero-overlay" aria-hidden="true"></div>
         <div class="mp-hero-inner">
-            <div class="mp-hero-badge">
-                <i class="fas fa-palette" aria-hidden="true"></i>
-                <span data-i18n="productos.heroBadge">Marketplace Creativo</span>
+            <div class="mp-mobile-hero-bar">
+                <div class="mp-hero-badge">
+                    <i class="fas fa-palette" aria-hidden="true"></i>
+                    <span data-i18n="productos.heroBadge">Marketplace Creativo</span>
+                </div>
+                <div class="lang-selector mp-lang-selector mp-lang-mobile" aria-label="Language">
+                    <button class="lang-btn active" data-lang="es" type="button">ES</button>
+                    <button class="lang-btn" data-lang="en" type="button">EN</button>
+                </div>
             </div>
             <h1 class="mp-hero-title">
                 <span class="mp-hero-line" data-i18n="productos.heroLine1">Arte y diseño</span>
@@ -1743,9 +2008,79 @@
         <div class="modal-content" id="modalContent"></div>
     </div>
 
+    <!-- Modal login -->
+    <div class="login-modal" id="loginModal" role="dialog" aria-modal="true" aria-labelledby="loginModalTitle">
+        <div class="login-modal-content">
+            <div class="login-modal-header">
+                <div>
+                    <div class="login-modal-eyebrow">Saltillo</div>
+                    <h2 class="login-modal-title" id="loginModalTitle" data-i18n="productos.loginTitle">Inicia sesión</h2>
+                    <p class="login-modal-subtitle" data-i18n="productos.loginSubtitle">Accede a tu cuenta del marketplace creativo</p>
+                </div>
+                <button class="close-login" id="closeLogin" type="button" data-i18n-aria="productos.loginClose" aria-label="Cerrar">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
+            </div>
+            <form class="login-form" id="loginForm" novalidate>
+                <div class="login-field">
+                    <label class="login-label" for="loginIdentifier" data-i18n="productos.loginIdentifier">Email o nombre de banda</label>
+                    <div class="login-input-wrap">
+                        <i class="fas fa-user login-input-icon" aria-hidden="true"></i>
+                        <input type="text" class="login-input" id="loginIdentifier" name="identifier" autocomplete="username" data-i18n-placeholder="productos.loginIdentifierPlaceholder" placeholder="tu@email.com o Ej. Los del Desierto" required>
+                    </div>
+                </div>
+                <div class="login-field">
+                    <label class="login-label" for="loginPassword" data-i18n="productos.loginPassword">Contraseña</label>
+                    <div class="login-input-wrap">
+                        <i class="fas fa-lock login-input-icon" aria-hidden="true"></i>
+                        <input type="password" class="login-input" id="loginPassword" name="password" autocomplete="current-password" data-i18n-placeholder="productos.loginPasswordPlaceholder" placeholder="Tu contraseña" required minlength="6">
+                        <button class="login-toggle-pw" type="button" id="togglePassword" aria-label="Mostrar contraseña">
+                            <i class="fas fa-eye" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary login-submit">
+                    <i class="fas fa-right-to-bracket" aria-hidden="true"></i>
+                    <span data-i18n="productos.loginSubmit">Entrar</span>
+                </button>
+            </form>
+            <div class="login-footer">
+                <button type="button" class="login-forgot" id="loginForgotBtn" data-i18n="productos.loginForgot">¿Olvidaste tu contraseña?</button>
+                <p class="login-register">
+                    <span data-i18n="productos.loginNoAccount">¿No tienes cuenta?</span>
+                    <a href="index.html" data-i18n="productos.loginRegister">Regístrate</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Perfil de banda -->
+    <div class="band-profile-overlay" id="bandProfileOverlay" aria-hidden="true"></div>
+    <div class="band-profile-panel" id="bandProfilePanel" role="dialog" aria-modal="true" aria-labelledby="bandProfileTitle">
+        <div class="bpp-scroll">
+            <div id="bandProfileContent"></div>
+        </div>
+        <div class="bpp-topbar">
+            <button class="bpp-icon-btn" id="closeBandProfile" type="button" data-i18n-aria="productos.profileClose" aria-label="Cerrar perfil">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+            <span class="bpp-topbar-title" id="bandProfileTitle" data-i18n="productos.profileTitle">Mi perfil de banda</span>
+            <div class="bpp-topbar-actions">
+                <button class="bpp-logout-btn" id="bandProfileLogout" type="button">
+                    <i class="fas fa-right-from-bracket" aria-hidden="true"></i>
+                    <span data-i18n="productos.profileLogout">Salir</span>
+                </button>
+            </div>
+        </div>
+        <input type="file" class="bpp-hidden-input" id="bandAvatarInput" accept="image/jpeg,image/png,image/webp">
+        <input type="file" class="bpp-hidden-input" id="bandMp3Input" accept="audio/mpeg,audio/mp3,audio/*">
+        <input type="file" class="bpp-hidden-input" id="bandGalleryInput" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/*" multiple>
+    </div>
+
     <!-- Toast -->
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+    <script src="mock-bands.js"></script>
     <script src="i18n.js"></script>
     <script>
         const CAT_I18N = {
@@ -1838,19 +2173,750 @@
         const mobileCartText = document.getElementById('mobileCartText');
         const resultsMetaText = document.getElementById('resultsMetaText');
         const metaDescription = document.getElementById('metaDescription');
+        const loginBtn = document.getElementById('loginBtn');
+        const loginModal = document.getElementById('loginModal');
+        const closeLogin = document.getElementById('closeLogin');
+        const loginForm = document.getElementById('loginForm');
+        const togglePassword = document.getElementById('togglePassword');
+        const loginPassword = document.getElementById('loginPassword');
+        const loginForgotBtn = document.getElementById('loginForgotBtn');
+        const bandProfilePanel = document.getElementById('bandProfilePanel');
+        const bandProfileOverlay = document.getElementById('bandProfileOverlay');
+        const bandProfileContent = document.getElementById('bandProfileContent');
+        const closeBandProfile = document.getElementById('closeBandProfile');
+        const bandProfileLogout = document.getElementById('bandProfileLogout');
+        const bandAvatarInput = document.getElementById('bandAvatarInput');
+        const bandMp3Input = document.getElementById('bandMp3Input');
+        const bandGalleryInput = document.getElementById('bandGalleryInput');
+
+        const BAND_ACCOUNTS_KEY = 'desiertoSonoro_bandAccounts';
+        const BAND_PROFILES_KEY = 'desiertoSonoro_bandProfiles';
+        const BAND_SESSION_KEY = 'desiertoSonoro_bandSession';
+
+        let currentBandSession = null;
+        let bandProfileAudio = null;
+        let playingTrackId = null;
 
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
         function initMarketplace() {
             window.I18n.init();
+            if (typeof window.seedMockBands === 'function') window.seedMockBands();
             updateMetaDescription();
             updateResultsMeta();
             renderProducts();
             renderArtists();
+            restoreBandSession();
             setupEventListeners();
             updateCartUI();
             animateCounters();
             setupScrollReveal();
+        }
+
+        function getBandProfiles() {
+            try {
+                return JSON.parse(localStorage.getItem(BAND_PROFILES_KEY) || '{}');
+            } catch (_) {
+                return {};
+            }
+        }
+
+        function getBandProfile(nombreKey) {
+            return getBandProfiles()[nombreKey] || null;
+        }
+
+        function saveBandProfileData(profile) {
+            try {
+                const profiles = getBandProfiles();
+                profiles[profile.nombreKey] = profile;
+                localStorage.setItem(BAND_PROFILES_KEY, JSON.stringify(profiles));
+            } catch (_) { /* storage unavailable */ }
+        }
+
+        function createDefaultProfile(account) {
+            return {
+                nombre: account.nombre,
+                nombreKey: account.nombreKey,
+                genero: '',
+                duracion: '',
+                precio: 0,
+                descripcion: '',
+                contacto: '',
+                telefono: account.telefono || '',
+                email: account.email || '',
+                lugares: [],
+                galeria: [],
+                avatar: null,
+                muestras: [],
+                stats: {
+                    vistas: Math.floor(Math.random() * 400) + 150,
+                    reservas: Math.floor(Math.random() * 15) + 3,
+                    shows: Math.floor(Math.random() * 12) + 2,
+                    productos: 0
+                },
+                rating: +(4 + Math.random() * 0.9).toFixed(1),
+                premium: true,
+                fechaRegistro: new Date().toISOString()
+            };
+        }
+
+        function readFileAsDataURL(file, maxBytes = 3 * 1024 * 1024) {
+            return new Promise(resolve => {
+                if (!file || file.size > maxBytes) {
+                    resolve(null);
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => resolve(null);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function renderStars(rating) {
+            const full = Math.floor(rating);
+            const half = rating - full >= 0.5;
+            let stars = '';
+            for (let i = 0; i < full; i++) stars += '<i class="fas fa-star"></i>';
+            if (half) stars += '<i class="fas fa-star-half-alt"></i>';
+            const empty = 5 - full - (half ? 1 : 0);
+            for (let i = 0; i < empty; i++) stars += '<i class="far fa-star"></i>';
+            return stars;
+        }
+
+        function formatMemberDate(iso) {
+            if (!iso) return '—';
+            try {
+                return new Date(iso).toLocaleDateString(isEn() ? 'en-US' : 'es-MX', { month: 'short', year: 'numeric' });
+            } catch (_) {
+                return '—';
+            }
+        }
+
+        function formatShowDate(iso) {
+            if (!iso) return '—';
+            try {
+                return new Date(iso + 'T12:00:00').toLocaleDateString(isEn() ? 'en-US' : 'es-MX', {
+                    weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
+                });
+            } catch (_) {
+                return iso;
+            }
+        }
+
+        function formatMoney(n) {
+            const locale = window.I18n?.getLocale() || 'es-MX';
+            return new Intl.NumberFormat(locale, { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 }).format(n || 0);
+        }
+
+        function formatHours(h) {
+            if (!h && h !== 0) return '—';
+            const hrs = Math.floor(h);
+            const mins = Math.round((h - hrs) * 60);
+            if (mins === 0) return `${hrs}${t('productos.profileHours')}`;
+            return `${hrs}${t('productos.profileHours')} ${mins}m`;
+        }
+
+        function escAttr(str) {
+            return String(str ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+        }
+
+        function getCurrentProfile() {
+            if (!currentBandSession) return null;
+            return getBandProfile(currentBandSession.nombreKey) || createDefaultProfile(currentBandSession);
+        }
+
+        function patchCurrentProfile(updates) {
+            const profile = getCurrentProfile();
+            if (!profile) return null;
+            Object.assign(profile, updates);
+            saveBandProfileData(profile);
+            if (updates.email !== undefined || updates.telefono !== undefined) {
+                try {
+                    const accounts = JSON.parse(localStorage.getItem(BAND_ACCOUNTS_KEY) || '[]');
+                    const idx = accounts.findIndex(a => a.nombreKey === profile.nombreKey);
+                    if (idx >= 0) {
+                        if (updates.email !== undefined) {
+                            accounts[idx].email = updates.email;
+                            accounts[idx].emailKey = (updates.email || '').toLowerCase();
+                        }
+                        if (updates.telefono !== undefined) accounts[idx].telefono = updates.telefono;
+                        localStorage.setItem(BAND_ACCOUNTS_KEY, JSON.stringify(accounts));
+                        if (currentBandSession?.nombreKey === profile.nombreKey) {
+                            currentBandSession = accounts[idx];
+                        }
+                    }
+                } catch (_) { /* ignore */ }
+            }
+            return profile;
+        }
+
+        function renderManagementDashboard(mgmt) {
+            if (!mgmt) return '';
+            const e = mgmt.earnings || {};
+            const v = mgmt.venues || {};
+            const s = mgmt.stageTime || {};
+
+            return `
+                <div class="bpp-dashboard">
+                    <h2 class="bpp-dashboard-title"><i class="fas fa-chart-line"></i> ${t('productos.profileDashboard')}</h2>
+                    <div class="bpp-dashboard-grid">
+                        <div class="bpp-kpi bpp-kpi-money">
+                            <div class="bpp-kpi-icon"><i class="fas fa-sack-dollar"></i></div>
+                            <div class="bpp-kpi-body">
+                                <span class="bpp-kpi-value">${formatMoney(e.month)}</span>
+                                <span class="bpp-kpi-label">${t('productos.profileEarningsMonth')}</span>
+                                ${e.monthTrend ? `<span class="bpp-kpi-trend up"><i class="fas fa-arrow-up"></i> +${e.monthTrend}% ${t('productos.profileTrendUp')}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="bpp-kpi bpp-kpi-money">
+                            <div class="bpp-kpi-icon"><i class="fas fa-coins"></i></div>
+                            <div class="bpp-kpi-body">
+                                <span class="bpp-kpi-value">${formatMoney(e.year)}</span>
+                                <span class="bpp-kpi-label">${t('productos.profileEarningsYear')}</span>
+                                ${e.yearTrend ? `<span class="bpp-kpi-trend up"><i class="fas fa-arrow-up"></i> +${e.yearTrend}% ${isEn() ? 'vs last year' : 'vs año anterior'}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="bpp-kpi bpp-kpi-warn">
+                            <div class="bpp-kpi-icon"><i class="fas fa-hourglass-half"></i></div>
+                            <div class="bpp-kpi-body">
+                                <span class="bpp-kpi-value">${formatMoney(e.pending)}</span>
+                                <span class="bpp-kpi-label">${t('productos.profileEarningsPending')}</span>
+                            </div>
+                        </div>
+                        <div class="bpp-kpi">
+                            <div class="bpp-kpi-icon"><i class="fas fa-tag"></i></div>
+                            <div class="bpp-kpi-body">
+                                <span class="bpp-kpi-value">${formatMoney(e.avgPerShow)}</span>
+                                <span class="bpp-kpi-label">${t('productos.profileEarningsAvg')}</span>
+                            </div>
+                        </div>
+                        <div class="bpp-kpi bpp-kpi-stage">
+                            <div class="bpp-kpi-icon"><i class="fas fa-clock"></i></div>
+                            <div class="bpp-kpi-body">
+                                <span class="bpp-kpi-value">${formatHours(s.hoursThisMonth)}</span>
+                                <span class="bpp-kpi-label">${t('productos.profileStageMonth')}</span>
+                                <span class="bpp-kpi-sub">${s.showsThisMonth || 0} ${t('productos.profileShowsMonth').toLowerCase()}</span>
+                            </div>
+                        </div>
+                        <div class="bpp-kpi bpp-kpi-stage">
+                            <div class="bpp-kpi-icon"><i class="fas fa-hourglass"></i></div>
+                            <div class="bpp-kpi-body">
+                                <span class="bpp-kpi-value">${formatHours(s.hoursThisYear)}</span>
+                                <span class="bpp-kpi-label">${t('productos.profileStageYear')}</span>
+                                <span class="bpp-kpi-sub">${s.showsThisYear || 0} ${t('productos.profileShowsYear').toLowerCase()}</span>
+                            </div>
+                        </div>
+                        <div class="bpp-kpi">
+                            <div class="bpp-kpi-icon"><i class="fas fa-building"></i></div>
+                            <div class="bpp-kpi-body">
+                                <span class="bpp-kpi-value">${v.totalUnique || 0}</span>
+                                <span class="bpp-kpi-label">${t('productos.profileVenuesTotal')}</span>
+                                <span class="bpp-kpi-sub">${v.thisMonth || 0} ${t('productos.profileVenuesMonth').toLowerCase()}</span>
+                            </div>
+                        </div>
+                        <div class="bpp-kpi">
+                            <div class="bpp-kpi-icon"><i class="fas fa-redo"></i></div>
+                            <div class="bpp-kpi-body">
+                                <span class="bpp-kpi-value">${v.repeatRate || 0}%</span>
+                                <span class="bpp-kpi-label">${t('productos.profileVenuesRepeat')}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderUpcomingShows(shows) {
+            if (!shows?.length) return `<p class="bpp-empty">${t('productos.profileNoVenues')}</p>`;
+            return shows.map(show => {
+                const confirmed = show.status === 'confirmado';
+                return `
+                    <div class="bpp-show-row">
+                        <div class="bpp-show-date">${formatShowDate(show.fecha)}</div>
+                        <div class="bpp-show-info">
+                            <span class="bpp-show-venue">${show.venue}</span>
+                            <span class="bpp-show-fee">${formatMoney(show.fee)}</span>
+                        </div>
+                        <span class="bpp-show-status ${confirmed ? 'confirmed' : 'pending'}">
+                            ${confirmed ? t('productos.profileStatusConfirmed') : t('productos.profileStatusPending')}
+                        </span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderRecentShows(shows) {
+            if (!shows?.length) return `<p class="bpp-empty">—</p>`;
+            return shows.map(show => `
+                <div class="bpp-show-row recent">
+                    <div class="bpp-show-date">${formatShowDate(show.fecha)}</div>
+                    <div class="bpp-show-info">
+                        <span class="bpp-show-venue">${show.venue}</span>
+                        <span class="bpp-show-meta">${formatHours(show.hours)} · ${formatMoney(show.fee)}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderEditableGallery(galeria) {
+            if (!galeria?.length) {
+                return `<p class="bpp-empty">${t('productos.profileNoGallery')}</p>`;
+            }
+            return galeria.map(item => {
+                const id = item.id || `gal-${Math.random().toString(36).slice(2, 8)}`;
+                const isVideo = item.type === 'video' || /\.(mp4|webm|mov)$/i.test(item.url || '');
+                const media = isVideo
+                    ? `<video src="${escAttr(item.url)}" controls playsinline preload="metadata"></video>`
+                    : `<img src="${escAttr(item.url)}" alt="${escAttr(item.caption || '')}" loading="lazy">`;
+                return `
+                    <figure class="bpp-gallery-item" data-id="${escAttr(id)}">
+                        <button type="button" class="bpp-gallery-delete" data-id="${escAttr(id)}" aria-label="${t('productos.profileDelete')}">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                        ${isVideo ? '<span class="bpp-gallery-type"><i class="fas fa-video"></i></span>' : ''}
+                        ${media}
+                        <input type="text" class="bpp-gallery-caption" data-id="${escAttr(id)}" value="${escAttr(item.caption || '')}" placeholder="Caption">
+                    </figure>
+                `;
+            }).join('');
+        }
+
+        function renderTopVenues(venues) {
+            if (!venues?.length) return `<p class="bpp-empty">—</p>`;
+            return venues.map(venue => `
+                <div class="bpp-venue-row">
+                    <div class="bpp-venue-row-info">
+                        <span class="bpp-venue-row-name">${venue.name}</span>
+                        <span class="bpp-venue-row-meta">${venue.shows} ${t('productos.profileVenueShows')} · ${formatShowDate(venue.lastDate)}</span>
+                    </div>
+                    <span class="bpp-venue-row-revenue">${formatMoney(venue.revenue)}</span>
+                </div>
+            `).join('');
+        }
+
+        function stopBandProfileAudio() {
+            if (bandProfileAudio) {
+                bandProfileAudio.pause();
+                bandProfileAudio = null;
+            }
+            playingTrackId = null;
+            bandProfileContent?.querySelectorAll('.bpp-track-play.playing').forEach(btn => {
+                btn.classList.remove('playing');
+                btn.innerHTML = '<i class="fas fa-play"></i>';
+            });
+        }
+
+        function renderBandProfile() {
+            if (!currentBandSession) return;
+            const profile = getBandProfile(currentBandSession.nombreKey) || createDefaultProfile(currentBandSession);
+            if (!getBandProfile(currentBandSession.nombreKey)) {
+                saveBandProfileData(profile);
+            }
+            let galleryMigrated = false;
+            (profile.galeria || []).forEach(item => {
+                if (!item.id) {
+                    item.id = `gal-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+                    if (!item.type) item.type = /\.(mp4|webm|mov)$/i.test(item.url || '') ? 'video' : 'image';
+                    galleryMigrated = true;
+                }
+            });
+            if (galleryMigrated) saveBandProfileData(profile);
+            if (!profile.galeria) profile.galeria = [];
+
+            const avatarHtml = profile.avatar
+                ? `<img src="${profile.avatar}" alt="${profile.nombre}" class="bpp-avatar">`
+                : `<div class="bpp-avatar-fallback"><i class="fas fa-guitar"></i></div>`;
+
+            const coverHtml = profile.cover
+                ? `<div class="bpp-cover-wrap"><img class="bpp-cover" src="${profile.cover}" alt=""></div>`
+                : '';
+
+            const tracksHtml = (profile.muestras || []).length
+                ? profile.muestras.map(track => `
+                    <div class="bpp-track" data-track-id="${track.id}">
+                        <button class="bpp-track-play" type="button" data-src="${track.dataUrl}" data-id="${track.id}" aria-label="${t('common.play')}">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <div class="bpp-track-info">
+                            <span class="bpp-track-title">${track.titulo}</span>
+                            <span class="bpp-track-meta">${track.nombre}</span>
+                        </div>
+                        <button class="bpp-track-delete" type="button" data-id="${track.id}" aria-label="Eliminar">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                `).join('')
+                : `<p class="bpp-empty">${t('productos.profileNoTracks')}</p>`;
+
+            bandProfileContent.innerHTML = `
+                <div class="bpp-hero-block">
+                    ${coverHtml}
+                    <div class="bpp-hero bpp-hero-overlap">
+                        <div class="bpp-hero-inner">
+                            <div class="bpp-avatar-wrap">
+                                ${avatarHtml}
+                                <button class="bpp-avatar-edit" id="bandAvatarEditBtn" type="button" data-i18n-aria="productos.profileChangePhoto" aria-label="Cambiar foto">
+                                    <i class="fas fa-camera"></i>
+                                </button>
+                            </div>
+                            <div class="bpp-hero-info">
+                                <div class="bpp-badges">
+                                    ${profile.premium ? `<span class="bpp-premium-badge"><i class="fas fa-crown"></i> ${t('productos.profilePremium')}</span>` : ''}
+                                    ${profile.genero ? `<span class="bpp-genre-badge"><i class="fas fa-music"></i> ${profile.genero}</span>` : ''}
+                                </div>
+                                <h1 class="bpp-name">${profile.nombre}</h1>
+                                <div class="bpp-rating">
+                                    <span class="bpp-stars">${renderStars(profile.rating || 0)}</span>
+                                    <span class="bpp-rating-num">${(profile.rating || 0).toFixed(1)}</span>
+                                    <span class="bpp-rating-label">${t('productos.profileRating')}</span>
+                                </div>
+                                <form class="bpp-edit-form bpp-desc-form" id="profileDescForm">
+                                    <label class="bpp-edit-label" for="profileDescripcion">${t('productos.profileDescription')}</label>
+                                    <textarea class="bpp-edit-textarea" id="profileDescripcion" name="descripcion" rows="3" maxlength="500">${String(profile.descripcion || '').replace(/&/g, '&amp;').replace(/</g, '&lt;')}</textarea>
+                                    <button type="submit" class="bpp-save-btn">${t('productos.profileEditSave')}</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                ${renderManagementDashboard(profile.management)}
+                <div class="bpp-stats">
+                    <div class="bpp-stat">
+                        <span class="bpp-stat-value">${(profile.stats?.vistas || 0).toLocaleString()}</span>
+                        <span class="bpp-stat-label">${t('productos.profileStatViews')}</span>
+                    </div>
+                    <div class="bpp-stat">
+                        <span class="bpp-stat-value">${profile.stats?.reservas || 0}</span>
+                        <span class="bpp-stat-label">${t('productos.profileStatBookings')}</span>
+                    </div>
+                    <div class="bpp-stat">
+                        <span class="bpp-stat-value">${profile.stats?.shows || 0}</span>
+                        <span class="bpp-stat-label">${t('productos.profileStatShows')}</span>
+                    </div>
+                    <div class="bpp-stat">
+                        <span class="bpp-stat-value">${profile.stats?.productos || 0}</span>
+                        <span class="bpp-stat-label">${t('productos.profileStatProducts')}</span>
+                    </div>
+                </div>
+                <div class="bpp-content">
+                    <div class="bpp-card">
+                        <h3 class="bpp-card-title"><i class="fas fa-calendar-check"></i> ${t('productos.profileUpcoming')}</h3>
+                        <div class="bpp-shows-list">${renderUpcomingShows(profile.proximosShows)}</div>
+                    </div>
+                    <div class="bpp-card">
+                        <h3 class="bpp-card-title"><i class="fas fa-history"></i> ${t('productos.profileRecent')}</h3>
+                        <div class="bpp-shows-list">${renderRecentShows(profile.showsRecientes)}</div>
+                    </div>
+                    <div class="bpp-card full">
+                        <h3 class="bpp-card-title"><i class="fas fa-trophy"></i> ${t('productos.profileTopVenues')}</h3>
+                        <div class="bpp-venue-rows">${renderTopVenues(profile.management?.venues?.topVenues)}</div>
+                    </div>
+                    <div class="bpp-card full">
+                        <h3 class="bpp-card-title"><i class="fas fa-images"></i> ${t('productos.profileGallery')}</h3>
+                        <div class="bpp-gallery" id="profileGallery">${renderEditableGallery(profile.galeria)}</div>
+                        <label class="bpp-upload-zone" for="bandGalleryInput">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <span>${t('productos.profileUploadGallery')}</span>
+                            <small>${t('productos.profileUploadGalleryHint')}</small>
+                        </label>
+                    </div>
+                    <div class="bpp-card bpp-card-editable">
+                        <h3 class="bpp-card-title"><i class="fas fa-id-card"></i> ${t('productos.profileInfo')}</h3>
+                        <form class="bpp-edit-form" id="profileInfoForm">
+                            <div class="bpp-edit-field">
+                                <label class="bpp-edit-label" for="profileContacto">${t('productos.profileContact')}</label>
+                                <input class="bpp-edit-input" id="profileContacto" name="contacto" type="text" value="${escAttr(profile.contacto)}" maxlength="80">
+                            </div>
+                            <div class="bpp-edit-field">
+                                <label class="bpp-edit-label" for="profileTelefono">${t('productos.profilePhone')}</label>
+                                <input class="bpp-edit-input" id="profileTelefono" name="telefono" type="tel" value="${escAttr(profile.telefono)}" maxlength="20">
+                            </div>
+                            <div class="bpp-edit-field">
+                                <label class="bpp-edit-label" for="profileEmail">${t('productos.profileEmail')}</label>
+                                <input class="bpp-edit-input" id="profileEmail" name="email" type="email" value="${escAttr(profile.email)}" maxlength="120">
+                            </div>
+                            <div class="bpp-edit-readonly">
+                                <span class="bpp-edit-label">${t('productos.profileMemberSince')}</span>
+                                <span class="bpp-edit-value">${formatMemberDate(profile.fechaRegistro)}</span>
+                            </div>
+                            <button type="submit" class="bpp-save-btn">${t('productos.profileEditSave')}</button>
+                        </form>
+                    </div>
+                    <div class="bpp-card bpp-card-editable">
+                        <h3 class="bpp-card-title"><i class="fas fa-microphone"></i> ${t('productos.profileShowDetails')}</h3>
+                        <form class="bpp-edit-form" id="profileShowForm">
+                            <div class="bpp-edit-field">
+                                <label class="bpp-edit-label" for="profileGenero">${t('productos.profileGenre')}</label>
+                                <input class="bpp-edit-input" id="profileGenero" name="genero" type="text" value="${escAttr(profile.genero)}" maxlength="60">
+                            </div>
+                            <div class="bpp-edit-field">
+                                <label class="bpp-edit-label" for="profileDuracion">${t('productos.profileDuration')}</label>
+                                <input class="bpp-edit-input" id="profileDuracion" name="duracion" type="text" value="${escAttr(profile.duracion)}" maxlength="40" placeholder="2.5 horas">
+                            </div>
+                            <div class="bpp-edit-field">
+                                <label class="bpp-edit-label" for="profilePrecio">${t('productos.profilePrice')} (MXN)</label>
+                                <input class="bpp-edit-input" id="profilePrecio" name="precio" type="number" min="0" step="100" value="${profile.precio || ''}">
+                            </div>
+                            <button type="submit" class="bpp-save-btn">${t('productos.profileEditSave')}</button>
+                        </form>
+                    </div>
+                    <div class="bpp-card full bpp-card-editable">
+                        <h3 class="bpp-card-title"><i class="fas fa-map-marker-alt"></i> ${t('productos.profileVenues')}</h3>
+                        <form class="bpp-edit-form" id="profileVenuesForm">
+                            <div class="bpp-edit-field">
+                                <label class="bpp-edit-label" for="profileLugares">${t('productos.profileVenues')}</label>
+                                <textarea class="bpp-edit-textarea" id="profileLugares" name="lugares" rows="3" maxlength="300" placeholder="${t('productos.profileVenuesHint')}">${String((profile.lugares || []).join(', ')).replace(/&/g, '&amp;').replace(/</g, '&lt;')}</textarea>
+                            </div>
+                            <button type="submit" class="bpp-save-btn">${t('productos.profileEditSave')}</button>
+                        </form>
+                    </div>
+                    <div class="bpp-card full">
+                        <h3 class="bpp-card-title"><i class="fas fa-headphones"></i> ${t('productos.profileTracks')}</h3>
+                        <div class="bpp-tracks">${tracksHtml}</div>
+                        <label class="bpp-upload-zone" for="bandMp3Input">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <span>${t('productos.profileUploadMp3')}</span>
+                            <small>${t('productos.profileUploadMp3Hint')}</small>
+                        </label>
+                    </div>
+                </div>
+            `;
+
+            bandProfileContent.querySelector('#bandAvatarEditBtn')?.addEventListener('click', () => bandAvatarInput?.click());
+
+            bandProfileContent.querySelectorAll('.bpp-track-play').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const src = btn.dataset.src;
+                    const id = btn.dataset.id;
+                    if (!src) return;
+
+                    if (playingTrackId === id) {
+                        stopBandProfileAudio();
+                        return;
+                    }
+
+                    stopBandProfileAudio();
+                    bandProfileAudio = new Audio(src);
+                    playingTrackId = id;
+                    btn.classList.add('playing');
+                    btn.innerHTML = '<i class="fas fa-pause"></i>';
+                    bandProfileAudio.play().catch(() => stopBandProfileAudio());
+                    bandProfileAudio.onended = () => stopBandProfileAudio();
+                });
+            });
+
+            bandProfileContent.querySelectorAll('.bpp-track-delete').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.dataset.id;
+                    const p = getBandProfile(currentBandSession.nombreKey);
+                    if (!p) return;
+                    p.muestras = (p.muestras || []).filter(m => m.id !== id);
+                    saveBandProfileData(p);
+                    renderBandProfile();
+                    showNotification(t('productos.profileSaved'));
+                });
+            });
+
+            bindProfileEditors();
+        }
+
+        function bindProfileEditors() {
+            bandProfileContent.querySelector('#profileDescForm')?.addEventListener('submit', e => {
+                e.preventDefault();
+                const descripcion = e.target.descripcion.value.trim();
+                patchCurrentProfile({ descripcion });
+                showNotification(t('productos.profileSaved'));
+            });
+
+            bandProfileContent.querySelector('#profileInfoForm')?.addEventListener('submit', e => {
+                e.preventDefault();
+                const fd = new FormData(e.target);
+                patchCurrentProfile({
+                    contacto: fd.get('contacto')?.trim() || '',
+                    telefono: fd.get('telefono')?.trim() || '',
+                    email: fd.get('email')?.trim() || ''
+                });
+                showNotification(t('productos.profileSaved'));
+            });
+
+            bandProfileContent.querySelector('#profileShowForm')?.addEventListener('submit', e => {
+                e.preventDefault();
+                const fd = new FormData(e.target);
+                const genero = fd.get('genero')?.trim() || '';
+                patchCurrentProfile({
+                    genero,
+                    duracion: fd.get('duracion')?.trim() || '',
+                    precio: parseInt(fd.get('precio'), 10) || 0
+                });
+                renderBandProfile();
+                showNotification(t('productos.profileSaved'));
+            });
+
+            bandProfileContent.querySelector('#profileVenuesForm')?.addEventListener('submit', e => {
+                e.preventDefault();
+                const raw = e.target.lugares.value || '';
+                const lugares = raw.split(',').map(s => s.trim()).filter(Boolean);
+                patchCurrentProfile({ lugares });
+                showNotification(t('productos.profileSaved'));
+            });
+
+            bandProfileContent.querySelectorAll('.bpp-gallery-delete').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.dataset.id;
+                    const p = getCurrentProfile();
+                    if (!p) return;
+                    p.galeria = (p.galeria || []).filter(g => g.id !== id);
+                    saveBandProfileData(p);
+                    renderBandProfile();
+                    showNotification(t('productos.profileSaved'));
+                });
+            });
+
+            bandProfileContent.querySelectorAll('.bpp-gallery-caption').forEach(input => {
+                input.addEventListener('change', () => {
+                    const p = getCurrentProfile();
+                    if (!p) return;
+                    const item = (p.galeria || []).find(g => g.id === input.dataset.id);
+                    if (item) {
+                        item.caption = input.value.trim();
+                        saveBandProfileData(p);
+                    }
+                });
+            });
+        }
+
+        async function handleGalleryUpload(fileList) {
+            if (!currentBandSession || !fileList?.length) return;
+            const profile = getCurrentProfile();
+            if (!profile) return;
+            profile.galeria = profile.galeria || [];
+            let added = 0;
+
+            for (const file of fileList) {
+                const isVideo = file.type.startsWith('video/');
+                const maxBytes = isVideo ? 10 * 1024 * 1024 : 3 * 1024 * 1024;
+                const dataUrl = await readFileAsDataURL(file, maxBytes);
+                if (!dataUrl) continue;
+                profile.galeria.push({
+                    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+                    url: dataUrl,
+                    caption: file.name.replace(/\.[^.]+$/, ''),
+                    type: isVideo ? 'video' : 'image'
+                });
+                added++;
+            }
+
+            if (!added) {
+                showNotification(t('productos.profileUploadError'));
+                return;
+            }
+            saveBandProfileData(profile);
+            renderBandProfile();
+            showNotification(t('productos.profileSaved'));
+        }
+
+        function openBandProfile() {
+            if (!currentBandSession) return;
+            renderBandProfile();
+            bandProfilePanel.classList.add('open');
+            bandProfileOverlay.classList.add('open');
+            bandProfileOverlay.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeBandProfilePanel() {
+            stopBandProfileAudio();
+            bandProfilePanel.classList.remove('open');
+            bandProfileOverlay.classList.remove('open');
+            bandProfileOverlay.setAttribute('aria-hidden', 'true');
+            if (!loginModal.classList.contains('open') && !cartSidebar.classList.contains('open') && !productModal.classList.contains('open')) {
+                document.body.style.overflow = '';
+            }
+        }
+
+        function updateLoginUI() {
+            const label = loginBtn?.querySelector('span');
+            if (!loginBtn || !label) return;
+
+            if (currentBandSession) {
+                loginBtn.classList.add('logged-in');
+                label.textContent = currentBandSession.nombre;
+                loginBtn.setAttribute('data-i18n-aria', 'productos.profileOpen');
+                loginBtn.setAttribute('aria-label', t('productos.profileOpen'));
+            } else {
+                loginBtn.classList.remove('logged-in');
+                label.setAttribute('data-i18n', 'productos.login');
+                label.textContent = t('productos.login');
+                loginBtn.setAttribute('data-i18n-aria', 'productos.loginAria');
+                loginBtn.setAttribute('aria-label', t('productos.loginAria'));
+            }
+        }
+
+        function setBandSession(account) {
+            currentBandSession = account;
+            try {
+                localStorage.setItem(BAND_SESSION_KEY, JSON.stringify({ nombreKey: account.nombreKey, nombre: account.nombre }));
+            } catch (_) { /* storage unavailable */ }
+            updateLoginUI();
+        }
+
+        function restoreBandSession() {
+            try {
+                const raw = localStorage.getItem(BAND_SESSION_KEY);
+                if (!raw) return;
+                const session = JSON.parse(raw);
+                const accounts = JSON.parse(localStorage.getItem(BAND_ACCOUNTS_KEY) || '[]');
+                const account = accounts.find(a => a.nombreKey === session.nombreKey);
+                if (account) {
+                    currentBandSession = account;
+                    updateLoginUI();
+                }
+            } catch (_) { /* ignore */ }
+        }
+
+        function logoutBand() {
+            currentBandSession = null;
+            try {
+                localStorage.removeItem(BAND_SESSION_KEY);
+            } catch (_) { /* ignore */ }
+            closeBandProfilePanel();
+            updateLoginUI();
+            showNotification(t('productos.profileLogout'));
+        }
+
+        async function handleAvatarUpload(file) {
+            if (!currentBandSession || !file) return;
+            const dataUrl = await readFileAsDataURL(file, 1024 * 1024);
+            if (!dataUrl) {
+                showNotification(t('productos.profileUploadError'));
+                return;
+            }
+            const profile = getBandProfile(currentBandSession.nombreKey) || createDefaultProfile(currentBandSession);
+            profile.avatar = dataUrl;
+            saveBandProfileData(profile);
+            renderBandProfile();
+            showNotification(t('productos.profileSaved'));
+        }
+
+        async function handleMp3Upload(file) {
+            if (!currentBandSession || !file) return;
+            const dataUrl = await readFileAsDataURL(file);
+            if (!dataUrl) {
+                showNotification(t('productos.profileUploadError'));
+                return;
+            }
+            const profile = getBandProfile(currentBandSession.nombreKey) || createDefaultProfile(currentBandSession);
+            profile.muestras = profile.muestras || [];
+            profile.muestras.push({
+                id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+                titulo: file.name.replace(/\.[^.]+$/, ''),
+                nombre: file.name,
+                dataUrl
+            });
+            saveBandProfileData(profile);
+            renderBandProfile();
+            showNotification(t('productos.profileSaved'));
         }
 
         function updateMetaDescription() {
@@ -2061,7 +3127,53 @@
         function closeModal() {
             productModal.classList.remove('open');
             delete productModal.dataset.openId;
-            document.body.style.overflow = '';
+            if (!loginModal.classList.contains('open') && !cartSidebar.classList.contains('open')) {
+                document.body.style.overflow = '';
+            }
+        }
+
+        function openLoginModal() {
+            loginModal.classList.add('open');
+            document.body.style.overflow = 'hidden';
+            document.getElementById('loginIdentifier')?.focus();
+        }
+
+        function closeLoginModal() {
+            loginModal.classList.remove('open');
+            if (!productModal.classList.contains('open') && !cartSidebar.classList.contains('open') && !bandProfilePanel.classList.contains('open')) {
+                document.body.style.overflow = '';
+            }
+        }
+
+        function handleLoginSubmit(e) {
+            e.preventDefault();
+            const identifier = document.getElementById('loginIdentifier').value.trim();
+            const password = loginPassword.value;
+
+            if (!identifier || !password) return;
+
+            const identifierKey = identifier.toLowerCase();
+            let matchedAccount = null;
+            try {
+                const accounts = JSON.parse(localStorage.getItem(BAND_ACCOUNTS_KEY) || '[]');
+                matchedAccount = accounts.find(a => {
+                    if (a.password !== password) return false;
+                    return a.nombreKey === identifierKey || a.emailKey === identifierKey;
+                }) || null;
+            } catch (_) { /* storage unavailable */ }
+
+            const loggedIn = !!matchedAccount;
+            showNotification(loggedIn ? t('productos.loginSuccess') : t('productos.loginError'));
+            if (loggedIn) {
+                setBandSession(matchedAccount);
+                closeLoginModal();
+                loginForm.reset();
+                if (loginPassword.type === 'text') {
+                    loginPassword.type = 'password';
+                    togglePassword.querySelector('i').className = 'fas fa-eye';
+                }
+                openBandProfile();
+            }
         }
 
         function openCart() {
@@ -2075,7 +3187,9 @@
             cartSidebar.classList.remove('open');
             cartOverlay.classList.remove('open');
             cartOverlay.setAttribute('aria-hidden', 'true');
-            document.body.style.overflow = '';
+            if (!productModal.classList.contains('open') && !loginModal.classList.contains('open') && !bandProfilePanel.classList.contains('open')) {
+                document.body.style.overflow = '';
+            }
         }
 
         function updateCartUI() {
@@ -2257,6 +3371,37 @@
             cartOverlay.addEventListener('click', closeCartPanel);
             mobileCheckout.addEventListener('click', openCart);
 
+            loginBtn.addEventListener('click', () => {
+                if (currentBandSession) openBandProfile();
+                else openLoginModal();
+            });
+            closeLogin.addEventListener('click', closeLoginModal);
+            loginForm.addEventListener('submit', handleLoginSubmit);
+            loginModal.addEventListener('click', e => {
+                if (e.target === loginModal) closeLoginModal();
+            });
+            closeBandProfile?.addEventListener('click', closeBandProfilePanel);
+            bandProfileOverlay?.addEventListener('click', closeBandProfilePanel);
+            bandProfileLogout?.addEventListener('click', logoutBand);
+            bandAvatarInput?.addEventListener('change', e => {
+                handleAvatarUpload(e.target.files?.[0]);
+                e.target.value = '';
+            });
+            bandMp3Input?.addEventListener('change', e => {
+                handleMp3Upload(e.target.files?.[0]);
+                e.target.value = '';
+            });
+            bandGalleryInput?.addEventListener('change', e => {
+                handleGalleryUpload(e.target.files);
+                e.target.value = '';
+            });
+            togglePassword.addEventListener('click', () => {
+                const isPassword = loginPassword.type === 'password';
+                loginPassword.type = isPassword ? 'text' : 'password';
+                togglePassword.querySelector('i').className = isPassword ? 'fas fa-eye-slash' : 'fas fa-eye';
+            });
+            loginForgotBtn.addEventListener('click', () => showNotification(t('productos.loginDemo')));
+
             checkoutBtn.addEventListener('click', () => {
                 if (carrito.length === 0) return;
                 showNotification(t('productos.processingPay'));
@@ -2280,6 +3425,8 @@
 
             document.addEventListener('keydown', e => {
                 if (e.key === 'Escape') {
+                    closeBandProfilePanel();
+                    closeLoginModal();
                     closeModal();
                     closeCartPanel();
                 }
