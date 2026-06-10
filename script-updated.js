@@ -5335,14 +5335,16 @@ class MobileHeader {
 
     updateLoginUI() {
         this.loginButtons.forEach(btn => {
-            const label = btn.querySelector('span');
+            const label = btn.querySelector('[data-login-label]');
             if (!label) return;
             if (this.bandSession) {
                 btn.classList.add('logged-in');
+                label.removeAttribute('data-i18n');
                 label.textContent = this.bandSession.nombre;
             } else {
                 btn.classList.remove('logged-in');
-                label.textContent = this.t('nav.login');
+                label.setAttribute('data-i18n', 'nav.login');
+                label.textContent = window.I18n?.t('nav.login') || 'ENTRAR';
             }
         });
     }

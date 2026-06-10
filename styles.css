@@ -742,10 +742,11 @@ body.mobile-menu-open {
 .nav-login-btn {
     display: inline-flex;
     align-items: center;
-    gap: var(--space-sm);
+    justify-content: center;
+    gap: 0.4rem;
     padding: var(--space-sm) var(--space-md);
-    background: transparent;
-    border: 1px solid rgba(255, 107, 0, 0.45);
+    background: rgba(255, 107, 0, 0.08);
+    border: 1px solid rgba(255, 107, 0, 0.55);
     border-radius: 50px;
     color: var(--text-primary);
     font-family: var(--font-primary);
@@ -756,31 +757,41 @@ body.mobile-menu-open {
     transition: var(--transition-normal);
     white-space: nowrap;
     flex-shrink: 0;
+    -webkit-appearance: none;
+    appearance: none;
+    line-height: 1;
 }
 
 .nav-login-btn i {
     color: #FF6B00;
     font-size: 0.85rem;
+    flex-shrink: 0;
 }
 
 .nav-login-btn:hover {
-    background: rgba(255, 107, 0, 0.12);
+    background: rgba(255, 107, 0, 0.16);
     border-color: #FF6B00;
     box-shadow: 0 0 12px rgba(255, 107, 0, 0.25);
 }
 
 .nav-login-btn.logged-in {
-    border-color: rgba(255, 107, 0, 0.65);
-    background: rgba(255, 107, 0, 0.1);
+    border-color: rgba(255, 107, 0, 0.75);
+    background: rgba(255, 107, 0, 0.14);
+    max-width: 9rem;
+}
+
+.nav-login-btn.logged-in span {
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .nav-login-btn-mobile {
     height: var(--mh-btn-size);
     min-height: var(--mh-btn-size);
+    min-width: var(--mh-btn-size);
     padding: 0 0.55rem;
     font-size: clamp(0.48rem, 2.4vw, 0.56rem);
     letter-spacing: 0.03em;
-    line-height: 1;
     border-radius: calc(var(--mh-btn-size) / 2);
 }
 
@@ -1880,6 +1891,7 @@ body.mobile-menu-open {
 }
 
 .hero-badge-row {
+    grid-column: 1 / -1;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1887,12 +1899,9 @@ body.mobile-menu-open {
     gap: var(--space-md);
 }
 
-.hero-badge-row .lang-selector-mobile {
-    display: none;
-}
-
 .lang-selector-hero {
     flex-shrink: 0;
+    margin-left: auto;
 }
 
 .hero-badge {
@@ -4478,21 +4487,8 @@ a.mobile-nav-item {
     }
 
     .hero-badge-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
         width: 100%;
         gap: var(--space-md);
-    }
-
-    .hero-badge-row .lang-selector-mobile {
-        display: flex;
-        flex-shrink: 0;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
-    }
-
-    .hero-badge-row .lang-selector-hero {
-        display: none;
     }
 
     .hero-badge {
@@ -4650,12 +4646,9 @@ a.mobile-nav-item {
     }
 
     .nav-login-btn-mobile {
-        padding: 0 0.5rem;
-    }
-
-    .hero-badge-row .lang-selector-mobile .lang-btn {
-        padding: 2px 6px;
-        font-size: 0.58rem;
+        padding: 0;
+        min-width: var(--mh-btn-size);
+        width: var(--mh-btn-size);
     }
 
     .badge-text {

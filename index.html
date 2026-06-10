@@ -47,7 +47,7 @@
 
             <button class="nav-login-btn nav-login-btn-mobile" id="loginBtnMobile" type="button" data-i18n-aria="nav.loginAria" aria-label="Abrir inicio de sesión">
                 <i class="fas fa-user" aria-hidden="true"></i>
-                <span data-i18n="nav.login">ENTRAR</span>
+                <span data-login-label data-i18n="nav.login">ENTRAR</span>
             </button>
             <button class="nav-register-btn nav-register-btn-mobile" id="registerBtnMobile" type="button" data-i18n="nav.register">REGÍSTRATE</button>
         </div>
@@ -249,7 +249,7 @@
             <div class="nav-controls">
                 <button class="nav-login-btn" id="loginBtn" type="button" data-i18n-aria="nav.loginAria" aria-label="Abrir inicio de sesión">
                     <i class="fas fa-user" aria-hidden="true"></i>
-                    <span data-i18n="nav.login">ENTRAR</span>
+                    <span data-login-label data-i18n="nav.login">ENTRAR</span>
                 </button>
                 <button class="nav-register-btn" id="registerBtn" type="button" data-i18n="nav.register">REGÍSTRATE</button>
                 <div class="header-player" id="headerPlayer">
@@ -310,22 +310,18 @@
         </div>
         
         <div class="hero-content">
-            <div class="hero-text-container">
-                <div class="hero-badge-row">
-                    <div class="hero-badge">
-                        <span class="badge-text" data-i18n="hero.badge">EN VIVO · SALTILLO</span>
-                        <div class="badge-glow"></div>
-                    </div>
-                    <div class="lang-selector lang-selector-hero" id="langSelector">
-                        <button class="lang-btn active" data-lang="es" type="button">ES</button>
-                        <button class="lang-btn" data-lang="en" type="button">EN</button>
-                    </div>
-                    <div class="lang-selector lang-selector-mobile" id="langSelectorMobile">
-                        <button class="lang-btn active" data-lang="es" type="button">ES</button>
-                        <button class="lang-btn" data-lang="en" type="button">EN</button>
-                    </div>
+            <div class="hero-badge-row">
+                <div class="hero-badge">
+                    <span class="badge-text" data-i18n="hero.badge">EN VIVO · SALTILLO</span>
+                    <div class="badge-glow"></div>
                 </div>
-                
+                <div class="lang-selector lang-selector-hero" id="langSelector">
+                    <button class="lang-btn active" data-lang="es" type="button">ES</button>
+                    <button class="lang-btn" data-lang="en" type="button">EN</button>
+                </div>
+            </div>
+
+            <div class="hero-text-container">
                 <h1 class="hero-title">
                     <span class="title-line" data-i18n="hero.title1">DESIERTO</span>
                     <span class="title-line" data-i18n="hero.title2">SONORO</span>
