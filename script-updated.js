@@ -131,6 +131,7 @@ class SaltilloApp {
         this._liveBroadcast = null;
         this._preLiveState = null;
         this._liveTimerInterval = null;
+        this._producerPlaybackTicker = null;
         
         // Configuración de audio
         this.streamUrl = 'song.mp3';
@@ -165,6 +166,7 @@ class SaltilloApp {
         this.refreshOpenModals();
         if (this.producerProfilePanel?.classList.contains('open')) {
             this.renderProducerProfile();
+            this.startProducerPlaybackTicker();
         }
         this.updateProducerLiveModalLabels();
     }
@@ -1227,6 +1229,7 @@ class SaltilloApp {
         });
 
         this.audio.addEventListener('ended', () => this.handleRadioTrackEnded());
+        this.audio.addEventListener('timeupdate', () => this.updateProducerPlaybackProgress());
     }
 
     async togglePlay() {
@@ -1248,6 +1251,7 @@ class SaltilloApp {
                 window.mobileHeader?.updatePlayState(true);
                 this.updateNowPlayingUI();
                 this.syncShazamUI();
+                if (document.getElementById('producerDeck')) this.renderProducerDeck();
                 return;
             }
 
@@ -1276,6 +1280,7 @@ class SaltilloApp {
             setTimeout(() => this.fetchNowPlayingMetadata(), 2500);
 
         this.updateNowPlayingUI();
+        if (document.getElementById('producerDeck')) this.renderProducerDeck();
         } catch (error) {
             console.error('Error reproduciendo audio:', error);
             this.showNotification(this.t('notifications.audioError'), 'error');
@@ -1316,6 +1321,7 @@ class SaltilloApp {
         window.mobileHeader?.updatePlayState(false);
         this.updateNowPlayingUI();
         this.syncShazamUI();
+        if (document.getElementById('producerDeck')) this.renderProducerDeck();
     }
 
     async tryFallbackStream() {
@@ -5416,6 +5422,7 @@ class SaltilloApp {
             this.startLiveLevelMeter();
             this.startLiveTimer();
             this.updateProducerLiveModalState();
+            this.renderProducerDeck();
             this.broadcastLiveState('start');
             this.showNotification(this.t('radio.producerLiveStarted'), 'success');
         } catch (error) {
@@ -5447,6 +5454,7 @@ class SaltilloApp {
 
         this._liveLevelBars.forEach(bar => { bar.style.height = '6px'; });
         this.updateProducerLiveModalState();
+        this.renderProducerDeck();
         this.broadcastLiveState('stop');
 
         if (notify) {
@@ -5459,6 +5467,7 @@ class SaltilloApp {
                 this.nowPlaying = null;
                 this.updateRadioLiveBar();
                 this.updateNowPlayingUI();
+                this.renderProducerDeck();
             });
         } else {
             this.isPlaying = false;
@@ -5467,6 +5476,7 @@ class SaltilloApp {
             window.mobileHeader?.updatePlayState(false);
             this.updateNowPlayingUI();
             this.syncShazamUI();
+            this.renderProducerDeck();
         }
     }
 
@@ -5503,9 +5513,11 @@ class SaltilloApp {
         this.producerProfileOverlay?.classList.add('open');
         this.producerProfileOverlay?.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
+        this.startProducerPlaybackTicker();
     }
 
     closeProducerProfile() {
+        this.stopProducerPlaybackTicker();
         if (this._liveBroadcast?.active) {
             this.stopLiveBroadcast(false);
             this.closeProducerLiveModal();
@@ -5552,8 +5564,19 @@ class SaltilloApp {
             <div class="bpp-content">
                 <div class="bpp-card full">
                     <h3 class="bpp-card-title"><i class="fas fa-headphones"></i> ${this.t('radio.producerQueueTitle')}</h3>
-                    <div class="bpp-tracks" id="producerQueueTracks"></div>
-                    <p class="bpp-empty" id="producerQueueEmpty">${this.t('radio.producerQueueEmpty')}</p>
+                    <div class="bpp-producer-deck" id="producerDeck">
+                        <div id="producerNowPlaying"></div>
+                        <div id="producerQueueControls"></div>
+                        <div class="bpp-producer-queue-wrap">
+                            <div class="bpp-producer-queue-head">
+                                <h4>${this.t('radio.producerQueueTitle')}</h4>
+                                <span class="bpp-producer-queue-count" id="producerQueueCount"></span>
+                                <button type="button" class="bpp-producer-queue-clear" id="producerClearQueueBtn">${this.t('radio.producerCtrlClearQueue')}</button>
+                            </div>
+                            <div class="bpp-tracks" id="producerQueueTracks"></div>
+                            <p class="bpp-empty" id="producerQueueEmpty">${this.t('radio.producerQueueEmpty')}</p>
+                        </div>
+                    </div>
                     <label class="bpp-upload-zone" for="producerMp3Input">
                         <i class="fas fa-cloud-upload-alt"></i>
                         <span>${this.t('radio.producerUpload')}</span>
@@ -5564,7 +5587,8 @@ class SaltilloApp {
         `;
 
         document.getElementById('producerGoLiveBtn')?.addEventListener('click', () => this.openProducerLiveModal());
-        this.renderProducerQueueUI();
+        this.bindProducerQueueControls();
+        this.renderProducerDeck();
     }
 
     logoutProducer() {
@@ -5592,51 +5616,356 @@ class SaltilloApp {
 
         const producerName = this.bandSession.nombre;
         mp3Files.forEach(file => {
-            this.radioQueue.push({
+            const track = {
                 id: `pq-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
                 title: file.name.replace(/\.mp3$/i, ''),
                 url: URL.createObjectURL(file),
-                producerName
-            });
+                producerName,
+                duration: null
+            };
+            this.radioQueue.push(track);
+            this.loadQueueTrackDuration(track);
         });
 
-        this.renderProducerQueueUI();
+        this.renderProducerDeck();
         this.showNotification(this.t('radio.producerAdded', { count: mp3Files.length }), 'success');
     }
 
-    renderProducerQueueUI() {
+    formatAudioTime(seconds) {
+        if (!Number.isFinite(seconds) || seconds < 0) return '--:--';
+        const total = Math.floor(seconds);
+        const min = Math.floor(total / 60);
+        const sec = total % 60;
+        return `${min}:${String(sec).padStart(2, '0')}`;
+    }
+
+    loadQueueTrackDuration(track) {
+        if (!track?.url) return;
+        const probe = new Audio();
+        probe.preload = 'metadata';
+        probe.addEventListener('loadedmetadata', () => {
+            if (Number.isFinite(probe.duration) && probe.duration > 0) {
+                track.duration = probe.duration;
+                this.renderProducerDeck();
+            }
+        });
+        probe.src = track.url;
+    }
+
+    getProducerPlaybackState() {
+        const idle = {
+            mode: 'idle',
+            typeLabel: this.t('radio.producerNowIdle'),
+            title: this.t('radio.producerNowIdle'),
+            subtitle: 'SALTILLO FM',
+            isPlaying: false,
+            progress: 0,
+            elapsed: 0,
+            remaining: null,
+            duration: null,
+            showProgress: false
+        };
+
+        if (this._radioMode === 'live' && this._liveBroadcast?.active) {
+            const elapsed = (Date.now() - (this._liveBroadcast.startedAt || Date.now())) / 1000;
+            return {
+                mode: 'live',
+                typeLabel: this.t('radio.producerNowLive'),
+                title: this.bandSession?.nombre || this.t('radio.producerLiveNowPlaying'),
+                subtitle: this._liveBroadcast.muted
+                    ? `${this.t('radio.producerLiveMute')} · SALTILLO FM`
+                    : 'SALTILLO FM',
+                isPlaying: this.isPlaying,
+                progress: 100,
+                elapsed,
+                remaining: null,
+                duration: null,
+                showProgress: true,
+                isLive: true
+            };
+        }
+
+        if (this._radioMode === 'queue' && this._currentQueueTrack) {
+            const duration = Number.isFinite(this.audio?.duration) && this.audio.duration > 0
+                ? this.audio.duration
+                : (this._currentQueueTrack.duration || 0);
+            const elapsed = this.audio?.currentTime || 0;
+            const remaining = duration > 0 ? Math.max(0, duration - elapsed) : null;
+            return {
+                mode: 'queue',
+                typeLabel: this.t('radio.producerNowQueued'),
+                title: this._currentQueueTrack.title,
+                subtitle: this._currentQueueTrack.producerName,
+                isPlaying: this.isPlaying,
+                progress: duration > 0 ? Math.min(100, (elapsed / duration) * 100) : 0,
+                elapsed,
+                remaining,
+                duration: duration || null,
+                showProgress: true
+            };
+        }
+
+        if (this.isPlaying || (this._radioMode === 'stream' && (this.audio?.currentTime > 0 || this.nowPlaying))) {
+            const duration = Number.isFinite(this.audio?.duration) && this.audio.duration > 0
+                ? this.audio.duration
+                : 0;
+            const elapsed = this.audio?.currentTime || 0;
+            const title = this.nowPlaying?.title || this.t('radio.nowTrack');
+            const subtitle = this.nowPlaying?.artist || this.t('radio.producerNowStream');
+            const remaining = duration > 0 ? Math.max(0, duration - elapsed) : null;
+            return {
+                mode: 'stream',
+                typeLabel: this.t('radio.producerNowStream'),
+                title,
+                subtitle,
+                isPlaying: this.isPlaying,
+                progress: duration > 0 ? Math.min(100, (elapsed / duration) * 100) : (this.isPlaying ? 100 : 0),
+                elapsed,
+                remaining,
+                duration: duration || null,
+                showProgress: this.isPlaying
+            };
+        }
+
+        return idle;
+    }
+
+    renderProducerNowPlaying() {
+        const el = document.getElementById('producerNowPlaying');
+        if (!el) return;
+
+        const state = this.getProducerPlaybackState();
+        const modClass = state.mode === 'live' ? ' bpp-producer-now--live'
+            : (state.isPlaying ? ' bpp-producer-now--playing' : '');
+        const typeMod = state.mode === 'live' ? ' bpp-producer-now-type--live' : '';
+        const typeIcon = state.mode === 'live' ? 'fa-circle'
+            : state.mode === 'queue' ? 'fa-music'
+            : state.isPlaying ? 'fa-tower-broadcast' : 'fa-pause';
+
+        const progressHtml = state.showProgress ? `
+            <div class="bpp-producer-progress-wrap">
+                <div class="bpp-producer-progress-bar">
+                    <div class="bpp-producer-progress-fill" id="producerNowProgress" style="width:${state.progress}%"></div>
+                </div>
+                <div class="bpp-producer-progress-times">
+                    <span>${state.mode === 'live' ? this.t('radio.producerLiveDuration') : this.t('radio.producerElapsed')}: <strong id="producerNowElapsed">${this.formatAudioTime(state.elapsed)}</strong></span>
+                    ${state.remaining != null
+                        ? `<span>${this.t('radio.producerRemaining')}: <strong id="producerNowRemaining">${this.formatAudioTime(state.remaining)}</strong></span>`
+                        : state.mode === 'live'
+                            ? `<span>${this.t('radio.producerLiveOnAir')}</span>`
+                            : `<span id="producerNowRemaining">—</span>`}
+                </div>
+            </div>
+        ` : '';
+
+        el.innerHTML = `
+            <div class="bpp-producer-now${modClass}">
+                <div class="bpp-producer-now-head">
+                    <div>
+                        <div class="bpp-producer-now-type${typeMod}">
+                            <i class="fas ${typeIcon}" aria-hidden="true"></i>
+                            ${this.escHtml(state.typeLabel)}
+                        </div>
+                        <div class="bpp-producer-now-title">${this.escHtml(state.title)}</div>
+                        <div class="bpp-producer-now-sub">${this.escHtml(state.subtitle)}</div>
+                    </div>
+                    <span class="bpp-producer-now-state${state.isPlaying ? ' is-playing' : ''}">
+                        ${state.isPlaying ? this.t('radio.live') : this.t('radio.producerNowPaused')}
+                    </span>
+                </div>
+                ${progressHtml}
+            </div>
+        `;
+    }
+
+    renderProducerQueueControls() {
+        const el = document.getElementById('producerQueueControls');
+        if (!el) return;
+
+        const isLive = this._radioMode === 'live' && this._liveBroadcast?.active;
+        const canSkip = isLive
+            ? false
+            : (this._radioMode === 'queue' && !!this._currentQueueTrack)
+                || (this._radioMode === 'stream' && this.radioQueue.length > 0);
+
+        el.innerHTML = `
+            <button type="button" class="bpp-producer-ctrl bpp-producer-ctrl--primary" id="producerCtrlPlayBtn">
+                <i class="fas fa-${this.isPlaying ? 'pause' : 'play'}" aria-hidden="true"></i>
+                <span>${this.isPlaying ? this.t('radio.producerCtrlPause') : this.t('radio.producerCtrlPlay')}</span>
+            </button>
+            <button type="button" class="bpp-producer-ctrl" id="producerCtrlSkipBtn"${canSkip ? '' : ' disabled'}>
+                <i class="fas fa-forward-step" aria-hidden="true"></i>
+                <span>${this.t('radio.producerCtrlSkip')}</span>
+            </button>
+            ${isLive ? `
+                <button type="button" class="bpp-producer-ctrl bpp-producer-ctrl--danger" id="producerCtrlStopLiveBtn">
+                    <i class="fas fa-stop" aria-hidden="true"></i>
+                    <span>${this.t('radio.producerCtrlStopLive')}</span>
+                </button>
+            ` : ''}
+        `;
+
+        bindTap(document.getElementById('producerCtrlPlayBtn'), () => this.producerTogglePlay());
+        bindTap(document.getElementById('producerCtrlSkipBtn'), () => this.producerSkipNext());
+        bindTap(document.getElementById('producerCtrlStopLiveBtn'), () => this.stopLiveBroadcast(true, true));
+    }
+
+    bindProducerQueueControls() {
+        document.getElementById('producerClearQueueBtn')?.addEventListener('click', () => this.producerClearQueue());
+    }
+
+    renderProducerQueueList() {
         const tracksEl = document.getElementById('producerQueueTracks');
         const emptyEl = document.getElementById('producerQueueEmpty');
+        const countEl = document.getElementById('producerQueueCount');
+        const clearBtn = document.getElementById('producerClearQueueBtn');
         if (!tracksEl) return;
 
-        const items = [];
-        if (this._currentQueueTrack) {
-            items.push({ track: this._currentQueueTrack, status: 'playing' });
-        }
-        this.radioQueue.forEach(track => items.push({ track, status: 'next' }));
-
+        const upcoming = [...this.radioQueue];
         tracksEl.innerHTML = '';
-        if (emptyEl) emptyEl.hidden = items.length > 0;
 
-        items.forEach(({ track, status }) => {
-            const row = document.createElement('div');
-            row.className = `bpp-track${status === 'playing' ? ' bpp-track--live' : ''}`;
-            const badge = status === 'playing'
-                ? this.t('radio.producerQueuePlaying')
-                : this.t('radio.producerQueueNext');
-            const badgeClass = status === 'playing' ? 'bpp-track-status' : 'bpp-track-status bpp-track-status--next';
-            row.innerHTML = `
-                <div class="bpp-track-play bpp-track-play--static" aria-hidden="true">
-                    <i class="fas fa-${status === 'playing' ? 'broadcast-tower' : 'music'}"></i>
-                </div>
-                <div class="bpp-track-info">
-                    <span class="bpp-track-title">${this.escHtml(track.title)}</span>
-                    <span class="bpp-track-meta">${this.escHtml(track.producerName)}</span>
-                </div>
-                <span class="${badgeClass}">${badge}</span>
-            `;
-            tracksEl.appendChild(row);
+        if (countEl) {
+            countEl.textContent = this.t('radio.producerQueueCount', { count: upcoming.length });
+        }
+        if (clearBtn) clearBtn.disabled = upcoming.length === 0;
+
+        const showEmpty = upcoming.length === 0 && !this._currentQueueTrack;
+        if (emptyEl) emptyEl.hidden = !showEmpty;
+
+        if (this._currentQueueTrack && this._radioMode === 'queue') {
+            const track = this._currentQueueTrack;
+            const dur = track.duration || (Number.isFinite(this.audio?.duration) ? this.audio.duration : null);
+            tracksEl.appendChild(this.createProducerQueueRow(track, {
+                position: 1,
+                badge: this.t('radio.producerQueuePlaying'),
+                badgeClass: 'bpp-track-status',
+                rowClass: ' bpp-track--live',
+                showRemove: false,
+                duration: dur
+            }));
+        }
+
+        upcoming.forEach((track, i) => {
+            const position = (this._currentQueueTrack && this._radioMode === 'queue' ? 2 : 1) + i;
+            tracksEl.appendChild(this.createProducerQueueRow(track, {
+                position,
+                badge: this.t('radio.producerQueueUpNext'),
+                badgeClass: 'bpp-track-status bpp-track-status--next',
+                rowClass: '',
+                showRemove: true,
+                duration: track.duration
+            }));
         });
+    }
+
+    createProducerQueueRow(track, opts) {
+        const row = document.createElement('div');
+        row.className = `bpp-track${opts.rowClass || ''}`;
+        row.dataset.trackId = track.id;
+        row.innerHTML = `
+            <span class="bpp-track-pos">${opts.position}</span>
+            <div class="bpp-track-play bpp-track-play--static" aria-hidden="true">
+                <i class="fas fa-music"></i>
+            </div>
+            <div class="bpp-track-info">
+                <span class="bpp-track-title">${this.escHtml(track.title)}</span>
+                <span class="bpp-track-meta">${this.escHtml(track.producerName)}</span>
+            </div>
+            <span class="bpp-track-dur">${opts.duration ? this.formatAudioTime(opts.duration) : '--:--'}</span>
+            <span class="${opts.badgeClass}">${opts.badge}</span>
+            ${opts.showRemove ? `
+                <button type="button" class="bpp-track-remove" data-remove-id="${track.id}" aria-label="${this.t('radio.producerCtrlRemove')}">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
+            ` : ''}
+        `;
+        row.querySelector('[data-remove-id]')?.addEventListener('click', () => {
+            this.producerRemoveFromQueue(track.id);
+        });
+        return row;
+    }
+
+    renderProducerDeck() {
+        this.renderProducerNowPlaying();
+        this.renderProducerQueueControls();
+        this.renderProducerQueueList();
+    }
+
+    renderProducerQueueUI() {
+        this.renderProducerDeck();
+    }
+
+    updateProducerPlaybackProgress() {
+        if (!document.getElementById('producerNowPlaying')) return;
+
+        const state = this.getProducerPlaybackState();
+        const progressEl = document.getElementById('producerNowProgress');
+        const elapsedEl = document.getElementById('producerNowElapsed');
+        const remainingEl = document.getElementById('producerNowRemaining');
+
+        if (progressEl) progressEl.style.width = `${state.progress}%`;
+        if (elapsedEl) elapsedEl.textContent = this.formatAudioTime(state.elapsed);
+        if (remainingEl && state.remaining != null) {
+            remainingEl.textContent = this.formatAudioTime(state.remaining);
+        }
+    }
+
+    startProducerPlaybackTicker() {
+        this.stopProducerPlaybackTicker();
+        this._producerPlaybackTicker = setInterval(() => {
+            if (!this.producerProfilePanel?.classList.contains('open')) return;
+            this.updateProducerPlaybackProgress();
+            if (this._radioMode === 'live' && this._liveBroadcast?.active) {
+                this.renderProducerNowPlaying();
+            }
+        }, 1000);
+    }
+
+    stopProducerPlaybackTicker() {
+        if (this._producerPlaybackTicker) {
+            clearInterval(this._producerPlaybackTicker);
+            this._producerPlaybackTicker = null;
+        }
+    }
+
+    async producerTogglePlay() {
+        await this.togglePlay();
+        this.renderProducerDeck();
+    }
+
+    producerSkipNext() {
+        if (this._radioMode === 'live') return;
+
+        if (this._radioMode === 'queue' && this._currentQueueTrack) {
+            this.showNotification(this.t('radio.producerSkipped'), 'info');
+            this.handleRadioTrackEnded();
+            return;
+        }
+
+        if (this._radioMode === 'stream' && this.radioQueue.length > 0) {
+            this.audio.pause();
+            this.isPlaying = true;
+            const next = this.radioQueue.shift();
+            this.playQueuedTrack(next);
+            this.showNotification(this.t('radio.producerSkipped'), 'info');
+        }
+    }
+
+    producerRemoveFromQueue(trackId) {
+        const idx = this.radioQueue.findIndex(t => t.id === trackId);
+        if (idx < 0) return;
+        const [removed] = this.radioQueue.splice(idx, 1);
+        if (removed?.url) URL.revokeObjectURL(removed.url);
+        this.renderProducerDeck();
+        this.showNotification(this.t('radio.producerRemovedFromQueue'), 'info');
+    }
+
+    producerClearQueue() {
+        if (!this.radioQueue.length) return;
+        this.radioQueue.forEach(t => { if (t.url) URL.revokeObjectURL(t.url); });
+        this.radioQueue = [];
+        this.renderProducerDeck();
+        this.showNotification(this.t('radio.producerQueueCleared'), 'info');
     }
 
     playQueuedTrack(track) {
@@ -5644,10 +5973,14 @@ class SaltilloApp {
 
         this._radioMode = 'queue';
         this._currentQueueTrack = track;
+        this.audio.srcObject = null;
         this.audio.src = track.url;
         this.setNowPlaying({ title: track.title, artist: track.producerName });
         this.audio.load();
-        this.renderProducerQueueUI();
+        this.isPlaying = true;
+        this.renderProducerDeck();
+        this.updateRadioLiveBar();
+        window.mobileHeader?.updatePlayState(true);
 
         return this.audio.play().catch(err => {
             console.error('Error reproduciendo pista en cola:', err);
@@ -5659,6 +5992,9 @@ class SaltilloApp {
         if (this._radioMode === 'live') return;
 
         if (this._currentQueueTrack) {
+            if (Number.isFinite(this.audio?.duration) && this.audio.duration > 0) {
+                this._currentQueueTrack.duration = this.audio.duration;
+            }
             URL.revokeObjectURL(this._currentQueueTrack.url);
             this._currentQueueTrack = null;
         }
@@ -5672,7 +6008,7 @@ class SaltilloApp {
         this._radioMode = 'stream';
         this.nowPlaying = null;
         this.updateNowPlayingUI();
-        this.renderProducerQueueUI();
+        this.renderProducerDeck();
 
         if (!this.isPlaying) return;
 
