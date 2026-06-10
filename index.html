@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="registro-banda-modal-styles.css">
     <link rel="stylesheet" href="registro-bar-modal-styles.css">
     <link rel="stylesheet" href="band-profile-panel.css">
+    <link rel="stylesheet" href="producer-live-modal.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Bebas+Neue&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -785,6 +786,60 @@
             </div>
         </div>
         <input type="file" class="bpp-hidden-input" id="producerMp3Input" accept="audio/mpeg,.mp3" multiple>
+    </div>
+
+    <!-- Modal broadcasting en vivo -->
+    <div class="producer-live-modal" id="producerLiveModal" role="dialog" aria-modal="true" aria-labelledby="producerLiveTitle" aria-hidden="true">
+        <div class="producer-live-backdrop" id="producerLiveBackdrop"></div>
+        <div class="producer-live-content">
+            <div class="producer-live-header">
+                <div class="producer-live-heading">
+                    <div class="producer-live-eyebrow" id="producerLiveEyebrow">
+                        <span class="producer-live-dot" hidden id="producerLiveDot"></span>
+                        <span id="producerLiveEyebrowText" data-i18n="radio.producerLiveStandby">STANDBY</span>
+                    </div>
+                    <h2 class="producer-live-title" id="producerLiveTitle" data-i18n="radio.producerLiveTitle">Broadcasting en vivo</h2>
+                    <p class="producer-live-subtitle" data-i18n="radio.producerLiveSubtitle">Transmite audio en directo a Radio Saltillo FM</p>
+                </div>
+                <button class="producer-live-close" id="closeProducerLive" type="button" data-i18n-aria="productos.profileClose" aria-label="Cerrar">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
+            </div>
+            <div class="producer-live-meter" id="producerLiveMeter" aria-hidden="true">
+                <span class="producer-live-bar"></span>
+                <span class="producer-live-bar"></span>
+                <span class="producer-live-bar"></span>
+                <span class="producer-live-bar"></span>
+                <span class="producer-live-bar"></span>
+                <span class="producer-live-bar"></span>
+                <span class="producer-live-bar"></span>
+                <span class="producer-live-bar"></span>
+                <span class="producer-live-bar"></span>
+                <span class="producer-live-bar"></span>
+                <span class="producer-live-bar"></span>
+                <span class="producer-live-bar"></span>
+            </div>
+            <p class="producer-live-status" id="producerLiveStatus" data-i18n="radio.producerLiveReady">Listo para transmitir</p>
+            <p class="producer-live-meta">
+                SALTILLO FM
+                <span class="producer-live-timer" id="producerLiveTimer" hidden>00:00</span>
+            </p>
+            <div class="producer-live-controls">
+                <button class="producer-live-btn" type="button" id="producerLiveMuteBtn" hidden>
+                    <i class="fas fa-microphone" aria-hidden="true"></i>
+                    <span data-i18n="radio.producerLiveMute">Silenciar</span>
+                </button>
+                <button class="producer-live-btn producer-live-btn--primary" type="button" id="producerLiveStartBtn">
+                    <i class="fas fa-circle" aria-hidden="true"></i>
+                    <span data-i18n="radio.producerLiveStart">Iniciar transmisión</span>
+                </button>
+                <button class="producer-live-btn producer-live-btn--danger" type="button" id="producerLiveStopBtn" hidden>
+                    <i class="fas fa-stop" aria-hidden="true"></i>
+                    <span data-i18n="radio.producerLiveStop">Terminar transmisión</span>
+                </button>
+            </div>
+            <p class="producer-live-note" data-i18n="radio.producerLiveNote">Demo local: el micrófono se enruta al reproductor de radio en este navegador. Sin backend aún.</p>
+        </div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>

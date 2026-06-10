@@ -128,6 +128,9 @@ class SaltilloApp {
         this.radioQueue = [];
         this._radioMode = 'stream';
         this._currentQueueTrack = null;
+        this._liveBroadcast = null;
+        this._preLiveState = null;
+        this._liveTimerInterval = null;
         
         // Configuración de audio
         this.streamUrl = 'song.mp3';
@@ -163,6 +166,7 @@ class SaltilloApp {
         if (this.producerProfilePanel?.classList.contains('open')) {
             this.renderProducerProfile();
         }
+        this.updateProducerLiveModalLabels();
     }
 
     refreshOpenModals() {
@@ -187,6 +191,7 @@ class SaltilloApp {
         if (typeof window.seedMockProducers === 'function') window.seedMockProducers();
         this.initLogin();
         this.initProducerPanel();
+        this.initLiveBroadcastChannel();
         
         // Verificar soporte de APIs
         this.checkAPISupport();
@@ -1234,7 +1239,19 @@ class SaltilloApp {
 
     async playAudio() {
         try {
-            if (!this.audio.src) {
+            if (this._radioMode === 'live' && this._liveBroadcast?.stream) {
+                this.audio.src = '';
+                this.audio.srcObject = this._liveBroadcast.stream;
+                await this.audio.play();
+                this.isPlaying = true;
+                this.updateRadioLiveBar();
+                window.mobileHeader?.updatePlayState(true);
+                this.updateNowPlayingUI();
+                this.syncShazamUI();
+                return;
+            }
+
+            if (!this.audio.src && !this.audio.srcObject) {
                 this.audio.src = this.streamUrl;
             }
             
@@ -1270,9 +1287,15 @@ class SaltilloApp {
             this.stopShazam();
         }
 
+        if (this._radioMode === 'live') {
+            this.stopLiveBroadcast(false, false);
+        }
+
         if (this.audio) {
             this.audio.pause();
-            this.audio.currentTime = 0;
+            if (this._radioMode !== 'live') {
+                this.audio.currentTime = 0;
+            }
         }
         
         this.isPlaying = false;
@@ -5158,6 +5181,311 @@ class SaltilloApp {
             this.handleProducerMp3Upload(e.target.files);
             e.target.value = '';
         });
+
+        this.initProducerLiveModal();
+    }
+
+    initProducerLiveModal() {
+        this.producerLiveModal = document.getElementById('producerLiveModal');
+        this.producerLiveMeter = document.getElementById('producerLiveMeter');
+        this.producerLiveStatus = document.getElementById('producerLiveStatus');
+        this.producerLiveTimer = document.getElementById('producerLiveTimer');
+        this.producerLiveStartBtn = document.getElementById('producerLiveStartBtn');
+        this.producerLiveStopBtn = document.getElementById('producerLiveStopBtn');
+        this.producerLiveMuteBtn = document.getElementById('producerLiveMuteBtn');
+        this.producerLiveEyebrow = document.getElementById('producerLiveEyebrow');
+        this.producerLiveEyebrowText = document.getElementById('producerLiveEyebrowText');
+        this.producerLiveDot = document.getElementById('producerLiveDot');
+        this._liveLevelBars = this.producerLiveMeter?.querySelectorAll('.producer-live-bar') || [];
+
+        bindTap(document.getElementById('closeProducerLive'), () => this.closeProducerLiveModal());
+        document.getElementById('producerLiveBackdrop')?.addEventListener('click', () => this.closeProducerLiveModal());
+        bindTap(this.producerLiveStartBtn, () => this.startLiveBroadcast());
+        bindTap(this.producerLiveStopBtn, () => this.stopLiveBroadcast(true, true));
+        bindTap(this.producerLiveMuteBtn, () => this.toggleLiveMute());
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.producerLiveModal?.classList.contains('open')) {
+                this.closeProducerLiveModal();
+            }
+        });
+    }
+
+    initLiveBroadcastChannel() {
+        if (typeof BroadcastChannel === 'undefined') return;
+        this._liveBroadcastChannel = new BroadcastChannel('desiertoSonoro_liveRadio');
+        this._liveBroadcastChannel.onmessage = (e) => {
+            const data = e.data || {};
+            if (data.type === 'live-start' && !this._liveBroadcast?.active) {
+                this.applyRemoteLiveUI(data.producer, data.artist);
+            } else if (data.type === 'live-stop' && !this._liveBroadcast?.active) {
+                this.clearRemoteLiveUI();
+            }
+        };
+    }
+
+    openProducerLiveModal() {
+        if (!this.isProducerSession() || !this.producerLiveModal) return;
+        this.updateProducerLiveModalLabels();
+        this.updateProducerLiveModalState();
+        this.producerLiveModal.classList.add('open');
+        this.producerLiveModal.setAttribute('aria-hidden', 'false');
+    }
+
+    closeProducerLiveModal() {
+        if (!this.producerLiveModal) return;
+        this.producerLiveModal.classList.remove('open');
+        this.producerLiveModal.setAttribute('aria-hidden', 'true');
+    }
+
+    updateProducerLiveModalLabels() {
+        if (!this.producerLiveModal) return;
+        const muteLabel = this.producerLiveMuteBtn?.querySelector('span');
+        if (muteLabel) {
+            muteLabel.textContent = this._liveBroadcast?.muted
+                ? this.t('radio.producerLiveUnmute')
+                : this.t('radio.producerLiveMute');
+        }
+    }
+
+    updateProducerLiveModalState() {
+        const isLive = !!this._liveBroadcast?.active;
+
+        this.producerLiveEyebrow?.classList.toggle('is-live', isLive);
+        if (this.producerLiveDot) this.producerLiveDot.hidden = !isLive;
+        if (this.producerLiveEyebrowText) {
+            this.producerLiveEyebrowText.textContent = isLive
+                ? this.t('radio.producerLiveOnAir')
+                : this.t('radio.producerLiveStandby');
+        }
+        if (this.producerLiveStartBtn) this.producerLiveStartBtn.hidden = isLive;
+        if (this.producerLiveStopBtn) this.producerLiveStopBtn.hidden = !isLive;
+        if (this.producerLiveMuteBtn) this.producerLiveMuteBtn.hidden = !isLive;
+        if (this.producerLiveTimer) this.producerLiveTimer.hidden = !isLive;
+        if (this.producerLiveStatus) {
+            this.producerLiveStatus.textContent = isLive
+                ? this.t('radio.producerLiveActive')
+                : this.t('radio.producerLiveReady');
+        }
+
+        document.getElementById('producerGoLiveBtn')?.classList.toggle('is-live', isLive);
+        this.updateProducerLiveModalLabels();
+    }
+
+    formatLiveTimer(ms) {
+        const totalSec = Math.floor(ms / 1000);
+        const min = String(Math.floor(totalSec / 60)).padStart(2, '0');
+        const sec = String(totalSec % 60).padStart(2, '0');
+        return `${min}:${sec}`;
+    }
+
+    startLiveLevelMeter() {
+        if (!this._liveBroadcast?.analyser || !this._liveLevelBars.length) return;
+
+        const analyser = this._liveBroadcast.analyser;
+        const data = new Uint8Array(analyser.frequencyBinCount);
+
+        const tick = () => {
+            if (!this._liveBroadcast?.active) return;
+            analyser.getByteFrequencyData(data);
+            this._liveLevelBars.forEach((bar, i) => {
+                const sample = data[i * 2] || 0;
+                const height = Math.max(6, Math.round((sample / 255) * 56));
+                bar.style.height = `${height}px`;
+            });
+            this._liveBroadcast.rafId = requestAnimationFrame(tick);
+        };
+
+        this._liveBroadcast.rafId = requestAnimationFrame(tick);
+    }
+
+    startLiveTimer() {
+        this.stopLiveTimer();
+        const startedAt = this._liveBroadcast?.startedAt || Date.now();
+        this._liveTimerInterval = setInterval(() => {
+            if (!this._liveBroadcast?.active || !this.producerLiveTimer) return;
+            this.producerLiveTimer.textContent = this.formatLiveTimer(Date.now() - startedAt);
+        }, 1000);
+        if (this.producerLiveTimer) {
+            this.producerLiveTimer.textContent = this.formatLiveTimer(0);
+        }
+    }
+
+    stopLiveTimer() {
+        if (this._liveTimerInterval) {
+            clearInterval(this._liveTimerInterval);
+            this._liveTimerInterval = null;
+        }
+    }
+
+    broadcastLiveState(type) {
+        const payload = type === 'start'
+            ? {
+                type: 'live-start',
+                producer: this.bandSession?.nombre,
+                artist: this.t('radio.producerLiveNowPlaying')
+            }
+            : { type: 'live-stop' };
+
+        this._liveBroadcastChannel?.postMessage(payload);
+
+        try {
+            if (type === 'start') {
+                localStorage.setItem('desiertoSonoro_liveRadio', JSON.stringify({
+                    active: true,
+                    producer: this.bandSession?.nombre,
+                    artist: this.t('radio.producerLiveNowPlaying'),
+                    at: Date.now()
+                }));
+            } else {
+                localStorage.removeItem('desiertoSonoro_liveRadio');
+            }
+        } catch (_) { /* ignore */ }
+    }
+
+    applyRemoteLiveUI(producer, artist) {
+        this.setNowPlaying({
+            title: producer || this.t('radio.producerLiveNowPlaying'),
+            artist: artist || this.t('radio.mobileLive')
+        });
+        this.isPlaying = true;
+        this.updateRadioLiveBar();
+        this.updateNowPlayingUI();
+    }
+
+    clearRemoteLiveUI() {
+        if (this._liveBroadcast?.active) return;
+        this.nowPlaying = null;
+        this.updateNowPlayingUI();
+    }
+
+    async startLiveBroadcast() {
+        if (!this.isProducerSession() || this._liveBroadcast?.active) return;
+        if (!navigator.mediaDevices?.getUserMedia) {
+            this.showNotification(this.t('radio.producerLiveMicError'), 'error');
+            return;
+        }
+
+        if (this.producerLiveStatus) {
+            this.producerLiveStatus.textContent = this.t('radio.producerLiveConnecting');
+        }
+        if (this.producerLiveStartBtn) this.producerLiveStartBtn.disabled = true;
+
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+            });
+
+            this._preLiveState = {
+                src: this.audio.src,
+                srcObject: this.audio.srcObject,
+                radioMode: this._radioMode,
+                wasPlaying: this.isPlaying
+            };
+
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const source = audioCtx.createMediaStreamSource(stream);
+            const analyser = audioCtx.createAnalyser();
+            analyser.fftSize = 128;
+            source.connect(analyser);
+
+            this._liveBroadcast = {
+                active: true,
+                stream,
+                audioCtx,
+                analyser,
+                muted: false,
+                startedAt: Date.now()
+            };
+
+            this.audio.pause();
+            this.audio.src = '';
+            this.audio.srcObject = stream;
+            await this.audio.play();
+
+            this.isPlaying = true;
+            this._radioMode = 'live';
+            this.setNowPlaying({
+                title: this.bandSession.nombre,
+                artist: this.t('radio.producerLiveNowPlaying')
+            });
+            this.updateRadioLiveBar();
+            window.mobileHeader?.updatePlayState(true);
+            this.syncShazamUI();
+
+            this.startLiveLevelMeter();
+            this.startLiveTimer();
+            this.updateProducerLiveModalState();
+            this.broadcastLiveState('start');
+            this.showNotification(this.t('radio.producerLiveStarted'), 'success');
+        } catch (error) {
+            console.error('Error iniciando transmisión en vivo:', error);
+            this.showNotification(this.t('radio.producerLiveMicError'), 'error');
+            if (this.producerLiveStatus) {
+                this.producerLiveStatus.textContent = this.t('radio.producerLiveReady');
+            }
+        } finally {
+            if (this.producerLiveStartBtn) this.producerLiveStartBtn.disabled = false;
+        }
+    }
+
+    stopLiveBroadcast(notify = true, resumeAfter = false) {
+        if (!this._liveBroadcast?.active) return;
+
+        if (this._liveBroadcast.rafId) cancelAnimationFrame(this._liveBroadcast.rafId);
+        this._liveBroadcast.stream?.getTracks().forEach(track => track.stop());
+        this._liveBroadcast.audioCtx?.close().catch(() => {});
+
+        this._liveBroadcast = null;
+        this.stopLiveTimer();
+
+        this.audio.pause();
+        this.audio.srcObject = null;
+        this.audio.src = this._preLiveState?.src || this.streamUrl;
+        this._radioMode = this._preLiveState?.radioMode || 'stream';
+        this._preLiveState = null;
+
+        this._liveLevelBars.forEach(bar => { bar.style.height = '6px'; });
+        this.updateProducerLiveModalState();
+        this.broadcastLiveState('stop');
+
+        if (notify) {
+            this.showNotification(this.t('radio.producerLiveStopped'), 'info');
+        }
+
+        if (resumeAfter) {
+            this.playAudio().catch(() => {
+                this.isPlaying = false;
+                this.nowPlaying = null;
+                this.updateRadioLiveBar();
+                this.updateNowPlayingUI();
+            });
+        } else {
+            this.isPlaying = false;
+            this.nowPlaying = null;
+            this.updateRadioLiveBar();
+            window.mobileHeader?.updatePlayState(false);
+            this.updateNowPlayingUI();
+            this.syncShazamUI();
+        }
+    }
+
+    toggleLiveMute() {
+        if (!this._liveBroadcast?.active) return;
+        const track = this._liveBroadcast.stream?.getAudioTracks()[0];
+        if (!track) return;
+
+        this._liveBroadcast.muted = !this._liveBroadcast.muted;
+        track.enabled = !this._liveBroadcast.muted;
+
+        const icon = this.producerLiveMuteBtn?.querySelector('i');
+        const label = this.producerLiveMuteBtn?.querySelector('span');
+        if (icon) icon.className = this._liveBroadcast.muted ? 'fas fa-microphone-slash' : 'fas fa-microphone';
+        if (label) {
+            label.textContent = this._liveBroadcast.muted
+                ? this.t('radio.producerLiveUnmute')
+                : this.t('radio.producerLiveMute');
+        }
     }
 
     escHtml(str) {
@@ -5178,6 +5506,10 @@ class SaltilloApp {
     }
 
     closeProducerProfile() {
+        if (this._liveBroadcast?.active) {
+            this.stopLiveBroadcast(false);
+            this.closeProducerLiveModal();
+        }
         this.producerProfilePanel?.classList.remove('open');
         this.producerProfileOverlay?.classList.remove('open');
         this.producerProfileOverlay?.setAttribute('aria-hidden', 'true');
@@ -5209,6 +5541,10 @@ class SaltilloApp {
                             <h1 class="bpp-name">${this.escHtml(session.nombre)}</h1>
                             ${session.email ? `<p class="bpp-producer-email">${this.escHtml(session.email)}</p>` : ''}
                             <p class="bpp-producer-desc">${this.t('radio.producerDesc')}</p>
+                            <button type="button" class="bpp-go-live-btn${this._liveBroadcast?.active ? ' is-live' : ''}" id="producerGoLiveBtn">
+                                <i class="fas fa-circle" aria-hidden="true"></i>
+                                ${this.t('radio.producerGoLive')}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -5227,10 +5563,13 @@ class SaltilloApp {
             </div>
         `;
 
+        document.getElementById('producerGoLiveBtn')?.addEventListener('click', () => this.openProducerLiveModal());
         this.renderProducerQueueUI();
     }
 
     logoutProducer() {
+        this.stopLiveBroadcast(false);
+        this.closeProducerLiveModal();
         this.bandSession = null;
         try {
             localStorage.removeItem('desiertoSonoro_bandSession');
@@ -5317,6 +5656,8 @@ class SaltilloApp {
     }
 
     handleRadioTrackEnded() {
+        if (this._radioMode === 'live') return;
+
         if (this._currentQueueTrack) {
             URL.revokeObjectURL(this._currentQueueTrack.url);
             this._currentQueueTrack = null;
