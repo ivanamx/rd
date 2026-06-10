@@ -13,6 +13,8 @@
                 radio: 'RADIO',
                 bands: 'BANDAS',
                 register: 'REGÍSTRATE',
+                login: 'ENTRAR',
+                loginAria: 'Abrir inicio de sesión',
                 products: 'PRODUCTOS',
                 guia: 'ÚNETE A LA ESCENA',
                 estudio: 'ESTUDIO',
@@ -577,6 +579,8 @@
                 radio: 'RADIO',
                 bands: 'BANDS',
                 register: 'SIGN UP',
+                login: 'LOG IN',
+                loginAria: 'Open login',
                 products: 'PRODUCTS',
                 guia: 'JOIN THE SCENE',
                 estudio: 'STUDIO',
@@ -1174,7 +1178,7 @@
                         commission: {
                             rate: '10%',
                             title: 'Comisión justa, solo cuando cobras',
-                            body: 'Retenemos 10% únicamente en reservas confirmadas y pagadas. Cero costo de registro, cero cuota fija: ganamos cuando tú ganas.',
+                            body: 'Retenemos 10% únicamente en reservas confirmadas y pagadas.',
                             example: 'Ejemplo: reserva de $6,500 MXN → recibes $5,850 MXN en tu cuenta.'
                         },
                         potential: '90%', potentialLabel: 'es tuyo en cada reserva'
@@ -1269,7 +1273,7 @@
                         commission: {
                             rate: '10%',
                             title: 'Fair fee, only when you get paid',
-                            body: 'We take 10% only on confirmed, paid bookings. Zero signup cost, zero fixed fees — we win when you win.',
+                            body: 'We take 10% only on confirmed, paid bookings.',
                             example: 'Example: a $6,500 MXN booking → you receive $5,850 MXN.'
                         },
                         potential: '90%', potentialLabel: 'is yours on every booking'

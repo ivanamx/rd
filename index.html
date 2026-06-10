@@ -45,6 +45,10 @@
                 <div class="mobile-logo-accent"></div>
             </div>
 
+            <button class="nav-login-btn nav-login-btn-mobile" id="loginBtnMobile" type="button" data-i18n-aria="nav.loginAria" aria-label="Abrir inicio de sesión">
+                <i class="fas fa-user" aria-hidden="true"></i>
+                <span data-i18n="nav.login">ENTRAR</span>
+            </button>
             <button class="nav-register-btn nav-register-btn-mobile" id="registerBtnMobile" type="button" data-i18n="nav.register">REGÍSTRATE</button>
         </div>
 
@@ -104,11 +108,6 @@
                     <button class="mobile-nav-item" type="button" data-section="hero">
                         <i class="fas fa-home mobile-nav-icon"></i>
                         <span class="mobile-nav-text" data-i18n="nav.home">INICIO</span>
-                        <i class="fas fa-chevron-right mobile-nav-arrow"></i>
-                    </button>
-                    <button class="mobile-nav-item" type="button" data-section="radio">
-                        <i class="fas fa-broadcast-tower mobile-nav-icon"></i>
-                        <span class="mobile-nav-text" data-i18n="nav.radio">RADIO</span>
                         <i class="fas fa-chevron-right mobile-nav-arrow"></i>
                     </button>
                     <button class="mobile-nav-item" type="button" data-section="guia">
@@ -238,10 +237,6 @@
                     <span class="nav-text" data-i18n="nav.home">INICIO</span>
                     <div class="nav-indicator"></div>
                 </div>
-                <div class="nav-item" data-section="radio">
-                    <span class="nav-text" data-i18n="nav.radio">RADIO</span>
-                    <div class="nav-indicator"></div>
-                </div>
                 <div class="nav-item" data-section="bandas" data-modal="true">
                     <span class="nav-text" data-i18n="nav.bands">BANDAS</span>
                     <div class="nav-indicator"></div>
@@ -252,11 +247,11 @@
                 </div>
             </div>
             <div class="nav-controls">
+                <button class="nav-login-btn" id="loginBtn" type="button" data-i18n-aria="nav.loginAria" aria-label="Abrir inicio de sesión">
+                    <i class="fas fa-user" aria-hidden="true"></i>
+                    <span data-i18n="nav.login">ENTRAR</span>
+                </button>
                 <button class="nav-register-btn" id="registerBtn" type="button" data-i18n="nav.register">REGÍSTRATE</button>
-                <div class="lang-selector" id="langSelector">
-                    <button class="lang-btn active" data-lang="es" type="button">ES</button>
-                    <button class="lang-btn" data-lang="en" type="button">EN</button>
-                </div>
                 <div class="header-player" id="headerPlayer">
                     <div class="header-player-track" aria-live="polite">
                         <span class="header-player-title" id="desktopNowTitle" data-i18n="radio.mobileIdleTitle">Radio Saltillo</span>
@@ -321,6 +316,10 @@
                         <span class="badge-text" data-i18n="hero.badge">EN VIVO · SALTILLO</span>
                         <div class="badge-glow"></div>
                     </div>
+                    <div class="lang-selector lang-selector-hero" id="langSelector">
+                        <button class="lang-btn active" data-lang="es" type="button">ES</button>
+                        <button class="lang-btn" data-lang="en" type="button">EN</button>
+                    </div>
                     <div class="lang-selector lang-selector-mobile" id="langSelectorMobile">
                         <button class="lang-btn active" data-lang="es" type="button">ES</button>
                         <button class="lang-btn" data-lang="en" type="button">EN</button>
@@ -382,15 +381,6 @@
         </div>
         
         <div class="radio-container">
-            <div class="section-header-experimental">
-                <div class="header-number">01</div>
-                <h2 class="section-title">
-                    <span class="title-main" data-i18n="radio.titleMain">RADIO</span>
-                    <span class="title-sub" data-i18n="radio.titleSub">SALTILLO</span>
-                </h2>
-                <div class="header-line"></div>
-            </div>
-            
             <div class="radio-showcase">
                 <p class="radio-tagline" data-i18n="radio.tagline">Streaming en vivo · Música local · Cultura del desierto</p>
 
@@ -733,8 +723,55 @@
         </div>
     </button>
 
+    <!-- Modal login -->
+    <div class="login-modal" id="loginModal" role="dialog" aria-modal="true" aria-labelledby="loginModalTitle">
+        <div class="login-modal-content">
+            <div class="login-modal-header">
+                <div>
+                    <div class="login-modal-eyebrow">Saltillo</div>
+                    <h2 class="login-modal-title" id="loginModalTitle" data-i18n="productos.loginTitle">Inicia sesión</h2>
+                    <p class="login-modal-subtitle" data-i18n="productos.loginSubtitle">Accede a tu cuenta del marketplace creativo</p>
+                </div>
+                <button class="close-login" id="closeLogin" type="button" data-i18n-aria="productos.loginClose" aria-label="Cerrar">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
+            </div>
+            <form class="login-form" id="loginForm" novalidate>
+                <div class="login-field">
+                    <label class="login-label" for="loginIdentifier" data-i18n="productos.loginIdentifier">Email o nombre de banda</label>
+                    <div class="login-input-wrap">
+                        <i class="fas fa-user login-input-icon" aria-hidden="true"></i>
+                        <input type="text" class="login-input" id="loginIdentifier" name="identifier" autocomplete="username" data-i18n-placeholder="productos.loginIdentifierPlaceholder" placeholder="tu@email.com o Ej. Los del Desierto" required>
+                    </div>
+                </div>
+                <div class="login-field">
+                    <label class="login-label" for="loginPassword" data-i18n="productos.loginPassword">Contraseña</label>
+                    <div class="login-input-wrap">
+                        <i class="fas fa-lock login-input-icon" aria-hidden="true"></i>
+                        <input type="password" class="login-input" id="loginPassword" name="password" autocomplete="current-password" data-i18n-placeholder="productos.loginPasswordPlaceholder" placeholder="Tu contraseña" required minlength="6">
+                        <button class="login-toggle-pw" type="button" id="togglePassword" aria-label="Mostrar contraseña">
+                            <i class="fas fa-eye" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" class="login-submit">
+                    <i class="fas fa-right-to-bracket" aria-hidden="true"></i>
+                    <span data-i18n="productos.loginSubmit">Entrar</span>
+                </button>
+            </form>
+            <div class="login-footer">
+                <button type="button" class="login-forgot" id="loginForgotBtn" data-i18n="productos.loginForgot">¿Olvidaste tu contraseña?</button>
+                <p class="login-register">
+                    <span data-i18n="productos.loginNoAccount">¿No tienes cuenta?</span>
+                    <button type="button" id="loginRegisterBtn" data-i18n="productos.loginRegister">Regístrate</button>
+                </p>
+            </div>
+        </div>
+    </div>
+
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="mock-data.js"></script>
+    <script src="mock-bands.js"></script>
     <script src="i18n.js"></script>
     <script src="script-updated.js"></script>
 </body>
