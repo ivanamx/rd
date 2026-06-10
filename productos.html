@@ -1916,7 +1916,7 @@
             </div>
             <button class="login-btn" id="loginBtn" type="button" data-i18n-aria="productos.loginAria" aria-label="Abrir inicio de sesión">
                 <i class="fas fa-user" aria-hidden="true"></i>
-                <span data-i18n="productos.login">Iniciar sesión</span>
+                <span data-i18n="productos.login">Entrar</span>
             </button>
             <button class="cart-toggle" id="cartToggle" data-i18n-aria="productos.openCart" aria-label="Abrir carrito de compras">
                 <i class="fas fa-shopping-cart" aria-hidden="true"></i>
@@ -2211,6 +2211,7 @@
 
     <script src="mock-bands.js"></script>
     <script src="i18n.js"></script>
+    <script src="band-shows-calendar.js"></script>
     <script>
         const CAT_I18N = {
             playeras: 'productos.catShirts',
@@ -2991,8 +2992,11 @@
                     </div>
                 </div>
                 <div class="bpp-content">
-                    <div class="bpp-card">
-                        <h3 class="bpp-card-title"><i class="fas fa-calendar-check"></i> ${t('productos.profileUpcoming')}</h3>
+                    <div class="bpp-card" id="bppUpcomingCard">
+                        <div class="bpp-card-header">
+                            <h3 class="bpp-card-title"><i class="fas fa-calendar-check"></i> ${t('productos.profileUpcoming')}</h3>
+                            ${profile.proximosShows?.length && window.BandShowsCalendar ? window.BandShowsCalendar.renderCardHeaderBtn() : ''}
+                        </div>
                         <div class="bpp-shows-list">${renderUpcomingShows(profile.proximosShows)}</div>
                     </div>
                     <div class="bpp-card">
@@ -3121,6 +3125,10 @@
             });
 
             initHeroCoverVideo();
+            window.BandShowsCalendar?.bindShowsCalendar(
+                bandProfileContent.querySelector('#bppUpcomingCard'),
+                profile.proximosShows
+            );
             bindProfileEditors();
         }
 

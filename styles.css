@@ -1763,9 +1763,74 @@ body.mobile-menu-open {
 
 @media (min-width: 769px) {
     .hero-experimental {
-        /* Dejar espacio bajo la nav fija para que el badge no quede tapado */
-        padding-top: calc(5.25rem + var(--space-md));
+        height: 100svh;
+        min-height: 100svh;
+        max-height: 100svh;
         box-sizing: border-box;
+        overflow: hidden;
+        align-items: flex-start;
+        justify-content: center;
+        /* Espacio bajo la nav fija sin empujar el badge fuera del viewport */
+        padding-top: 5rem;
+        padding-bottom: 2.25rem;
+    }
+
+    .hero-content {
+        gap: var(--space-md) var(--space-3xl);
+        margin-top: clamp(0.25rem, 2vh, 1.25rem);
+        width: 100%;
+    }
+
+    .hero-badge-row {
+        margin-bottom: 0;
+    }
+
+    .hero-text-container {
+        gap: var(--space-md);
+    }
+
+    .hero-title {
+        font-size: clamp(2.75rem, 4.8vw, 5.25rem);
+        line-height: 0.92;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+        line-height: 1.55;
+        padding: 0.7rem 1rem;
+        max-width: 480px;
+    }
+
+    .hero-interactive {
+        gap: var(--space-md);
+    }
+
+    .hero-visual-container {
+        height: clamp(300px, 36vh, 420px);
+    }
+
+    .visual-canvas {
+        width: clamp(260px, 26vw, 340px);
+        height: clamp(260px, 26vw, 340px);
+    }
+
+    .ring-1 {
+        width: 80px;
+        height: 80px;
+    }
+
+    .ring-2 {
+        width: 120px;
+        height: 120px;
+    }
+
+    .ring-3 {
+        width: 160px;
+        height: 160px;
+    }
+
+    .scroll-indicator {
+        bottom: var(--space-md);
     }
 }
 

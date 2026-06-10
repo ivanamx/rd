@@ -357,8 +357,11 @@
             ${statsHtml}
             <div class="bpp-content">
                 ${profile.proximosShows.length ? `
-                    <div class="bpp-card">
-                        <h3 class="bpp-card-title"><i class="fas fa-calendar-check"></i> ${t('productos.profileUpcoming')}</h3>
+                    <div class="bpp-card" id="bppUpcomingCard">
+                        <div class="bpp-card-header">
+                            <h3 class="bpp-card-title"><i class="fas fa-calendar-check"></i> ${t('productos.profileUpcoming')}</h3>
+                            ${global.BandShowsCalendar ? global.BandShowsCalendar.renderCardHeaderBtn() : ''}
+                        </div>
                         <div class="bpp-shows-list">${renderUpcomingShows(profile.proximosShows)}</div>
                     </div>
                 ` : ''}
@@ -392,6 +395,10 @@
         `;
 
         bindEvents(container, profile, options);
+        global.BandShowsCalendar?.bindShowsCalendar(
+            container.querySelector('#bppUpcomingCard'),
+            profile.proximosShows
+        );
         initHeroVideo(container);
         return profile;
     }
