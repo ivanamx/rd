@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="mapa-modal-styles.css">
     <link rel="stylesheet" href="registro-banda-modal-styles.css">
     <link rel="stylesheet" href="registro-bar-modal-styles.css">
+    <link rel="stylesheet" href="band-profile-panel.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Bebas+Neue&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -399,30 +400,6 @@
                     </div>
                 </div>
 
-                <div class="producer-panel" id="producerPanel" hidden>
-                    <div class="producer-panel-header">
-                        <div class="producer-panel-intro">
-                            <span class="producer-panel-badge" data-i18n="radio.producerBadge">Productor de radio</span>
-                            <h3 class="producer-panel-title" data-i18n="radio.producerTitle">Panel de producción</h3>
-                            <p class="producer-panel-desc" data-i18n="radio.producerDesc">Sube MP3 desde tu dispositivo. Se encolarán para sonar después de la pista actual.</p>
-                        </div>
-                        <button type="button" class="producer-logout-btn" id="producerLogoutBtn" data-i18n="radio.producerLogout">Cerrar sesión</button>
-                    </div>
-                    <div class="producer-panel-body">
-                        <label class="producer-upload-zone" for="producerMp3Input">
-                            <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
-                            <span class="producer-upload-label" data-i18n="radio.producerUpload">Agregar MP3</span>
-                            <span class="producer-upload-hint" data-i18n="radio.producerUploadHint">Solo archivos .mp3 · Múltiples permitidos</span>
-                            <input type="file" id="producerMp3Input" accept="audio/mpeg,.mp3" multiple hidden>
-                        </label>
-                        <div class="producer-queue">
-                            <h4 class="producer-queue-heading" data-i18n="radio.producerQueueTitle">Cola de reproducción</h4>
-                            <ul class="producer-queue-list" id="producerQueueList"></ul>
-                            <p class="producer-queue-empty" id="producerQueueEmpty" data-i18n="radio.producerQueueEmpty">No hay pistas en cola</p>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="radio-bento">
                     <article class="radio-card radio-card-hero" data-radio-action="banda" data-banda-id="gary-garcia">
                         <img class="radio-card-img" src="bandas-media/gary-garcia/cover.svg" alt="Gary Garcia en vivo" loading="lazy"
@@ -787,6 +764,27 @@
                 </p>
             </div>
         </div>
+    </div>
+
+    <!-- Perfil de productor de radio -->
+    <div class="band-profile-overlay" id="producerProfileOverlay" aria-hidden="true"></div>
+    <div class="band-profile-panel" id="producerProfilePanel" role="dialog" aria-modal="true" aria-labelledby="producerProfileTitle">
+        <div class="bpp-scroll">
+            <div id="producerProfileContent"></div>
+        </div>
+        <div class="bpp-topbar">
+            <button class="bpp-icon-btn" id="closeProducerProfile" type="button" data-i18n-aria="productos.profileClose" aria-label="Cerrar perfil">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+            <span class="bpp-topbar-title" id="producerProfileTitle" data-i18n="radio.producerProfileTitle">Mi perfil de productor</span>
+            <div class="bpp-topbar-actions">
+                <button class="bpp-logout-btn" id="producerLogoutBtn" type="button">
+                    <i class="fas fa-right-from-bracket" aria-hidden="true"></i>
+                    <span data-i18n="productos.profileLogout">Salir</span>
+                </button>
+            </div>
+        </div>
+        <input type="file" class="bpp-hidden-input" id="producerMp3Input" accept="audio/mpeg,.mp3" multiple>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>

@@ -160,6 +160,9 @@ class SaltilloApp {
         this.updateLoginUI();
         this.renderProducerQueueUI();
         this.refreshOpenModals();
+        if (this.producerProfilePanel?.classList.contains('open')) {
+            this.renderProducerProfile();
+        }
     }
 
     refreshOpenModals() {
@@ -204,6 +207,7 @@ class SaltilloApp {
         // Verificar resultado de pago Stripe
         this.checkPaymentResult();
         this.checkBandaDeepLink();
+        this.checkProducerDeepLink();
         this.initMapaFloatPreview();
         
         console.log('✅ Radio Saltillo inicializada');
@@ -218,6 +222,13 @@ class SaltilloApp {
         if (params.get('reservar') === '1') {
             setTimeout(() => this.bandasGoToStep(3), 150);
         }
+        window.history.replaceState({}, '', window.location.pathname);
+    }
+
+    checkProducerDeepLink() {
+        if (!this.isProducerSession()) return;
+        if (window.location.hash !== '#radio') return;
+        this.openProducerProfile();
         window.history.replaceState({}, '', window.location.pathname);
     }
 
@@ -5134,12 +5145,14 @@ class SaltilloApp {
     }
 
     initProducerPanel() {
-        this.producerPanel = document.getElementById('producerPanel');
+        this.producerProfilePanel = document.getElementById('producerProfilePanel');
+        this.producerProfileOverlay = document.getElementById('producerProfileOverlay');
+        this.producerProfileContent = document.getElementById('producerProfileContent');
         this.producerMp3Input = document.getElementById('producerMp3Input');
-        this.producerQueueList = document.getElementById('producerQueueList');
-        this.producerQueueEmpty = document.getElementById('producerQueueEmpty');
 
+        bindTap(document.getElementById('closeProducerProfile'), () => this.closeProducerProfile());
         bindTap(document.getElementById('producerLogoutBtn'), () => this.logoutProducer());
+        this.producerProfileOverlay?.addEventListener('click', () => this.closeProducerProfile());
 
         this.producerMp3Input?.addEventListener('change', (e) => {
             this.handleProducerMp3Upload(e.target.files);
@@ -5147,15 +5160,74 @@ class SaltilloApp {
         });
     }
 
-    showProducerPanel() {
-        if (!this.producerPanel || !this.isProducerSession()) return;
-        this.producerPanel.hidden = false;
-        this.renderProducerQueueUI();
+    escHtml(str) {
+        return String(str ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
     }
 
-    hideProducerPanel() {
-        if (!this.producerPanel) return;
-        this.producerPanel.hidden = true;
+    openProducerProfile() {
+        if (!this.isProducerSession()) return;
+        this.renderProducerProfile();
+        this.producerProfilePanel?.classList.add('open');
+        this.producerProfileOverlay?.classList.add('open');
+        this.producerProfileOverlay?.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+    }
+
+    closeProducerProfile() {
+        this.producerProfilePanel?.classList.remove('open');
+        this.producerProfileOverlay?.classList.remove('open');
+        this.producerProfileOverlay?.setAttribute('aria-hidden', 'true');
+        if (!this.loginModal?.classList.contains('open')) {
+            document.body.style.overflow = '';
+        }
+    }
+
+    renderProducerProfile() {
+        if (!this.producerProfileContent || !this.bandSession) return;
+
+        const session = this.bandSession;
+        const coverUrl = 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=1200&q=80';
+
+        this.producerProfileContent.innerHTML = `
+            <div class="bpp-hero-block">
+                <div class="bpp-cover-wrap">
+                    <img class="bpp-cover" src="${coverUrl}" alt="">
+                </div>
+                <div class="bpp-hero bpp-hero-overlap">
+                    <div class="bpp-hero-inner">
+                        <div class="bpp-avatar-wrap">
+                            <div class="bpp-avatar-fallback"><i class="fas fa-broadcast-tower"></i></div>
+                        </div>
+                        <div class="bpp-hero-info">
+                            <div class="bpp-badges">
+                                <span class="bpp-producer-badge"><i class="fas fa-sliders"></i> ${this.t('radio.producerBadge')}</span>
+                            </div>
+                            <h1 class="bpp-name">${this.escHtml(session.nombre)}</h1>
+                            ${session.email ? `<p class="bpp-producer-email">${this.escHtml(session.email)}</p>` : ''}
+                            <p class="bpp-producer-desc">${this.t('radio.producerDesc')}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bpp-content">
+                <div class="bpp-card full">
+                    <h3 class="bpp-card-title"><i class="fas fa-headphones"></i> ${this.t('radio.producerQueueTitle')}</h3>
+                    <div class="bpp-tracks" id="producerQueueTracks"></div>
+                    <p class="bpp-empty" id="producerQueueEmpty">${this.t('radio.producerQueueEmpty')}</p>
+                    <label class="bpp-upload-zone" for="producerMp3Input">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <span>${this.t('radio.producerUpload')}</span>
+                        <small>${this.t('radio.producerUploadHint')}</small>
+                    </label>
+                </div>
+            </div>
+        `;
+
+        this.renderProducerQueueUI();
     }
 
     logoutProducer() {
@@ -5163,9 +5235,9 @@ class SaltilloApp {
         try {
             localStorage.removeItem('desiertoSonoro_bandSession');
         } catch (_) { /* ignore */ }
-        this.hideProducerPanel();
+        this.closeProducerProfile();
         this.updateLoginUI();
-        this.showNotification(this.t('radio.producerLogout'), 'info');
+        this.showNotification(this.t('productos.profileLogout'), 'info');
     }
 
     handleProducerMp3Upload(fileList) {
@@ -5194,7 +5266,9 @@ class SaltilloApp {
     }
 
     renderProducerQueueUI() {
-        if (!this.producerQueueList) return;
+        const tracksEl = document.getElementById('producerQueueTracks');
+        const emptyEl = document.getElementById('producerQueueEmpty');
+        if (!tracksEl) return;
 
         const items = [];
         if (this._currentQueueTrack) {
@@ -5202,23 +5276,27 @@ class SaltilloApp {
         }
         this.radioQueue.forEach(track => items.push({ track, status: 'next' }));
 
-        this.producerQueueList.innerHTML = '';
-        if (this.producerQueueEmpty) {
-            this.producerQueueEmpty.hidden = items.length > 0;
-        }
+        tracksEl.innerHTML = '';
+        if (emptyEl) emptyEl.hidden = items.length > 0;
 
         items.forEach(({ track, status }) => {
-            const li = document.createElement('li');
-            li.className = `producer-queue-item${status === 'playing' ? ' producer-queue-item--playing' : ''}`;
+            const row = document.createElement('div');
+            row.className = `bpp-track${status === 'playing' ? ' bpp-track--live' : ''}`;
             const badge = status === 'playing'
                 ? this.t('radio.producerQueuePlaying')
                 : this.t('radio.producerQueueNext');
-            li.innerHTML = `
-                <i class="fas fa-${status === 'playing' ? 'broadcast-tower' : 'music'}" aria-hidden="true"></i>
-                <span class="producer-queue-item-title">${track.title}</span>
-                <span class="producer-queue-item-badge">${badge}</span>
+            const badgeClass = status === 'playing' ? 'bpp-track-status' : 'bpp-track-status bpp-track-status--next';
+            row.innerHTML = `
+                <div class="bpp-track-play bpp-track-play--static" aria-hidden="true">
+                    <i class="fas fa-${status === 'playing' ? 'broadcast-tower' : 'music'}"></i>
+                </div>
+                <div class="bpp-track-info">
+                    <span class="bpp-track-title">${this.escHtml(track.title)}</span>
+                    <span class="bpp-track-meta">${this.escHtml(track.producerName)}</span>
+                </div>
+                <span class="${badgeClass}">${badge}</span>
             `;
-            this.producerQueueList.appendChild(li);
+            tracksEl.appendChild(row);
         });
     }
 
@@ -5276,8 +5354,7 @@ class SaltilloApp {
             bindTap(btn, () => {
                 if (this.bandSession) {
                     if (this.isProducerSession()) {
-                        this.showProducerPanel();
-                        document.getElementById('radio')?.scrollIntoView({ behavior: 'smooth' });
+                        this.openProducerProfile();
                         return;
                     }
                     window.location.href = 'productos.html';
@@ -5323,7 +5400,6 @@ class SaltilloApp {
             if (account) {
                 this.bandSession = account;
                 this.updateLoginUI();
-                if (this.isProducerSession()) this.showProducerPanel();
             }
         } catch (_) { /* ignore */ }
     }
@@ -5391,8 +5467,7 @@ class SaltilloApp {
             }
             this.updateLoginUI();
             if (this.isProducerSession()) {
-                this.showProducerPanel();
-                document.getElementById('radio')?.scrollIntoView({ behavior: 'smooth' });
+                this.openProducerProfile();
                 return;
             }
             window.location.href = 'productos.html';
