@@ -5116,6 +5116,141 @@ class SaltilloApp {
             notification.remove();
         });
     }
+
+    initLogin() {
+        this.loginModal = document.getElementById('loginModal');
+        this.loginForm = document.getElementById('loginForm');
+        this.loginPassword = document.getElementById('loginPassword');
+        this.loginButtons = [
+            document.getElementById('loginBtn'),
+            document.getElementById('loginBtnMobile')
+        ].filter(Boolean);
+        this.restoreBandSession();
+    }
+
+    setupLoginListeners() {
+        const closeLogin = document.getElementById('closeLogin');
+        const togglePassword = document.getElementById('togglePassword');
+        const loginForgotBtn = document.getElementById('loginForgotBtn');
+        const loginRegisterBtn = document.getElementById('loginRegisterBtn');
+
+        this.loginButtons.forEach(btn => {
+            bindTap(btn, () => {
+                if (this.bandSession) {
+                    window.location.href = 'productos.html';
+                    return;
+                }
+                this.openLoginModal();
+            });
+        });
+
+        bindTap(closeLogin, () => this.closeLoginModal());
+        this.loginForm?.addEventListener('submit', (e) => this.handleLoginSubmit(e));
+        this.loginModal?.addEventListener('click', (e) => {
+            if (e.target === this.loginModal) this.closeLoginModal();
+        });
+
+        togglePassword?.addEventListener('click', () => {
+            if (!this.loginPassword) return;
+            const isPassword = this.loginPassword.type === 'password';
+            this.loginPassword.type = isPassword ? 'text' : 'password';
+            const icon = togglePassword.querySelector('i');
+            if (icon) icon.className = isPassword ? 'fas fa-eye-slash' : 'fas fa-eye';
+        });
+
+        bindTap(loginForgotBtn, () => {
+            this.showNotification(this.t('productos.loginDemo'), 'info');
+        });
+
+        bindTap(loginRegisterBtn, () => {
+            this.closeLoginModal();
+            this.openRegistroPickerModal();
+        });
+    }
+
+    restoreBandSession() {
+        const sessionKey = 'desiertoSonoro_bandSession';
+        const accountsKey = 'desiertoSonoro_bandAccounts';
+        try {
+            const raw = localStorage.getItem(sessionKey);
+            if (!raw) return;
+            const session = JSON.parse(raw);
+            const accounts = JSON.parse(localStorage.getItem(accountsKey) || '[]');
+            const account = accounts.find(a => a.nombreKey === session.nombreKey);
+            if (account) {
+                this.bandSession = account;
+                this.updateLoginUI();
+            }
+        } catch (_) { /* ignore */ }
+    }
+
+    updateLoginUI() {
+        this.loginButtons.forEach(btn => {
+            const label = btn.querySelector('[data-login-label]');
+            if (!label) return;
+            if (this.bandSession) {
+                btn.classList.add('logged-in');
+                label.removeAttribute('data-i18n');
+                label.textContent = this.bandSession.nombre;
+            } else {
+                btn.classList.remove('logged-in');
+                label.setAttribute('data-i18n', 'nav.login');
+                label.textContent = window.I18n?.t('nav.login') || 'ENTRAR';
+            }
+        });
+    }
+
+    openLoginModal() {
+        if (!this.loginModal) return;
+        this.loginModal.classList.add('open');
+        document.body.style.overflow = 'hidden';
+        document.getElementById('loginIdentifier')?.focus();
+    }
+
+    closeLoginModal() {
+        if (!this.loginModal) return;
+        this.loginModal.classList.remove('open');
+        document.body.style.overflow = '';
+    }
+
+    handleLoginSubmit(e) {
+        e.preventDefault();
+        const identifier = document.getElementById('loginIdentifier')?.value.trim();
+        const password = this.loginPassword?.value;
+        if (!identifier || !password) return;
+
+        const identifierKey = identifier.toLowerCase();
+        let matchedAccount = null;
+        try {
+            const accounts = JSON.parse(localStorage.getItem('desiertoSonoro_bandAccounts') || '[]');
+            matchedAccount = accounts.find(a => {
+                if (a.password !== password) return false;
+                return a.nombreKey === identifierKey || a.emailKey === identifierKey;
+            }) || null;
+        } catch (_) { /* storage unavailable */ }
+
+        if (matchedAccount) {
+            this.bandSession = matchedAccount;
+            try {
+                localStorage.setItem('desiertoSonoro_bandSession', JSON.stringify({
+                    nombreKey: matchedAccount.nombreKey,
+                    nombre: matchedAccount.nombre
+                }));
+            } catch (_) { /* ignore */ }
+            this.showNotification(this.t('productos.loginSuccess'), 'success');
+            this.closeLoginModal();
+            this.loginForm?.reset();
+            if (this.loginPassword?.type === 'text') {
+                this.loginPassword.type = 'password';
+                document.getElementById('togglePassword')?.querySelector('i')?.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+            this.updateLoginUI();
+            window.location.href = 'productos.html';
+            return;
+        }
+
+        this.showNotification(this.t('productos.loginError'), 'error');
+    }
 }
 
 // Funcionalidad del header móvil
@@ -5264,141 +5399,6 @@ class MobileHeader {
         this.mobileShazamBtn.classList.toggle('identified', isIdentified && !isListening);
         this.mobileShazamBtn.disabled = inactive;
         this.mobileShazamBtn.setAttribute('aria-disabled', inactive ? 'true' : 'false');
-    }
-
-    initLogin() {
-        this.loginModal = document.getElementById('loginModal');
-        this.loginForm = document.getElementById('loginForm');
-        this.loginPassword = document.getElementById('loginPassword');
-        this.loginButtons = [
-            document.getElementById('loginBtn'),
-            document.getElementById('loginBtnMobile')
-        ].filter(Boolean);
-        this.restoreBandSession();
-    }
-
-    setupLoginListeners() {
-        const closeLogin = document.getElementById('closeLogin');
-        const togglePassword = document.getElementById('togglePassword');
-        const loginForgotBtn = document.getElementById('loginForgotBtn');
-        const loginRegisterBtn = document.getElementById('loginRegisterBtn');
-
-        this.loginButtons.forEach(btn => {
-            bindTap(btn, () => {
-                if (this.bandSession) {
-                    window.location.href = 'productos.html';
-                    return;
-                }
-                this.openLoginModal();
-            });
-        });
-
-        bindTap(closeLogin, () => this.closeLoginModal());
-        this.loginForm?.addEventListener('submit', (e) => this.handleLoginSubmit(e));
-        this.loginModal?.addEventListener('click', (e) => {
-            if (e.target === this.loginModal) this.closeLoginModal();
-        });
-
-        togglePassword?.addEventListener('click', () => {
-            if (!this.loginPassword) return;
-            const isPassword = this.loginPassword.type === 'password';
-            this.loginPassword.type = isPassword ? 'text' : 'password';
-            const icon = togglePassword.querySelector('i');
-            if (icon) icon.className = isPassword ? 'fas fa-eye-slash' : 'fas fa-eye';
-        });
-
-        bindTap(loginForgotBtn, () => {
-            this.showNotification(this.t('productos.loginDemo'), 'info');
-        });
-
-        bindTap(loginRegisterBtn, () => {
-            this.closeLoginModal();
-            this.openRegistroPickerModal();
-        });
-    }
-
-    restoreBandSession() {
-        const sessionKey = 'desiertoSonoro_bandSession';
-        const accountsKey = 'desiertoSonoro_bandAccounts';
-        try {
-            const raw = localStorage.getItem(sessionKey);
-            if (!raw) return;
-            const session = JSON.parse(raw);
-            const accounts = JSON.parse(localStorage.getItem(accountsKey) || '[]');
-            const account = accounts.find(a => a.nombreKey === session.nombreKey);
-            if (account) {
-                this.bandSession = account;
-                this.updateLoginUI();
-            }
-        } catch (_) { /* ignore */ }
-    }
-
-    updateLoginUI() {
-        this.loginButtons.forEach(btn => {
-            const label = btn.querySelector('[data-login-label]');
-            if (!label) return;
-            if (this.bandSession) {
-                btn.classList.add('logged-in');
-                label.removeAttribute('data-i18n');
-                label.textContent = this.bandSession.nombre;
-            } else {
-                btn.classList.remove('logged-in');
-                label.setAttribute('data-i18n', 'nav.login');
-                label.textContent = window.I18n?.t('nav.login') || 'ENTRAR';
-            }
-        });
-    }
-
-    openLoginModal() {
-        if (!this.loginModal) return;
-        this.loginModal.classList.add('open');
-        document.body.style.overflow = 'hidden';
-        document.getElementById('loginIdentifier')?.focus();
-    }
-
-    closeLoginModal() {
-        if (!this.loginModal) return;
-        this.loginModal.classList.remove('open');
-        document.body.style.overflow = '';
-    }
-
-    handleLoginSubmit(e) {
-        e.preventDefault();
-        const identifier = document.getElementById('loginIdentifier')?.value.trim();
-        const password = this.loginPassword?.value;
-        if (!identifier || !password) return;
-
-        const identifierKey = identifier.toLowerCase();
-        let matchedAccount = null;
-        try {
-            const accounts = JSON.parse(localStorage.getItem('desiertoSonoro_bandAccounts') || '[]');
-            matchedAccount = accounts.find(a => {
-                if (a.password !== password) return false;
-                return a.nombreKey === identifierKey || a.emailKey === identifierKey;
-            }) || null;
-        } catch (_) { /* storage unavailable */ }
-
-        if (matchedAccount) {
-            this.bandSession = matchedAccount;
-            try {
-                localStorage.setItem('desiertoSonoro_bandSession', JSON.stringify({
-                    nombreKey: matchedAccount.nombreKey,
-                    nombre: matchedAccount.nombre
-                }));
-            } catch (_) { /* ignore */ }
-            this.showNotification(this.t('productos.loginSuccess'), 'success');
-            this.closeLoginModal();
-            this.loginForm?.reset();
-            if (this.loginPassword?.type === 'text') {
-                this.loginPassword.type = 'password';
-                document.getElementById('togglePassword')?.querySelector('i')?.classList.replace('fa-eye-slash', 'fa-eye');
-            }
-            this.updateLoginUI();
-            window.location.href = 'productos.html';
-            return;
-        }
-
-        this.showNotification(this.t('productos.loginError'), 'error');
     }
 }
 
