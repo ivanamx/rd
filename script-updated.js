@@ -125,6 +125,9 @@ class SaltilloApp {
         this.nowPlaying = null;
         this._nowPlayingFetch = false;
         this.bandSession = null;
+        this.radioQueue = [];
+        this._radioMode = 'stream';
+        this._currentQueueTrack = null;
         
         // Configuración de audio
         this.streamUrl = 'song.mp3';
@@ -155,6 +158,7 @@ class SaltilloApp {
         this.syncShazamUI();
         this.updateNowPlayingUI();
         this.updateLoginUI();
+        this.renderProducerQueueUI();
         this.refreshOpenModals();
     }
 
@@ -177,7 +181,9 @@ class SaltilloApp {
         this.guiaContent = window.I18n.getGuiaContent();
         window.addEventListener('languagechange', () => this.onLanguageChange());
         if (typeof window.seedMockBands === 'function') window.seedMockBands();
+        if (typeof window.seedMockProducers === 'function') window.seedMockProducers();
         this.initLogin();
+        this.initProducerPanel();
         
         // Verificar soporte de APIs
         this.checkAPISupport();
@@ -1203,6 +1209,8 @@ class SaltilloApp {
             console.error('❌ Error de audio:', e);
             this.tryFallbackStream();
         });
+
+        this.audio.addEventListener('ended', () => this.handleRadioTrackEnded());
     }
 
     async togglePlay() {
@@ -2426,18 +2434,11 @@ class SaltilloApp {
                     <h4 class="banda-profile-section-title"><i class="fas fa-map-marker-alt"></i> ${this.t('bandas.playedIn')}</h4>
                     <div class="banda-lugares">${lugares || `<p class="banda-profile-empty">${this.t('bandas.noVenues')}</p>`}</div>
                 </div>
-                <button class="bandas-reserve-inline-btn" id="bandasReserveInlineBtn">
-                    <i class="fas fa-calendar-check"></i> ${this.t('bandas.reserveBand')}
-                </button>
             </div>
         `;
 
         container.querySelectorAll('.banda-sample-play').forEach(btn => {
             btn.addEventListener('click', () => this.playBandaSample(btn));
-        });
-
-        container.querySelector('#bandasReserveInlineBtn')?.addEventListener('click', () => {
-            this.bandasGoToStep(3);
         });
     }
 
@@ -5128,6 +5129,143 @@ class SaltilloApp {
         this.restoreBandSession();
     }
 
+    isProducerSession() {
+        return this.bandSession?.tipo === 'producer';
+    }
+
+    initProducerPanel() {
+        this.producerPanel = document.getElementById('producerPanel');
+        this.producerMp3Input = document.getElementById('producerMp3Input');
+        this.producerQueueList = document.getElementById('producerQueueList');
+        this.producerQueueEmpty = document.getElementById('producerQueueEmpty');
+
+        bindTap(document.getElementById('producerLogoutBtn'), () => this.logoutProducer());
+
+        this.producerMp3Input?.addEventListener('change', (e) => {
+            this.handleProducerMp3Upload(e.target.files);
+            e.target.value = '';
+        });
+    }
+
+    showProducerPanel() {
+        if (!this.producerPanel || !this.isProducerSession()) return;
+        this.producerPanel.hidden = false;
+        this.renderProducerQueueUI();
+    }
+
+    hideProducerPanel() {
+        if (!this.producerPanel) return;
+        this.producerPanel.hidden = true;
+    }
+
+    logoutProducer() {
+        this.bandSession = null;
+        try {
+            localStorage.removeItem('desiertoSonoro_bandSession');
+        } catch (_) { /* ignore */ }
+        this.hideProducerPanel();
+        this.updateLoginUI();
+        this.showNotification(this.t('radio.producerLogout'), 'info');
+    }
+
+    handleProducerMp3Upload(fileList) {
+        if (!this.isProducerSession() || !fileList?.length) return;
+
+        const mp3Files = Array.from(fileList).filter(f =>
+            f.type === 'audio/mpeg' || f.name.toLowerCase().endsWith('.mp3')
+        );
+        if (!mp3Files.length) {
+            this.showNotification(this.t('notifications.audioError'), 'error');
+            return;
+        }
+
+        const producerName = this.bandSession.nombre;
+        mp3Files.forEach(file => {
+            this.radioQueue.push({
+                id: `pq-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+                title: file.name.replace(/\.mp3$/i, ''),
+                url: URL.createObjectURL(file),
+                producerName
+            });
+        });
+
+        this.renderProducerQueueUI();
+        this.showNotification(this.t('radio.producerAdded', { count: mp3Files.length }), 'success');
+    }
+
+    renderProducerQueueUI() {
+        if (!this.producerQueueList) return;
+
+        const items = [];
+        if (this._currentQueueTrack) {
+            items.push({ track: this._currentQueueTrack, status: 'playing' });
+        }
+        this.radioQueue.forEach(track => items.push({ track, status: 'next' }));
+
+        this.producerQueueList.innerHTML = '';
+        if (this.producerQueueEmpty) {
+            this.producerQueueEmpty.hidden = items.length > 0;
+        }
+
+        items.forEach(({ track, status }) => {
+            const li = document.createElement('li');
+            li.className = `producer-queue-item${status === 'playing' ? ' producer-queue-item--playing' : ''}`;
+            const badge = status === 'playing'
+                ? this.t('radio.producerQueuePlaying')
+                : this.t('radio.producerQueueNext');
+            li.innerHTML = `
+                <i class="fas fa-${status === 'playing' ? 'broadcast-tower' : 'music'}" aria-hidden="true"></i>
+                <span class="producer-queue-item-title">${track.title}</span>
+                <span class="producer-queue-item-badge">${badge}</span>
+            `;
+            this.producerQueueList.appendChild(li);
+        });
+    }
+
+    playQueuedTrack(track) {
+        if (!track?.url || !this.audio) return;
+
+        this._radioMode = 'queue';
+        this._currentQueueTrack = track;
+        this.audio.src = track.url;
+        this.setNowPlaying({ title: track.title, artist: track.producerName });
+        this.audio.load();
+        this.renderProducerQueueUI();
+
+        return this.audio.play().catch(err => {
+            console.error('Error reproduciendo pista en cola:', err);
+            this.handleRadioTrackEnded();
+        });
+    }
+
+    handleRadioTrackEnded() {
+        if (this._currentQueueTrack) {
+            URL.revokeObjectURL(this._currentQueueTrack.url);
+            this._currentQueueTrack = null;
+        }
+
+        if (this.radioQueue.length > 0) {
+            const next = this.radioQueue.shift();
+            this.playQueuedTrack(next);
+            return;
+        }
+
+        this._radioMode = 'stream';
+        this.nowPlaying = null;
+        this.updateNowPlayingUI();
+        this.renderProducerQueueUI();
+
+        if (!this.isPlaying) return;
+
+        this.audio.src = this.streamUrl;
+        this.audio.load();
+        this.audio.play().catch(err => {
+            console.error('Error retomando stream:', err);
+            this.isPlaying = false;
+            this.updateRadioLiveBar();
+        });
+    }
+
     setupLoginListeners() {
         const closeLogin = document.getElementById('closeLogin');
         const togglePassword = document.getElementById('togglePassword');
@@ -5137,6 +5275,11 @@ class SaltilloApp {
         this.loginButtons.forEach(btn => {
             bindTap(btn, () => {
                 if (this.bandSession) {
+                    if (this.isProducerSession()) {
+                        this.showProducerPanel();
+                        document.getElementById('radio')?.scrollIntoView({ behavior: 'smooth' });
+                        return;
+                    }
                     window.location.href = 'productos.html';
                     return;
                 }
@@ -5180,6 +5323,7 @@ class SaltilloApp {
             if (account) {
                 this.bandSession = account;
                 this.updateLoginUI();
+                if (this.isProducerSession()) this.showProducerPanel();
             }
         } catch (_) { /* ignore */ }
     }
@@ -5234,7 +5378,8 @@ class SaltilloApp {
             try {
                 localStorage.setItem('desiertoSonoro_bandSession', JSON.stringify({
                     nombreKey: matchedAccount.nombreKey,
-                    nombre: matchedAccount.nombre
+                    nombre: matchedAccount.nombre,
+                    tipo: matchedAccount.tipo || 'banda'
                 }));
             } catch (_) { /* ignore */ }
             this.showNotification(this.t('productos.loginSuccess'), 'success');
@@ -5245,6 +5390,11 @@ class SaltilloApp {
                 document.getElementById('togglePassword')?.querySelector('i')?.classList.replace('fa-eye-slash', 'fa-eye');
             }
             this.updateLoginUI();
+            if (this.isProducerSession()) {
+                this.showProducerPanel();
+                document.getElementById('radio')?.scrollIntoView({ behavior: 'smooth' });
+                return;
+            }
             window.location.href = 'productos.html';
             return;
         }

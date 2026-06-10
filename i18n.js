@@ -78,7 +78,18 @@
                 cardEntrevistasBadge: 'Podcast',
                 cardEntrevistasTitle: 'Entrevistas',
                 cardEntrevistasDesc: 'Artesanos, chefs y creadores saltillenses',
-                cardEntrevistasCta: 'Escuchar'
+                cardEntrevistasCta: 'Escuchar',
+                producerBadge: 'Productor de radio',
+                producerTitle: 'Panel de producción',
+                producerDesc: 'Sube MP3 desde tu dispositivo. Se encolarán para sonar después de la pista actual.',
+                producerUpload: 'Agregar MP3',
+                producerUploadHint: 'Solo archivos .mp3 · Múltiples permitidos',
+                producerQueueTitle: 'Cola de reproducción',
+                producerQueueEmpty: 'No hay pistas en cola',
+                producerQueueNext: 'Siguiente',
+                producerQueuePlaying: 'En vivo ahora',
+                producerAdded: '{{count}} pista(s) agregada(s) a la cola de la radio',
+                producerLogout: 'Cerrar sesión'
             },
             guia: {
                 titleMain: 'ÚNETE',
@@ -649,7 +660,18 @@
                 cardEntrevistasBadge: 'Podcast',
                 cardEntrevistasTitle: 'Interviews',
                 cardEntrevistasDesc: 'Saltillo artisans, chefs and creators',
-                cardEntrevistasCta: 'Listen'
+                cardEntrevistasCta: 'Listen',
+                producerBadge: 'Radio producer',
+                producerTitle: 'Production panel',
+                producerDesc: 'Upload MP3 files from your device. They will be queued to play after the current track.',
+                producerUpload: 'Add MP3',
+                producerUploadHint: '.mp3 files only · Multiple allowed',
+                producerQueueTitle: 'Playback queue',
+                producerQueueEmpty: 'No tracks in queue',
+                producerQueueNext: 'Up next',
+                producerQueuePlaying: 'Live now',
+                producerAdded: '{{count}} track(s) added to the radio queue',
+                producerLogout: 'Log out'
             },
             guia: {
                 titleMain: 'JOIN',

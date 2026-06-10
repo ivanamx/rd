@@ -709,31 +709,6 @@
     margin: 0;
 }
 
-.bandas-reserve-inline-btn {
-    width: 100%;
-    padding: 16px 24px;
-    margin-top: 8px;
-    background: linear-gradient(135deg, var(--neon-green), #00D4AA);
-    border: none;
-    border-radius: 12px;
-    color: #000;
-    font-family: var(--font-primary);
-    font-size: 1rem;
-    font-weight: 700;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    transition: var(--transition-fast);
-    letter-spacing: 0.03em;
-}
-
-.bandas-reserve-inline-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--glow-green);
-}
-
 /* Pago */
 .bandas-payment-summary {
     background: rgba(0, 0, 0, 0.3);
@@ -836,7 +811,7 @@
 
 .bandas-btn {
     padding: 12px 20px;
-    border-radius: 10px;
+    border-radius: 12px;
     font-family: var(--font-primary);
     font-size: 0.85rem;
     font-weight: 600;
@@ -953,24 +928,36 @@
     }
 
     .bandas-stripe-btn {
-        max-width: 560px;
+        max-width: 400px;
         margin: 0 auto;
-        padding: 18px 28px;
-        font-size: 1.05rem;
+        padding: 16px 24px;
+        font-size: 1rem;
     }
 
     .bandas-stripe-note {
-        max-width: 560px;
+        max-width: 400px;
         margin: 14px auto 0;
     }
 
     .bandas-footer {
-        padding: 20px 32px;
+        padding: 16px 24px;
+        justify-content: flex-end;
     }
 
     .bandas-btn {
-        padding: 14px 28px;
-        font-size: 0.9rem;
+        padding: 16px 24px;
+        font-size: 1rem;
+        border-radius: 12px;
+    }
+
+    .bandas-btn-secondary {
+        margin-right: auto;
+    }
+
+    .bandas-btn-primary {
+        flex: 0 0 auto;
+        min-width: 200px;
+        max-width: 400px;
     }
 
     .banda-profile-top {
@@ -992,10 +979,6 @@
         gap: 10px;
     }
 
-    .bandas-reserve-inline-btn {
-        max-width: 400px;
-        margin: 12px auto 0;
-    }
 }
 
 @media (max-width: 600px) {

@@ -2210,6 +2210,7 @@
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
     <script src="mock-bands.js"></script>
+    <script src="mock-producers.js"></script>
     <script src="i18n.js"></script>
     <script src="band-shows-calendar.js"></script>
     <script>
@@ -2345,6 +2346,7 @@
         async function initMarketplace() {
             window.I18n.init();
             if (typeof window.seedMockBands === 'function') window.seedMockBands();
+            if (typeof window.seedMockProducers === 'function') window.seedMockProducers();
             updateMetaDescription();
             updateResultsMeta();
             renderProducts();
@@ -3266,10 +3268,22 @@
             }
         }
 
+        function isProducerAccount(account) {
+            return account?.tipo === 'producer';
+        }
+
+        function redirectProducerToRadio() {
+            window.location.href = 'index.html#radio';
+        }
+
         function setBandSession(account) {
             currentBandSession = account;
             try {
-                localStorage.setItem(BAND_SESSION_KEY, JSON.stringify({ nombreKey: account.nombreKey, nombre: account.nombre }));
+                localStorage.setItem(BAND_SESSION_KEY, JSON.stringify({
+                    nombreKey: account.nombreKey,
+                    nombre: account.nombre,
+                    tipo: account.tipo || 'banda'
+                }));
             } catch (_) { /* storage unavailable */ }
             updateLoginUI();
         }
@@ -3284,6 +3298,7 @@
                 if (account) {
                     currentBandSession = account;
                     updateLoginUI();
+                    if (isProducerAccount(account)) redirectProducerToRadio();
                 }
             } catch (_) { /* ignore */ }
         }
@@ -3541,6 +3556,10 @@
                     loginPassword.type = 'password';
                     togglePassword.querySelector('i').className = 'fas fa-eye';
                 }
+                if (isProducerAccount(matchedAccount)) {
+                    redirectProducerToRadio();
+                    return;
+                }
                 openBandProfile();
             }
         }
@@ -3744,8 +3763,12 @@
             mobileCheckout.addEventListener('click', openCart);
 
             loginBtn.addEventListener('click', () => {
-                if (currentBandSession) openBandProfile();
-                else openLoginModal();
+                if (currentBandSession) {
+                    if (isProducerAccount(currentBandSession)) redirectProducerToRadio();
+                    else openBandProfile();
+                    return;
+                }
+                openLoginModal();
             });
             closeLogin.addEventListener('click', closeLoginModal);
             loginForm.addEventListener('submit', handleLoginSubmit);

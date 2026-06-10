@@ -28,7 +28,8 @@
             email: 'gary@desierto.com',
             emailKey: 'gary@desierto.com',
             password: 'gary2024',
-            telefono: '+528441234567'
+            telefono: '+528441234567',
+            tipo: 'banda'
         },
         profile: {
             nombre: 'Gary Garcia',

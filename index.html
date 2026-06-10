@@ -399,6 +399,30 @@
                     </div>
                 </div>
 
+                <div class="producer-panel" id="producerPanel" hidden>
+                    <div class="producer-panel-header">
+                        <div class="producer-panel-intro">
+                            <span class="producer-panel-badge" data-i18n="radio.producerBadge">Productor de radio</span>
+                            <h3 class="producer-panel-title" data-i18n="radio.producerTitle">Panel de producción</h3>
+                            <p class="producer-panel-desc" data-i18n="radio.producerDesc">Sube MP3 desde tu dispositivo. Se encolarán para sonar después de la pista actual.</p>
+                        </div>
+                        <button type="button" class="producer-logout-btn" id="producerLogoutBtn" data-i18n="radio.producerLogout">Cerrar sesión</button>
+                    </div>
+                    <div class="producer-panel-body">
+                        <label class="producer-upload-zone" for="producerMp3Input">
+                            <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
+                            <span class="producer-upload-label" data-i18n="radio.producerUpload">Agregar MP3</span>
+                            <span class="producer-upload-hint" data-i18n="radio.producerUploadHint">Solo archivos .mp3 · Múltiples permitidos</span>
+                            <input type="file" id="producerMp3Input" accept="audio/mpeg,.mp3" multiple hidden>
+                        </label>
+                        <div class="producer-queue">
+                            <h4 class="producer-queue-heading" data-i18n="radio.producerQueueTitle">Cola de reproducción</h4>
+                            <ul class="producer-queue-list" id="producerQueueList"></ul>
+                            <p class="producer-queue-empty" id="producerQueueEmpty" data-i18n="radio.producerQueueEmpty">No hay pistas en cola</p>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="radio-bento">
                     <article class="radio-card radio-card-hero" data-radio-action="banda" data-banda-id="gary-garcia">
                         <img class="radio-card-img" src="bandas-media/gary-garcia/cover.svg" alt="Gary Garcia en vivo" loading="lazy"
@@ -768,6 +792,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="mock-data.js"></script>
     <script src="mock-bands.js"></script>
+    <script src="mock-producers.js"></script>
     <script src="i18n.js"></script>
     <script src="script-updated.js"></script>
 </body>
