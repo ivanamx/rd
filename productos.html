@@ -2211,6 +2211,7 @@
 
     <script src="mock-bands.js"></script>
     <script src="mock-producers.js"></script>
+    <script src="auth-api.js"></script>
     <script src="i18n.js"></script>
     <script src="band-shows-calendar.js"></script>
     <script>
@@ -2222,7 +2223,7 @@
             arte: 'productos.catArt'
         };
 
-        const productos = [
+        let productos = [
             { id: 1, nombre: "Playera 'Desierto Sonoro'", nombreEn: "'Sonic Desert' T-shirt", categoria: "playeras", descripcion: "Playera con diseño exclusivo inspirado en la cultura del desierto coahuilense. 100% algodón, estampado de alta calidad.", descripcionEn: "T-shirt with an exclusive design inspired by Coahuila desert culture. 100% cotton, high-quality print.", precio: 350, imagen: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=300&fit=crop", stock: 25, destacado: true, artista: "Diseño Colectivo Saltillo", rating: 4.9 },
             { id: 2, nombre: "Sticker Pack 'Saltillo Vibes'", nombreEn: "'Saltillo Vibes' Sticker Pack", categoria: "stickers", descripcion: "Pack de 10 stickers con diseños únicos de Saltillo. Vinilo resistente al agua, perfectos para laptops y botellas.", descripcionEn: "Pack of 10 stickers with unique Saltillo designs. Water-resistant vinyl, perfect for laptops and bottles.", precio: 120, imagen: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop", stock: 50, destacado: true, artista: "Ana Martínez", rating: 4.8 },
             { id: 3, nombre: "Guitarra Acústica Artesanal", nombreEn: "Handcrafted Acoustic Guitar", categoria: "instrumentos", descripcion: "Guitarra acústica elaborada por luthier local con maderas de la región. Sonido único y cálido.", descripcionEn: "Acoustic guitar built by a local luthier with regional woods. Unique, warm tone.", precio: 4500, imagen: "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=400&h=300&fit=crop", stock: 3, destacado: true, artista: "Carlos Herrera", rating: 5.0 },
@@ -2237,7 +2238,7 @@
             { id: 12, nombre: "Pack Stickers 'Arte Urbano'", nombreEn: "'Urban Art' Sticker Pack", categoria: "stickers", descripcion: "Pack de 15 stickers con arte urbano inspirado en Saltillo. Diseños únicos y coloridos.", descripcionEn: "Pack of 15 stickers with urban art inspired by Saltillo. Unique, colorful designs.", precio: 180, imagen: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop", stock: 40, destacado: false, artista: "Ana Martínez", rating: 4.8 }
         ];
 
-        const artistas = [
+        let artistas = [
             { id: 1, nombre: "Ana Martínez", especialidad: "Diseño Gráfico", especialidadEn: "Graphic Design", descripcion: "Especialista en diseño de stickers y arte urbano. Su trabajo refleja la identidad cultural de Saltillo.", descripcionEn: "Specialist in sticker design and urban art. Her work reflects Saltillo's cultural identity.", imagen: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&h=800&fit=crop&crop=faces", productos: 25, ventas: 150, rating: 4.9 },
             { id: 2, nombre: "Carlos Herrera", especialidad: "Luthier", especialidadEn: "Luthier", descripcion: "Maestro luthier con más de 15 años de experiencia. Crea instrumentos únicos con maderas locales.", descripcionEn: "Master luthier with over 15 years of experience. Creates unique instruments with local woods.", imagen: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=600&h=800&fit=crop&crop=faces", productos: 8, ventas: 45, rating: 5.0 },
             { id: 3, nombre: "Estudio Creativo Norte", especialidad: "Branding", especialidadEn: "Branding", descripcion: "Estudio especializado en identidad visual para empresas locales. Diseños que conectan con la comunidad.", descripcionEn: "Studio specialized in visual identity for local businesses. Designs that connect with the community.", imagen: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&h=800&fit=crop&crop=faces", productos: 15, ventas: 80, rating: 4.8 },
@@ -2343,10 +2344,24 @@
 
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+        async function loadCatalogFromAPI() {
+            if (!window.AuthAPI) return;
+            const [apiProductos, apiArtistas] = await Promise.all([
+                window.AuthAPI.fetchProductos(),
+                window.AuthAPI.fetchArtistas()
+            ]);
+            if (apiProductos?.length) {
+                productos = apiProductos;
+                productosFiltrados = [...productos];
+            }
+            if (apiArtistas?.length) artistas = apiArtistas;
+        }
+
         async function initMarketplace() {
             window.I18n.init();
             if (typeof window.seedMockBands === 'function') window.seedMockBands();
             if (typeof window.seedMockProducers === 'function') window.seedMockProducers();
+            await loadCatalogFromAPI();
             updateMetaDescription();
             updateResultsMeta();
             renderProducts();
@@ -2361,7 +2376,8 @@
 
         async function loadBandas() {
             try {
-                const res = await fetch('bandas.json');
+                let res = await fetch('/api/bandas');
+                if (!res.ok) res = await fetch('bandas.json');
                 if (!res.ok) throw new Error('fetch failed');
                 const data = await res.json();
                 bandasData = data.bandas || [];
@@ -3529,22 +3545,33 @@
             }
         }
 
-        function handleLoginSubmit(e) {
+        async function handleLoginSubmit(e) {
             e.preventDefault();
             const identifier = document.getElementById('loginIdentifier').value.trim();
             const password = loginPassword.value;
 
             if (!identifier || !password) return;
 
-            const identifierKey = identifier.toLowerCase();
             let matchedAccount = null;
-            try {
-                const accounts = JSON.parse(localStorage.getItem(BAND_ACCOUNTS_KEY) || '[]');
-                matchedAccount = accounts.find(a => {
-                    if (a.password !== password) return false;
-                    return a.nombreKey === identifierKey || a.emailKey === identifierKey;
-                }) || null;
-            } catch (_) { /* storage unavailable */ }
+
+            if (window.AuthAPI) {
+                const apiResult = await window.AuthAPI.login(identifier, password);
+                if (apiResult?.account) {
+                    matchedAccount = apiResult.account;
+                    window.AuthAPI.syncSessionToLocalStorage(apiResult.account, apiResult.profile);
+                }
+            }
+
+            if (!matchedAccount) {
+                const identifierKey = identifier.toLowerCase();
+                try {
+                    const accounts = JSON.parse(localStorage.getItem(BAND_ACCOUNTS_KEY) || '[]');
+                    matchedAccount = accounts.find(a => {
+                        if (a.password !== password) return false;
+                        return a.nombreKey === identifierKey || a.emailKey === identifierKey;
+                    }) || null;
+                } catch (_) { /* storage unavailable */ }
+            }
 
             const loggedIn = !!matchedAccount;
             showNotification(loggedIn ? t('productos.loginSuccess') : t('productos.loginError'));

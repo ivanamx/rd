@@ -1,11 +1,12 @@
 // Servidor proxy para evitar CORS en APIs de reconocimiento de música
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
 const FormData = require('form-data');
 const fetch = require('node-fetch');
 const path = require('path');
-const fs = require('fs');
+const dataBridge = require('./db/server-bridge');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -38,88 +39,6 @@ if (process.env.STRIPE_SECRET_KEY) {
     stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 }
 
-// Reservas en memoria
-const reservasPendientes = new Set();
-const reservasConfirmadas = new Set();
-const estudioReservasPendientes = new Set();
-const estudioReservasConfirmadas = new Set();
-const clasesReservasPendientes = new Set();
-const clasesReservasConfirmadas = new Set();
-
-function loadBandasData() {
-    const filePath = path.join(__dirname, 'bandas.json');
-    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-}
-
-function getBandasDisponibles() {
-    const data = loadBandasData();
-    return {
-        bandas: data.bandas.map(banda => ({
-            ...banda,
-            disponibilidad: banda.disponibilidad.filter(fecha => {
-                const key = `${banda.id}:${fecha}`;
-                return !reservasPendientes.has(key) && !reservasConfirmadas.has(key);
-            })
-        }))
-    };
-}
-
-function findBanda(bandaId) {
-    return loadBandasData().bandas.find(b => b.id === bandaId);
-}
-
-function loadBaresData() {
-    const filePath = path.join(__dirname, 'bares.json');
-    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-}
-
-function loadEstudiosData() {
-    const filePath = path.join(__dirname, 'estudios.json');
-    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-}
-
-function getEstudiosDisponibles() {
-    const data = loadEstudiosData();
-    return {
-        estudios: data.estudios.map(estudio => ({
-            ...estudio,
-            disponibilidad: estudio.disponibilidad.filter(fecha => {
-                const horarios = estudio.horarios || [];
-                return horarios.some(hora => {
-                    const key = `${estudio.id}:${fecha}:${hora}`;
-                    return !estudioReservasPendientes.has(key) && !estudioReservasConfirmadas.has(key);
-                });
-            })
-        }))
-    };
-}
-
-function findEstudio(estudioId) {
-    return loadEstudiosData().estudios.find(e => e.id === estudioId);
-}
-
-function loadClasesData() {
-    const filePath = path.join(__dirname, 'clases.json');
-    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-}
-
-function getClasesDisponibles() {
-    const data = loadClasesData();
-    return {
-        maestros: data.maestros.map(maestro => ({
-            ...maestro,
-            planes: (maestro.planes || []).filter(plan => {
-                const key = `${maestro.id}:${plan.id}`;
-                return !clasesReservasPendientes.has(key) && !clasesReservasConfirmadas.has(key);
-            })
-        }))
-    };
-}
-
-function findMaestro(maestroId) {
-    return loadClasesData().maestros.find(m => m.id === maestroId);
-}
-
 // Middleware
 app.use(cors());
 
@@ -142,32 +61,12 @@ app.post('/api/stripe-webhook', express.raw({ type: 'application/json' }), async
     if (event.type === 'checkout.session.completed') {
         const session = event.data.object;
         const meta = session.metadata || {};
-        if (meta.tipo === 'estudio') {
-            const key = `${meta.estudioId}:${meta.fecha}:${meta.hora}`;
-            estudioReservasPendientes.delete(key);
-            estudioReservasConfirmadas.add(key);
-            console.log('✅ Reserva de estudio confirmada:', key);
-        } else if (meta.tipo === 'clases') {
-            const key = `${meta.maestroId}:${meta.planId}`;
-            clasesReservasPendientes.delete(key);
-            clasesReservasConfirmadas.add(key);
-            console.log('✅ Inscripción de clases confirmada:', key);
-        } else {
-            const key = `${meta.bandaId}:${meta.fecha}`;
-            reservasPendientes.delete(key);
-            reservasConfirmadas.add(key);
-            console.log('✅ Reserva confirmada:', key);
-        }
+        await dataBridge.markReservationConfirmed(meta, session.id);
+        console.log('✅ Reserva confirmada:', meta);
     } else if (event.type === 'checkout.session.expired') {
         const session = event.data.object;
         const meta = session.metadata || {};
-        if (meta.tipo === 'estudio') {
-            estudioReservasPendientes.delete(`${meta.estudioId}:${meta.fecha}:${meta.hora}`);
-        } else if (meta.tipo === 'clases') {
-            clasesReservasPendientes.delete(`${meta.maestroId}:${meta.planId}`);
-        } else {
-            reservasPendientes.delete(`${meta.bandaId}:${meta.fecha}`);
-        }
+        await dataBridge.markReservationExpired(meta);
         console.log('⏰ Sesión de pago expirada');
     }
 
@@ -433,34 +332,31 @@ app.post('/api/recognize-url', async (req, res) => {
 });
 
 // API de bandas locales
-app.get('/api/bandas', (req, res) => {
+app.get('/api/bandas', async (req, res) => {
     try {
-        res.json(getBandasDisponibles());
+        res.json(await dataBridge.getBandasDisponibles());
     } catch (error) {
         console.error('Error cargando bandas:', error);
         res.status(500).json({ error: 'Error al cargar bandas' });
     }
 });
 
-app.get('/api/bares', (req, res) => {
+app.get('/api/bares', async (req, res) => {
     try {
-        res.json(loadBaresData());
+        res.json(await dataBridge.getBares());
     } catch (error) {
         console.error('Error cargando bares:', error);
         res.status(500).json({ error: 'Error al cargar bares' });
     }
 });
 
-app.post('/api/bandas/liberar', (req, res) => {
+app.post('/api/bandas/liberar', async (req, res) => {
     const { bandaId, fecha } = req.body;
     if (!bandaId || !fecha) {
         return res.status(400).json({ error: 'Se requiere bandaId y fecha' });
     }
-    const key = `${bandaId}:${fecha}`;
-    if (reservasConfirmadas.has(key)) {
-        return res.status(400).json({ error: 'Reserva ya confirmada' });
-    }
-    reservasPendientes.delete(key);
+    const result = await dataBridge.liberarReserva('band', { bandaId, fecha });
+    if (result.error) return res.status(400).json({ error: result.error });
     res.json({ success: true });
 });
 
@@ -472,7 +368,7 @@ app.post('/api/bandas/checkout', async (req, res) => {
             return res.status(400).json({ error: 'Se requiere bandaId y fecha' });
         }
 
-        const banda = findBanda(bandaId);
+        const banda = await dataBridge.findBanda(bandaId);
         if (!banda) {
             return res.status(404).json({ error: 'Banda no encontrada' });
         }
@@ -481,8 +377,7 @@ app.post('/api/bandas/checkout', async (req, res) => {
             return res.status(400).json({ error: 'Fecha no disponible para esta banda' });
         }
 
-        const reservaKey = `${bandaId}:${fecha}`;
-        if (reservasPendientes.has(reservaKey) || reservasConfirmadas.has(reservaKey)) {
+        if (await dataBridge.isSlotReserved('band', { bandaId, fecha })) {
             return res.status(409).json({ error: 'Esta fecha ya fue reservada' });
         }
 
@@ -492,7 +387,7 @@ app.post('/api/bandas/checkout', async (req, res) => {
             });
         }
 
-        reservasPendientes.add(reservaKey);
+        await dataBridge.markReservationPending('band', { bandaId, fecha, amountCents: banda.precio });
 
         const origin = req.headers.origin || `http://localhost:${PORT}`;
         const precioMXN = banda.precio;
@@ -521,32 +416,29 @@ app.post('/api/bandas/checkout', async (req, res) => {
     } catch (error) {
         console.error('Error en checkout:', error);
         if (req.body?.bandaId && req.body?.fecha) {
-            reservasPendientes.delete(`${req.body.bandaId}:${req.body.fecha}`);
+            await dataBridge.rollbackPending('band', { bandaId: req.body.bandaId, fecha: req.body.fecha });
         }
         res.status(500).json({ error: error.message || 'Error al procesar el pago' });
     }
 });
 
 // API de estudios
-app.get('/api/estudios', (req, res) => {
+app.get('/api/estudios', async (req, res) => {
     try {
-        res.json(getEstudiosDisponibles());
+        res.json(await dataBridge.getEstudiosDisponibles());
     } catch (error) {
         console.error('Error cargando estudios:', error);
         res.status(500).json({ error: 'Error al cargar estudios' });
     }
 });
 
-app.post('/api/estudios/liberar', (req, res) => {
+app.post('/api/estudios/liberar', async (req, res) => {
     const { estudioId, fecha, hora } = req.body;
     if (!estudioId || !fecha || !hora) {
         return res.status(400).json({ error: 'Se requiere estudioId, fecha y hora' });
     }
-    const key = `${estudioId}:${fecha}:${hora}`;
-    if (estudioReservasConfirmadas.has(key)) {
-        return res.status(400).json({ error: 'Reserva ya confirmada' });
-    }
-    estudioReservasPendientes.delete(key);
+    const result = await dataBridge.liberarReserva('studio', { estudioId, fecha, hora });
+    if (result.error) return res.status(400).json({ error: result.error });
     res.json({ success: true });
 });
 
@@ -557,7 +449,7 @@ app.post('/api/estudios/checkout', async (req, res) => {
             return res.status(400).json({ error: 'Se requiere estudioId, fecha y hora' });
         }
 
-        const estudio = findEstudio(estudioId);
+        const estudio = await dataBridge.findEstudio(estudioId);
         if (!estudio) return res.status(404).json({ error: 'Estudio no encontrado' });
         if (!estudio.disponibilidad.includes(fecha)) {
             return res.status(400).json({ error: 'Fecha no disponible' });
@@ -566,8 +458,7 @@ app.post('/api/estudios/checkout', async (req, res) => {
             return res.status(400).json({ error: 'Horario no válido' });
         }
 
-        const reservaKey = `${estudioId}:${fecha}:${hora}`;
-        if (estudioReservasPendientes.has(reservaKey) || estudioReservasConfirmadas.has(reservaKey)) {
+        if (await dataBridge.isSlotReserved('studio', { estudioId, fecha, hora })) {
             return res.status(409).json({ error: 'Este horario ya fue reservado' });
         }
 
@@ -575,7 +466,7 @@ app.post('/api/estudios/checkout', async (req, res) => {
             return res.status(503).json({ error: 'Stripe no configurado. Agrega STRIPE_SECRET_KEY a las variables de entorno.' });
         }
 
-        estudioReservasPendientes.add(reservaKey);
+        await dataBridge.markReservationPending('studio', { estudioId, fecha, hora, amountCents: estudio.precio });
         const origin = req.headers.origin || `http://localhost:${PORT}`;
 
         const session = await stripe.checkout.sessions.create({
@@ -602,32 +493,31 @@ app.post('/api/estudios/checkout', async (req, res) => {
     } catch (error) {
         console.error('Error en checkout estudio:', error);
         if (req.body?.estudioId && req.body?.fecha && req.body?.hora) {
-            estudioReservasPendientes.delete(`${req.body.estudioId}:${req.body.fecha}:${req.body.hora}`);
+            await dataBridge.rollbackPending('studio', {
+                estudioId: req.body.estudioId, fecha: req.body.fecha, hora: req.body.hora
+            });
         }
         res.status(500).json({ error: error.message || 'Error al procesar el pago' });
     }
 });
 
 // API de clases
-app.get('/api/clases', (req, res) => {
+app.get('/api/clases', async (req, res) => {
     try {
-        res.json(getClasesDisponibles());
+        res.json(await dataBridge.getClasesDisponibles());
     } catch (error) {
         console.error('Error cargando clases:', error);
         res.status(500).json({ error: 'Error al cargar clases' });
     }
 });
 
-app.post('/api/clases/liberar', (req, res) => {
+app.post('/api/clases/liberar', async (req, res) => {
     const { maestroId, planId } = req.body;
     if (!maestroId || !planId) {
         return res.status(400).json({ error: 'Se requiere maestroId y planId' });
     }
-    const key = `${maestroId}:${planId}`;
-    if (clasesReservasConfirmadas.has(key)) {
-        return res.status(400).json({ error: 'Inscripción ya confirmada' });
-    }
-    clasesReservasPendientes.delete(key);
+    const result = await dataBridge.liberarReserva('class', { maestroId, planId });
+    if (result.error) return res.status(400).json({ error: result.error });
     res.json({ success: true });
 });
 
@@ -638,14 +528,13 @@ app.post('/api/clases/checkout', async (req, res) => {
             return res.status(400).json({ error: 'Se requiere maestroId y planId' });
         }
 
-        const maestro = findMaestro(maestroId);
+        const maestro = await dataBridge.findMaestro(maestroId);
         if (!maestro) return res.status(404).json({ error: 'Maestro no encontrado' });
 
         const plan = (maestro.planes || []).find(p => p.id === planId);
         if (!plan) return res.status(404).json({ error: 'Plan no encontrado' });
 
-        const reservaKey = `${maestroId}:${planId}`;
-        if (clasesReservasPendientes.has(reservaKey) || clasesReservasConfirmadas.has(reservaKey)) {
+        if (await dataBridge.isSlotReserved('class', { maestroId, planId })) {
             return res.status(409).json({ error: 'Este plan ya fue inscrito' });
         }
 
@@ -653,7 +542,7 @@ app.post('/api/clases/checkout', async (req, res) => {
             return res.status(503).json({ error: 'Stripe no configurado. Agrega STRIPE_SECRET_KEY a las variables de entorno.' });
         }
 
-        clasesReservasPendientes.add(reservaKey);
+        await dataBridge.markReservationPending('class', { maestroId, planId, amountCents: plan.precio });
         const origin = req.headers.origin || `http://localhost:${PORT}`;
 
         const session = await stripe.checkout.sessions.create({
@@ -680,9 +569,65 @@ app.post('/api/clases/checkout', async (req, res) => {
     } catch (error) {
         console.error('Error en checkout clases:', error);
         if (req.body?.maestroId && req.body?.planId) {
-            clasesReservasPendientes.delete(`${req.body.maestroId}:${req.body.planId}`);
+            await dataBridge.rollbackPending('class', {
+                maestroId: req.body.maestroId, planId: req.body.planId
+            });
         }
         res.status(500).json({ error: error.message || 'Error al procesar el pago' });
+    }
+});
+
+// API de autenticación
+app.post('/api/auth/login', async (req, res) => {
+    try {
+        const { identifier, password } = req.body;
+        if (!identifier || !password) {
+            return res.status(400).json({ error: 'Usuario y contraseña requeridos' });
+        }
+        const result = await dataBridge.loginUser(identifier, password);
+        if (!result) {
+            return res.status(401).json({ error: 'Credenciales incorrectas' });
+        }
+        res.json({
+            success: true,
+            account: result.account,
+            profile: result.profile
+        });
+    } catch (error) {
+        console.error('Error en login:', error);
+        res.status(500).json({ error: 'Error al iniciar sesión' });
+    }
+});
+
+app.get('/api/auth/profile', async (req, res) => {
+    try {
+        const { nombreKey } = req.query;
+        if (!nombreKey) return res.status(400).json({ error: 'nombreKey requerido' });
+        const profile = await dataBridge.getProfileByNombreKey(nombreKey);
+        if (!profile) return res.status(404).json({ error: 'Perfil no encontrado' });
+        res.json({ profile });
+    } catch (error) {
+        console.error('Error cargando perfil:', error);
+        res.status(500).json({ error: 'Error al cargar perfil' });
+    }
+});
+
+// API marketplace
+app.get('/api/productos', async (req, res) => {
+    try {
+        res.json(await dataBridge.getProductos());
+    } catch (error) {
+        console.error('Error cargando productos:', error);
+        res.status(500).json({ error: 'Error al cargar productos' });
+    }
+});
+
+app.get('/api/artistas', async (req, res) => {
+    try {
+        res.json(await dataBridge.getArtistas());
+    } catch (error) {
+        console.error('Error cargando artistas:', error);
+        res.status(500).json({ error: 'Error al cargar artistas' });
     }
 });
 
@@ -692,17 +637,26 @@ app.get('/', (req, res) => {
 });
 
 // Iniciar servidor
-app.listen(PORT, () => {
-    console.log(`🚀 Servidor proxy iniciado en http://localhost:${PORT}`);
-    console.log(`🎵 APIs de reconocimiento disponibles:`);
-    console.log(`   - AudD: http://localhost:${PORT}/api/recognize`);
-    console.log(`   - AudioTag: http://localhost:${PORT}/api/recognize`);
-    console.log(`   - ACRCloud: http://localhost:${PORT}/api/recognize`);
-    console.log(`🎸 API de bandas: http://localhost:${PORT}/api/bandas`);
-    console.log(`🍸 API de bares: http://localhost:${PORT}/api/bares`);
-    console.log(`🎙️ API de estudios: http://localhost:${PORT}/api/estudios`);
-    console.log(`🎓 API de clases: http://localhost:${PORT}/api/clases`);
-    console.log(`💳 Stripe: ${stripe ? 'configurado' : 'no configurado (agrega STRIPE_SECRET_KEY)'}`);
+async function startServer() {
+    await dataBridge.init();
+    app.listen(PORT, () => {
+        console.log(`🚀 Servidor proxy iniciado en http://localhost:${PORT}`);
+        console.log(`🗄️  Base de datos: ${dataBridge.isDbEnabled() ? 'PostgreSQL' : 'JSON (fallback)'}`);
+        console.log(`🎵 APIs de reconocimiento disponibles:`);
+        console.log(`   - AudD: http://localhost:${PORT}/api/recognize`);
+        console.log(`🎸 API de bandas: http://localhost:${PORT}/api/bandas`);
+        console.log(`🍸 API de bares: http://localhost:${PORT}/api/bares`);
+        console.log(`🎙️ API de estudios: http://localhost:${PORT}/api/estudios`);
+        console.log(`🎓 API de clases: http://localhost:${PORT}/api/clases`);
+        console.log(`🛒 API de productos: http://localhost:${PORT}/api/productos`);
+        console.log(`🔐 API de auth: http://localhost:${PORT}/api/auth/login`);
+        console.log(`💳 Stripe: ${stripe ? 'configurado' : 'no configurado (agrega STRIPE_SECRET_KEY)'}`);
+    });
+}
+
+startServer().catch(err => {
+    console.error('Error al iniciar servidor:', err);
+    process.exit(1);
 });
 
 module.exports = app;

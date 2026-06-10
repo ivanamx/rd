@@ -6110,21 +6110,32 @@ class SaltilloApp {
         document.body.style.overflow = '';
     }
 
-    handleLoginSubmit(e) {
+    async handleLoginSubmit(e) {
         e.preventDefault();
         const identifier = document.getElementById('loginIdentifier')?.value.trim();
         const password = this.loginPassword?.value;
         if (!identifier || !password) return;
 
-        const identifierKey = identifier.toLowerCase();
         let matchedAccount = null;
-        try {
-            const accounts = JSON.parse(localStorage.getItem('desiertoSonoro_bandAccounts') || '[]');
-            matchedAccount = accounts.find(a => {
-                if (a.password !== password) return false;
-                return a.nombreKey === identifierKey || a.emailKey === identifierKey;
-            }) || null;
-        } catch (_) { /* storage unavailable */ }
+
+        if (window.AuthAPI) {
+            const apiResult = await window.AuthAPI.login(identifier, password);
+            if (apiResult?.account) {
+                matchedAccount = apiResult.account;
+                window.AuthAPI.syncSessionToLocalStorage(apiResult.account, apiResult.profile);
+            }
+        }
+
+        if (!matchedAccount) {
+            const identifierKey = identifier.toLowerCase();
+            try {
+                const accounts = JSON.parse(localStorage.getItem('desiertoSonoro_bandAccounts') || '[]');
+                matchedAccount = accounts.find(a => {
+                    if (a.password !== password) return false;
+                    return a.nombreKey === identifierKey || a.emailKey === identifierKey;
+                }) || null;
+            } catch (_) { /* storage unavailable */ }
+        }
 
         if (matchedAccount) {
             this.bandSession = matchedAccount;
